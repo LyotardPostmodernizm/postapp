@@ -1,7 +1,9 @@
 package com.postapp.postapp.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
+import org.antlr.v4.runtime.misc.NotNull;
 
 import java.util.List;
 
@@ -14,13 +16,19 @@ import java.util.List;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-
+    private Long id;
     private int avatar;
+
+    @NotEmpty
     private String username;
+
+    @NotEmpty
     private String password;
+
     private String firstName;
     private String lastName;
+
+    @NotEmpty
     private String email;
 
     @OneToMany(mappedBy = "user")
