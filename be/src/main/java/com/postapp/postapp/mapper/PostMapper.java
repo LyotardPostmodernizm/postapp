@@ -14,6 +14,9 @@ public interface PostMapper {
     @Mapping(target = "user", ignore = true) // Kullanıcı context'ten alınacak
     @Mapping(target = "comments", ignore = true)
     @Mapping(target = "likes", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target="id",ignore = true)
     Post toEntity(PostCreateDto postCreateDto);
 
     // Post → PostResponseDto

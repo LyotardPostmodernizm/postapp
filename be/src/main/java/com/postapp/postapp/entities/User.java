@@ -1,7 +1,9 @@
 package com.postapp.postapp.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.antlr.v4.runtime.misc.NotNull;
 
@@ -19,10 +21,11 @@ public class User {
     private Long id;
     private int avatar;
 
-    @NotEmpty
+    @NotEmpty(message = "Kullanıcı adı boş olamaz!")
     private String username;
 
     @NotEmpty
+    @Size(max = 20,message = "Parola en fazla 20 karakter olabilir!")
     private String password;
 
     private String firstName;

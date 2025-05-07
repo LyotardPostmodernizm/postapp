@@ -75,7 +75,7 @@ public class PostController {
         if (!post.getUser().getId().equals(currentUser.getId())) {
             throw new UnauthorizedException("Bu postu silme yetkiniz yok!");
         }
-        postService.deletePost(post.getId());
+        postService.deletePost(id);
     }
 
 

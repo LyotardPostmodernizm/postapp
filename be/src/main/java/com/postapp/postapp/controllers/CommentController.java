@@ -62,10 +62,10 @@ public class CommentController {
             @RequestBody CommentCreateDto commentCreateDto,
             @AuthenticationPrincipal User currentUser
     ) {
-        // Postu veritabanından çekiyoruz
+
         Post post = postService.getPostById(postId);
 
-        // DTO → Entity dönüşümü
+        // DTO → Entity
         Comment comment = commentMapper.toEntity(commentCreateDto);
         comment.setUser(currentUser);
         comment.setPost(post);
@@ -106,7 +106,7 @@ public class CommentController {
         if (!comment.getUser().getId().equals(currentUser.getId())) {
             throw new UnauthorizedException("Bu yorumu silme yetkiniz yok!");
         }
-        commentService.deleteComment(comment.getId());
+        commentService.deleteComment(id);
     }
 
 }

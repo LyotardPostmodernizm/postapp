@@ -2,9 +2,7 @@ package com.postapp.postapp.mapper;
 
 import com.postapp.postapp.dto.CommentCreateDto;
 import com.postapp.postapp.dto.CommentResponseDto;
-import com.postapp.postapp.dto.PostCreateDto;
 import com.postapp.postapp.entities.Comment;
-import com.postapp.postapp.entities.Post;
 import org.mapstruct.*;
 
 import java.util.List;
