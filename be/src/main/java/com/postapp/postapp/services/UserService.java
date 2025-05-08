@@ -22,25 +22,8 @@ public class UserService {
     }
 
     public User getUserById(Long id) {
-        return userRepository.findById(id).orElse(null);
+        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("Kullanıcı Bulunamadı!"));
     }
-
-    public User updateUser(Long id, User newUser) {
-        Optional<User> oldUser = userRepository.findById(id);
-        if (oldUser.isPresent()) {
-            User existingUser = oldUser.get();
-            existingUser.setFirstName(newUser.getFirstName());
-            existingUser.setLastName(newUser.getLastName());
-            existingUser.setEmail(newUser.getEmail());
-//            existingUser.setUsername(existingUser.getUsername());
-//            existingUser.setPassword(existingUser.getPassword());
-//            existingUser.setAvatar(existingUser.getAvatar()); Bunlar için ayrı bir mantık eklenecek.
-
-            return userRepository.save(newUser);
-        }
-        else return null;
-    }
-
     public void deleteUserById(Long id) {
         userRepository.deleteById(id);
     }
