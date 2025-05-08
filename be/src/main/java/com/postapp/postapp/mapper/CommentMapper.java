@@ -4,12 +4,14 @@ import com.postapp.postapp.dto.CommentCreateDto;
 import com.postapp.postapp.dto.CommentResponseDto;
 import com.postapp.postapp.entities.Comment;
 import org.mapstruct.*;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE,
         componentModel = "spring",
         uses = {UserMapper.class})
+@Component
 public interface CommentMapper {
 
     // CommentCreateDto → Comment

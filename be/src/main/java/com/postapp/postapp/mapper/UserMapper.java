@@ -4,8 +4,10 @@ import com.postapp.postapp.dto.UserCreateDto;
 import com.postapp.postapp.dto.UserResponseDto;
 import com.postapp.postapp.entities.User;
 import org.mapstruct.*;
+import org.springframework.stereotype.Component;
 
 @Mapper(componentModel = "spring")
+@Component
 public interface UserMapper {
     // UserCreateDto → User
     @Mapping(target = "id", ignore = true)
