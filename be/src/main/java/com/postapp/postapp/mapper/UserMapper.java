@@ -22,6 +22,6 @@ public interface UserMapper {
     UserResponseDto toResponseDto(User user);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "email", ignore = true)
+    @Mapping(target = "email", ignore = true) //Kayıtlı bir usrin emaili güncellenemez
     void partialUpdate(UserCreateDto userCreateDto, @MappingTarget User user);
 }
