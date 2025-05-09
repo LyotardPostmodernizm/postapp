@@ -1,8 +1,8 @@
-import React from 'react';
-import {useState, useEffect} from "react";
-import ReactDOM from 'react-dom';
+import React, {useEffect, useState} from 'react';
+import Post from "../components/Post/Post.jsx";
+import './Home.scss';
 
-function Post() {
+function Home() {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -36,15 +36,16 @@ function Post() {
         return (
             <div>
                 {posts.map(post => (
-                    <div key={post.id}>
-                        <h2>{post.title}</h2>
-                        <p>{post.content}</p>
-                    </div>
+                    <Post 
+                        key={post.id}
+                        title={post.title}
+                        content={post.content}
+                    />
                 ))}
             </div>
-        )
+        );
     }
-
 }
 
-export default Post;
+
+export default Home
