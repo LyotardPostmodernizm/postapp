@@ -41,7 +41,6 @@ public class Comment {
     private Post post;
 
     @OneToMany(mappedBy = "comment")
-    @JoinColumn(name = "like_id")
     private List<Like> likes;
 
     @ManyToOne(fetch = FetchType.LAZY)

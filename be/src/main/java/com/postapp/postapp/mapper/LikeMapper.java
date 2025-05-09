@@ -5,8 +5,10 @@ import com.postapp.postapp.dto.LikeResponseDto;
 import com.postapp.postapp.entities.Like;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.stereotype.Component;
 
 @Mapper(componentModel = "spring")
+@Component
 public interface LikeMapper {
     @Mapping(target = "post", ignore = true)
     @Mapping(target = "comment", ignore = true)

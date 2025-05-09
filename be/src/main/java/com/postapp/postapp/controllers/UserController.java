@@ -20,7 +20,7 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
     private final UserMapper userMapper;
-    private final PasswordEncoder passwordEncoder;
+//    private final PasswordEncoder passwordEncoder;
 
     @GetMapping
     public List<UserResponseDto> getAllUsers() {
@@ -51,7 +51,8 @@ public class UserController {
 
         // Parolayı hashliyoruz
         if (userCreateDto.getPassword() != null && !userCreateDto.getPassword().isEmpty()) {
-            String hashedPassword = passwordEncoder.encode(userCreateDto.getPassword());
+            String hashedPassword = userCreateDto.getPassword();
+//            String hashedPassword = passwordEncoder.encode(userCreateDto.getPassword());
             user.setPassword(hashedPassword);
         }
 

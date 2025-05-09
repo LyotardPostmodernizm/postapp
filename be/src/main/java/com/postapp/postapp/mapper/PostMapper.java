@@ -4,10 +4,12 @@ import com.postapp.postapp.dto.PostCreateDto;
 import com.postapp.postapp.dto.PostResponseDto;
 import com.postapp.postapp.entities.Post;
 import org.mapstruct.*;
+import org.springframework.stereotype.Component;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE,
         componentModel = "spring",
         uses = {UserMapper.class})
+@Component
 public interface PostMapper {
 
     // PostCreateDto → Post
