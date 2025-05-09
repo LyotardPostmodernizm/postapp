@@ -50,6 +50,10 @@ function Home() {
                             key={post.id}
                             title={post.title}
                             content={post.content}
+                            authorUsername={post.authorUsername}
+                            userId={post.userId}
+                            commentCount = {post.commentCount}
+                            likeCount = {post.likeCount}
                             createdAt={post.createdAt}
                             updatedAt={post.updatedAt}
                         />

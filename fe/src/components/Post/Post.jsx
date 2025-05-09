@@ -13,13 +13,18 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import {red} from '@mui/material/colors';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import AddCommentIcon from '@mui/icons-material/AddComment';
+import {Link} from "react-router-dom";
 
 function Post(props) {
-    const {title, content, createdAt, updatedAt} = props;
+    const {title, content, authorUsername, userId, commentCount, likeCount, createdAt, updatedAt} = props;
     const [expanded, setExpanded] = useState(false);
+    const [liked,setLiked] =useState(false);
+
+    function handleLike() {
+        setLiked(liked => !liked)
+    }
 
     function handleExpandClick() {
         setExpanded(!expanded);
@@ -41,26 +46,28 @@ function Post(props) {
             <Card className="card">
                 <CardHeader
                     avatar={
-                        <Avatar sx={{bgcolor: red[500]}} aria-label="recipe">
-                            R
-                        </Avatar>
+                        <Link className="userLink" to={{pathname: "/users/" + userId}}> <Avatar sx={{bgcolor: red[500]}}
+                                                                                                aria-label="recipe">
+                            {authorUsername.charAt(0).toUpperCase()}
+                        </Avatar></Link>
+
                     }
                     action={
                         <IconButton aria-label="settings">
                             <MoreVertIcon/>
                         </IconButton>
                     }
-                    title={title}
-
+                    subheader={<h1>{title}</h1>}
+                    title={authorUsername}
                 />
 
                 <CardContent>
                     <Typography
                         variant="body2"
                         className="typography"
-                        sx={{color: 'text.primary'}}
+                        sx={{color: 'text.secondary'}}
                     >
-                        {content}
+                        {<h2>{content}</h2>}
                     </Typography>
                 </CardContent>
 
@@ -77,8 +84,8 @@ function Post(props) {
                     </>
                 </CardContent>
                 <CardActions disableSpacing>
-                    <IconButton aria-label="add to favorites">
-                        <FavoriteIcon/>
+                    <IconButton onClick={handleLike} aria-label="add to favorites">
+                        <FavoriteIcon style={{color: liked ? "red" : undefined}}/>
                     </IconButton>
                     <ExpandMore
                         expand={expanded}

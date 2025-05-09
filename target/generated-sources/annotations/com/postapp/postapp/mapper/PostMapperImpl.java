@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-05-09T10:17:11+0300",
+    date = "2025-05-09T16:03:09+0300",
     comments = "version: 1.6.3, compiler: javac, environment: Java 21.0.7 (Amazon.com Inc.)"
 )
 @Component
@@ -40,6 +40,10 @@ public class PostMapperImpl implements PostMapper {
         PostResponseDto postResponseDto = new PostResponseDto();
 
         postResponseDto.setAuthorUsername( postUserUsername( post ) );
+        Long id = postUserId( post );
+        if ( id != null ) {
+            postResponseDto.setUserId( String.valueOf( id ) );
+        }
         postResponseDto.setId( post.getId() );
         postResponseDto.setTitle( post.getTitle() );
         postResponseDto.setContent( post.getContent() );
@@ -76,5 +80,13 @@ public class PostMapperImpl implements PostMapper {
             return null;
         }
         return user.getUsername();
+    }
+
+    private Long postUserId(Post post) {
+        User user = post.getUser();
+        if ( user == null ) {
+            return null;
+        }
+        return user.getId();
     }
 }

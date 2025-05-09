@@ -11,6 +11,7 @@ public class PostResponseDto {
     private String title;
     private String content;
     private String authorUsername;
+    private String userId;
     private int commentCount;
     private int likeCount;
     private LocalDateTime createdAt;
