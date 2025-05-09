@@ -1,0 +1,80 @@
+package com.postapp.postapp.mapper;
+
+import com.postapp.postapp.dto.PostCreateDto;
+import com.postapp.postapp.dto.PostResponseDto;
+import com.postapp.postapp.entities.Post;
+import com.postapp.postapp.entities.User;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = "org.mapstruct.ap.MappingProcessor",
+    date = "2025-05-09T15:17:39+0300",
+    comments = "version: 1.6.3, compiler: javac, environment: Java 21.0.7 (Amazon.com Inc.)"
+)
+@Component
+public class PostMapperImpl implements PostMapper {
+
+    @Override
+    public Post toEntity(PostCreateDto postCreateDto) {
+        if ( postCreateDto == null ) {
+            return null;
+        }
+
+        Post post = new Post();
+
+        post.setTitle( postCreateDto.getTitle() );
+        post.setContent( postCreateDto.getContent() );
+
+        return post;
+    }
+
+    @Override
+    public PostResponseDto toResponseDto(Post post) {
+        if ( post == null ) {
+            return null;
+        }
+
+        PostResponseDto postResponseDto = new PostResponseDto();
+
+        postResponseDto.setAuthorUsername( postUserUsername( post ) );
+        postResponseDto.setId( post.getId() );
+        postResponseDto.setTitle( post.getTitle() );
+        postResponseDto.setContent( post.getContent() );
+        if ( post.getCreatedAt() != null ) {
+            postResponseDto.setCreatedAt( LocalDateTime.ofInstant( post.getCreatedAt().toInstant(), ZoneId.of( "UTC" ) ) );
+        }
+        if ( post.getUpdatedAt() != null ) {
+            postResponseDto.setUpdatedAt( LocalDateTime.ofInstant( post.getUpdatedAt().toInstant(), ZoneId.of( "UTC" ) ) );
+        }
+
+        postResponseDto.setCommentCount( post.getComments() != null ? post.getComments().size() : 0 );
+        postResponseDto.setLikeCount( post.getLikes() != null ? post.getLikes().size() : 0 );
+
+        return postResponseDto;
+    }
+
+    @Override
+    public void partialUpdate(PostCreateDto postCreateDto, Post post) {
+        if ( postCreateDto == null ) {
+            return;
+        }
+
+        if ( postCreateDto.getTitle() != null ) {
+            post.setTitle( postCreateDto.getTitle() );
+        }
+        if ( postCreateDto.getContent() != null ) {
+            post.setContent( postCreateDto.getContent() );
+        }
+    }
+
+    private String postUserUsername(Post post) {
+        User user = post.getUser();
+        if ( user == null ) {
+            return null;
+        }
+        return user.getUsername();
+    }
+}
