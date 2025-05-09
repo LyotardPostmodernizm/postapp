@@ -20,7 +20,6 @@ function App() {
           <Route path="/users/:userId" element={<User/>} />
         </Routes>
       </BrowserRouter>
-
     </div>
   )
 }

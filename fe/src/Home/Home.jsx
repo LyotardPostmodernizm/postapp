@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import Post from "../components/Post/Post.jsx";
 import './Home.scss';
+import {Container} from "@mui/material";
 
 function Home() {
     const [posts, setPosts] = useState([]);
@@ -36,11 +37,23 @@ function Home() {
         return (
             <div>
                 {posts.map(post => (
-                    <Post 
-                        key={post.id}
-                        title={post.title}
-                        content={post.content}
-                    />
+                    <Container fixed style={{
+                        display: "flex"
+                        , justifyContent: "center"
+                        , alignItems: "center"
+                        , height: "100vh",
+                        width: "800",
+                        flexWrap: "wrap",
+                        backgroundColor: "#e5e8e8"
+                    }}>
+                        <Post
+                            key={post.id}
+                            title={post.title}
+                            content={post.content}
+                            createdAt={post.createdAt}
+                            updatedAt={post.updatedAt}
+                        />
+                    </Container>
                 ))}
             </div>
         );
