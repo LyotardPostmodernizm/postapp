@@ -2,11 +2,16 @@ import React, {useEffect, useState} from 'react';
 import Post from "../components/Post/Post.jsx";
 import './Home.scss';
 import {Container} from "@mui/material";
+import Postform from "../components/Post/Postform.jsx";
 
 function Home() {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    const refreshPosts = () => {
+
+    }
 
     useEffect(() => {
         fetch("/posts")
@@ -41,11 +46,20 @@ function Home() {
                         display: "flex"
                         , justifyContent: "center"
                         , alignItems: "center"
-                        , height: "100vh",
+                        , height: "80vh",
                         width: "800",
                         flexWrap: "wrap",
                         backgroundColor: "#e5e8e8"
                     }}>
+                        <Postform title={post.title}
+                                  content={post.content}
+                                  authorUsername={post.authorUsername}
+                                  userId={post.userId}
+                                  commentCount = {post.commentCount}
+                                  likeCount = {post.likeCount}
+                                  createdAt={post.createdAt}
+                                  updatedAt={post.updatedAt}
+                        />
                         <Post
                             key={post.id}
                             title={post.title}
