@@ -18,7 +18,7 @@ import AddCommentIcon from '@mui/icons-material/AddComment';
 import {Link} from "react-router-dom";
 
 function Post(props) {
-    const {title, content, authorUsername, userId, commentCount, likeCount, createdAt, updatedAt} = props;
+    const {postId,title, content, authorUsername, userId, commentCount, likeCount, createdAt, updatedAt} = props;
     const [expanded, setExpanded] = useState(false);
     const [liked,setLiked] =useState(false);
 
@@ -28,6 +28,23 @@ function Post(props) {
 
     function handleExpandClick() {
         setExpanded(!expanded);
+    }
+    const [comments, setComments] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const loadComments = () => {
+        fetch("/comments?postId="+postId)
+            .then(response => response.json())
+            .then(data => {
+                    setComments(data);
+                    setLoading(false);
+                },
+                error => {
+                    setError(error);
+                    setLoading(false);
+                }
+            )
     }
 
     const ExpandMore = styled((props) => {

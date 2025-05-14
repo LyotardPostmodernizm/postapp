@@ -61,6 +61,7 @@ function Home() {
                         />
                         <Post
                             key={post.id}
+                            postId={post.id}
                             title={post.title}
                             content={post.content}
                             authorUsername={post.authorUsername}
