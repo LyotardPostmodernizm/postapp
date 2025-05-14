@@ -1,34 +1,35 @@
 import React from 'react';
 import {useState} from 'react';
 import './Post.scss';
-import {styled} from '@mui/material/styles';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
-import CardMedia from '@mui/material/CardMedia';
 import CardContent from '@mui/material/CardContent';
-import CardActions from '@mui/material/CardActions';
-import Collapse from '@mui/material/Collapse';
 import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import {red} from '@mui/material/colors';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import AddCommentIcon from '@mui/icons-material/AddComment';
 import {Link} from "react-router-dom";
-import OutlinedInput from '@mui/material/OutlinedInput'
-import {Container, FormControl, InputAdornment, InputLabel, TextField} from "@mui/material";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
+import {InputAdornment, Snackbar, TextField} from "@mui/material";
 import SendIcon from '@mui/icons-material/Send';
 
 function Postform(props) {
-    const {authorUsername, userId, commentCount, likeCount, createdAt, updatedAt} = props;
+    const {authorUsername, userId, refreshPosts} = props;
     const [content, setContent] = useState("");
     const [title, setTitle] = useState("");
-    const handleSubmit = () => {
-        savePost()
+    const [isSent, setIsSent] = useState(false);
 
+    const handleSubmit = () => {
+        savePost();
+        setIsSent(true);
+        setTitle("")
+        setContent("")
+        refreshPosts();
+    }
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway' || reason === 'escapeKeyDown') {
+            return;
+        }
+        setIsSent(false);
     }
     const savePost = () => {
         fetch("/posts", {
@@ -49,6 +50,15 @@ function Postform(props) {
     }
 
     return (
+        <>
+        <Snackbar
+            open={isSent}
+            onClose={handleClose}
+            autoHideDuration={1000}
+            message="Gönderi Başarılı"
+            action
+            sx={{ bottom: { xs: 90, sm: 0 } }}
+        />
         <div className="postContainer">
             <Card className="card">
                 <CardHeader
@@ -62,18 +72,16 @@ function Postform(props) {
                     }
                     action
                     subheader={
-                        <OutlinedInput
-                            sx={{marginBottom: "30px"}}
-                            id={"outlined-adornment-amount"}
+                        <TextField
+                            label="Başlık Gereklidir"
+                            id="outlined-start-adornment"
                             multiline
                             fullWidth
-                            placeholder={"Başlık"}
                             required
-                            slotProps={{input: {maxLength: 50}}}
-                            label={"Gerekli"}
-                            onChange={(e) => setTitle(e.target.value)}
-                        >
-                        </OutlinedInput>
+                            value={title}
+                            onChange={(e) => {setTitle(e.target.value)
+                                             setIsSent(false)}}
+                        />
                     }
                 />
 
@@ -83,31 +91,33 @@ function Postform(props) {
                         className="typography"
                         sx={{color: 'text.secondary'}}
                     >
-                        {<OutlinedInput
-                            id={"outlined-adornment-amount"}
+                        {<TextField
+                            label="İçerik Gereklidir"
+                            id="outlined-start-adornment"
                             multiline
                             fullWidth
-                            placeholder={"İçerik"}
                             required
-                            slotProps={{input: {maxLength: 200}}}
-                            label={"Gerekli"}
-                            onChange={(e) => setContent(e.target.value)}
-                            endAdornment=
-                                {<InputAdornment
-                                    position={"end"}
-                                >
-                                    <IconButton
+                            value={content}
+                            onChange={(e) => {setContent(e.target.value)
+                                              setIsSent(false)}}
+                            slotProps={{
+                                input: {
+                                    endAdornment: <InputAdornment position="end">
+                                        <IconButton
                                         onClick={handleSubmit}
                                         aria-label="send">
                                         <SendIcon color="primary"/>
                                     </IconButton>
-                                </InputAdornment>}>
-                        </OutlinedInput>}
+                                    </InputAdornment>
+                                }
+                            }}
+                        />}
                     </Typography>
                 </CardContent>
 
             </Card>
         </div>
+        </>
     );
 
 

@@ -9,11 +9,8 @@ function Home() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+
     const refreshPosts = () => {
-
-    }
-
-    useEffect(() => {
         fetch("/posts")
             .then(response => response.json())
             .then(data => {
@@ -23,8 +20,14 @@ function Home() {
                 error => {
                     setError(error);
                     setLoading(false);
-                })
+                }
+            )
+    }
+
+    useEffect(() => {
+        refreshPosts();
     }, [])
+
 
     if (error) {
         return (
@@ -51,14 +54,10 @@ function Home() {
                         flexWrap: "wrap",
                         backgroundColor: "#e5e8e8"
                     }}>
-                        <Postform title={post.title}
-                                  content={post.content}
+                        <Postform
                                   authorUsername={post.authorUsername}
                                   userId={post.userId}
-                                  commentCount = {post.commentCount}
-                                  likeCount = {post.likeCount}
-                                  createdAt={post.createdAt}
-                                  updatedAt={post.updatedAt}
+                                  refreshPosts={refreshPosts}
                         />
                         <Post
                             key={post.id}
@@ -66,8 +65,8 @@ function Home() {
                             content={post.content}
                             authorUsername={post.authorUsername}
                             userId={post.userId}
-                            commentCount = {post.commentCount}
-                            likeCount = {post.likeCount}
+                            commentCount={post.commentCount}
+                            likeCount={post.likeCount}
                             createdAt={post.createdAt}
                             updatedAt={post.updatedAt}
                         />
