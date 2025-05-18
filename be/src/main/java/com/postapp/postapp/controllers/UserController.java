@@ -1,9 +1,15 @@
 package com.postapp.postapp.controllers;
 
+import com.postapp.postapp.dto.UserCreateDto;
+import com.postapp.postapp.dto.UserResponseDto;
 import com.postapp.postapp.entities.User;
+import com.postapp.postapp.mapper.UserMapper;
 import com.postapp.postapp.services.UserService;
-import jakarta.transaction.Transactional;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,27 +19,47 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final UserMapper userMapper;
+//    private final PasswordEncoder passwordEncoder;
 
     @GetMapping
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
+    public List<UserResponseDto> getAllUsers() {
+        return userService.getAllUsers().stream()
+                .map(userMapper::toResponseDto)
+                .toList();
+
     }
 
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable Long id) {
-        return userService.getUserById(id);
+    public UserResponseDto getUserById(@PathVariable Long id) {
+        User user =userService.getUserById(id);
+        return userMapper.toResponseDto(user);
     }
 
-    @Transactional
     @PostMapping
-    public User createUser(@RequestBody User newUser) {
-        return userService.saveUser(newUser);
+    public UserResponseDto createUser(@RequestBody @Valid UserCreateDto userCreateDto) {
+        User user = userMapper.toEntity(userCreateDto);
+        User savedUser = userService.saveUser(user);
+        return userMapper.toResponseDto(savedUser);
     }
 
     @PutMapping("/{id}")
-    public User updateUser(@PathVariable Long id, @RequestBody User newUser) {
-        return userService.updateUser(id, newUser);
+    public UserResponseDto updateUser(@PathVariable Long id, @RequestBody @Valid UserCreateDto userCreateDto) {
+        User user = userService.getUserById(id);
+        
+        userMapper.partialUpdate(userCreateDto, user);
+
+        // Parolayı hashliyoruz
+        if (userCreateDto.getPassword() != null && !userCreateDto.getPassword().isEmpty()) {
+            String hashedPassword = userCreateDto.getPassword();
+//            String hashedPassword = passwordEncoder.encode(userCreateDto.getPassword());
+            user.setPassword(hashedPassword);
+        }
+
+        User updatedUser = userService.saveUser(user);
+        return userMapper.toResponseDto(updatedUser);
     }
+
 
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable Long id) {

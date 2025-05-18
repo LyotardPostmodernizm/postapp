@@ -29,20 +29,19 @@ public class Comment {
     private String text;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id",nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "post_id",nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private Post post;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "like_id")
-    private Like like;
+    @OneToMany(mappedBy = "comment")
+    private List<Like> likes;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
@@ -51,9 +50,6 @@ public class Comment {
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> children = new ArrayList<>();
-
-
-
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
@@ -71,6 +67,7 @@ public class Comment {
     protected void onUpdate() {
         updatedAt = new Date();
     }
+
 
 
 }
