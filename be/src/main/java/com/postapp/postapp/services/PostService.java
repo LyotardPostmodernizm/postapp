@@ -1,5 +1,6 @@
 package com.postapp.postapp.services;
 
+import com.postapp.postapp.dto.PostCreateDto;
 import com.postapp.postapp.entities.Post;
 import com.postapp.postapp.repositories.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,18 +23,15 @@ public class PostService {
     }
 
     public Post getPostById(Long id) {
-        return postRepository.findById(id).orElse(null);
+        return postRepository.findById(id).orElseThrow(() ->  new RuntimeException("Post bulunamadı!"));
     }
 
-    public Post updatePost(Long id, Post newPost) {
-        Optional<Post> existingPost = postRepository.findById(id);
-        if (existingPost.isPresent()) {
-            Post existingPostEntity = existingPost.get();
-            existingPostEntity.setTitle(newPost.getTitle());
-            existingPostEntity.setContent(newPost.getContent());
-            return postRepository.save(existingPostEntity);
-        } else {
-            return null;
-        }
+    public Post createPost(Post post) {
+        return postRepository.save(post);
     }
+
+    public void deletePost(Long id) {
+        postRepository.deleteById(id);
+    }
+
 }

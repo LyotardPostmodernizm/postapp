@@ -1,7 +1,13 @@
 package com.postapp.postapp.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.antlr.v4.runtime.misc.NotNull;
+
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -13,13 +19,20 @@ import java.util.List;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-
+    private Long id;
     private int avatar;
+
+    @NotEmpty(message = "Kullanıcı adı boş olamaz!")
     private String username;
+
+    @NotEmpty
+    @Size(max = 20,message = "Parola en fazla 20 karakter olabilir!")
     private String password;
+
     private String firstName;
     private String lastName;
+
+    @NotEmpty
     private String email;
 
     @OneToMany(mappedBy = "user")
@@ -31,7 +44,21 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Like>likes;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdAt;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedAt;
 
+    @PrePersist
+    protected void onCreate() {
+        createdAt = new Date();
+        updatedAt = createdAt;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = new Date();
+    }
 
 }
