@@ -10,6 +10,21 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
+      },
+      '/users': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/comments': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/likes':{
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false,
       }
     }
   }

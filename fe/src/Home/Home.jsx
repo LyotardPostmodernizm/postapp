@@ -20,6 +20,7 @@ function Home() {
                 error => {
                     setError(error);
                     setLoading(false);
+                    console.log(error)
                 }
             )
     }
@@ -43,22 +44,25 @@ function Home() {
         )
     } else {
         return (
-            <div>
-                {posts.map(post => (
-                    <Container fixed style={{
+            <div className={"homeContainer"} style={{}}>
+                {posts.map((post, index) => (
+                    <Container className={"home"} fixed style={{
                         display: "flex"
                         , justifyContent: "center"
                         , alignItems: "center"
-                        , height: "80vh",
+                        , height: "auto",
                         width: "800",
                         flexWrap: "wrap",
-                        backgroundColor: "#e5e8e8"
-                    }}>
-                        <Postform
+                        backgroundColor: "#e5e8e8",
+                        marginBottom: "1rem"
+
+                    }}
+                               key={index}>
+                        { /* <Postform
                                   authorUsername={post.authorUsername}
                                   userId={post.userId}
                                   refreshPosts={refreshPosts}
-                        />
+                        /> */}
                         <Post
                             key={post.id}
                             postId={post.id}
