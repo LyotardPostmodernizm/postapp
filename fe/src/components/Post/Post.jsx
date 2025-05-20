@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {useState} from 'react';
 import './Post.scss';
 import {styled} from '@mui/material/styles';
@@ -21,23 +21,16 @@ function Post(props) {
     const {postId,title, content, authorUsername, userId, commentCount, likeCount, createdAt, updatedAt} = props;
     const [expanded, setExpanded] = useState(false);
     const [liked,setLiked] =useState(false);
-
-    function handleLike() {
-        setLiked(liked => !liked)
-    }
-
-    function handleExpandClick() {
-        setExpanded(!expanded);
-    }
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const loadComments = () => {
+    const loadAllComments = () => {
         fetch("/comments?postId="+postId)
             .then(response => response.json())
             .then(data => {
                     setComments(data);
+                    console.log('Yorumlar yüklendi:',data)
                     setLoading(false);
                 },
                 error => {
@@ -46,6 +39,17 @@ function Post(props) {
                 }
             )
     }
+
+    function handleLike() {
+        setLiked(liked => !liked)
+    }
+
+    function handleExpandClick() {
+        setExpanded(!expanded);
+        loadAllComments()
+
+    }
+
 
     const ExpandMore = styled((props) => {
         const {expand, ...other} = props;
