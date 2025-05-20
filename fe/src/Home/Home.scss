@@ -1,5 +1,16 @@
-.home{
+.home {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-around;
+  justify-content: center;
+  align-items: flex-start; /* Flex hatasına karşı öğeler üstten hizalanır */
+  width: 100%; /* Genişlik belirtilir */
+}
+
+.homeContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start; /* Yine üstten hizalanır */
+  gap: 1rem; /* Kartlar arası boşluk eklenir */
+  width: 100%; /* Tüm genişlik kullanılır */
 }

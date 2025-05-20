@@ -16,21 +16,25 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import AddCommentIcon from '@mui/icons-material/AddComment';
 import {Link} from "react-router-dom";
+import {Container, Tooltip} from "@mui/material";
+import Comment from "../Comment/Comment.jsx";
+import Commentform from "../Comment/Commentform.jsx";
+
 
 function Post(props) {
-    const {postId,title, content, authorUsername, userId, commentCount, likeCount, createdAt, updatedAt} = props;
+    const {postId, title, content, authorUsername, userId, commentCount, likeCount, createdAt, updatedAt} = props;
     const [expanded, setExpanded] = useState(false);
-    const [liked,setLiked] =useState(false);
+    const [liked, setLiked] = useState(false);
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     const loadAllComments = () => {
-        fetch("/comments?postId="+postId)
+        fetch("/comments?postId=" + postId)
             .then(response => response.json())
             .then(data => {
                     setComments(data);
-                    console.log('Yorumlar yüklendi:',data)
+                    console.log('Yorumlar yüklendi:', data)
                     setLoading(false);
                 },
                 error => {
@@ -69,8 +73,16 @@ function Post(props) {
                     avatar={
                         <Link className="userLink" to={{pathname: "/users/" + userId}}> <Avatar sx={{bgcolor: red[500]}}
                                                                                                 aria-label="recipe">
-                            {authorUsername.charAt(0).toUpperCase()}
-                        </Avatar></Link>
+                            {
+                                <Typography
+                                    variant={"body2"}
+                                    fontFamily={"Arial"}
+                                    fontSize={"20px"}
+                                    fontWeight={"bold"}
+                                    fontStyle={"italic"}
+                                >{authorUsername.charAt(0).toUpperCase()}</Typography>}
+                        </Avatar>
+                        </Link>
 
                     }
                     action={
@@ -79,7 +91,17 @@ function Post(props) {
                         </IconButton>
                     }
                     subheader={<h1>{title}</h1>}
-                    title={authorUsername}
+                    title={
+                        <Typography
+                            variant={"body2"}
+                            fontFamily={"Arial"}
+                            fontSize={"20px"}
+                            fontWeight={"bold"}
+                            color={"blue"}
+                            fontStyle={"italic"}>
+                            <Link className={"userLink"} to={/users/ + userId}>{authorUsername}</Link>
+
+                        </Typography>}
                 />
 
                 <CardContent>
@@ -105,9 +127,11 @@ function Post(props) {
                     </>
                 </CardContent>
                 <CardActions disableSpacing>
-                    <IconButton onClick={handleLike} aria-label="add to favorites">
-                        <FavoriteIcon style={{color: liked ? "red" : undefined}}/>
-                    </IconButton>
+                    <Tooltip title={!liked ? "Postu beğen" : "Posttan beğeniyi çek"}>
+                        <IconButton onClick={handleLike} aria-label="postu favorilere ekle">
+                            <FavoriteIcon style={{color: liked ? "red" : undefined}}/>
+                        </IconButton>
+                    </Tooltip>
                     <ExpandMore
                         expand={expanded}
                         onClick={handleExpandClick}
@@ -118,9 +142,24 @@ function Post(props) {
                     </ExpandMore>
                 </CardActions>
                 <Collapse in={expanded} timeout="auto" unmountOnExit>
-                    <CardContent>
+                    <Container className="commentContainer"
 
-                    </CardContent>
+                    >
+                        {error ? <div>Error!!</div>
+                            : !loading ? comments.map((comment, index) => (
+                                    <Comment
+                                        text={comment.text}
+                                        userId={comment.userId}
+                                        userName={comment.authorUsername}
+                                        key={index}
+                                        createdDAt={comment.createdAt}
+                                        updatedAt={comment.updatedAt}/>
+                                ))
+                                :
+                                "Loading..."
+                        }
+                        <Commentform text={""} userId={userId} userName={authorUsername}/>
+                    </Container>
                 </Collapse>
             </Card>
         </div>
