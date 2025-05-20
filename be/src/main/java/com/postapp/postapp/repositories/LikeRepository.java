@@ -2,7 +2,6 @@ package com.postapp.postapp.repositories;
 
 import com.postapp.postapp.dto.LikeResponseDto;
 import com.postapp.postapp.entities.Like;
-import com.postapp.postapp.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

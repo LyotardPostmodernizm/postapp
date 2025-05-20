@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {useState} from 'react';
 import './Post.scss';
 import {styled} from '@mui/material/styles';
@@ -13,17 +13,47 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import {red} from '@mui/material/colors';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import AddCommentIcon from '@mui/icons-material/AddComment';
+import {Link} from "react-router-dom";
+import {Container, Tooltip} from "@mui/material";
+import Comment from "../Comment/Comment.jsx";
+import Commentform from "../Comment/Commentform.jsx";
+
 
 function Post(props) {
-    const {title, content, createdAt, updatedAt} = props;
+    const {postId, title, content, authorUsername, userId, commentCount, likeCount, createdAt, updatedAt} = props;
     const [expanded, setExpanded] = useState(false);
+    const [liked, setLiked] = useState(false);
+    const [comments, setComments] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const loadAllComments = () => {
+        fetch("/comments?postId=" + postId)
+            .then(response => response.json())
+            .then(data => {
+                    setComments(data);
+                    console.log('Yorumlar yüklendi:', data)
+                    setLoading(false);
+                },
+                error => {
+                    setError(error);
+                    setLoading(false);
+                }
+            )
+    }
+
+    function handleLike() {
+        setLiked(liked => !liked)
+    }
 
     function handleExpandClick() {
         setExpanded(!expanded);
+        loadAllComments()
+
     }
+
 
     const ExpandMore = styled((props) => {
         const {expand, ...other} = props;
@@ -41,26 +71,46 @@ function Post(props) {
             <Card className="card">
                 <CardHeader
                     avatar={
-                        <Avatar sx={{bgcolor: red[500]}} aria-label="recipe">
-                            R
+                        <Link className="userLink" to={{pathname: "/users/" + userId}}> <Avatar sx={{bgcolor: red[500]}}
+                                                                                                aria-label="recipe">
+                            {
+                                <Typography
+                                    variant={"body2"}
+                                    fontFamily={"Arial"}
+                                    fontSize={"20px"}
+                                    fontWeight={"bold"}
+                                    fontStyle={"italic"}
+                                >{authorUsername.charAt(0).toUpperCase()}</Typography>}
                         </Avatar>
+                        </Link>
+
                     }
                     action={
                         <IconButton aria-label="settings">
                             <MoreVertIcon/>
                         </IconButton>
                     }
-                    title={title}
+                    subheader={<h1>{title}</h1>}
+                    title={
+                        <Typography
+                            variant={"body2"}
+                            fontFamily={"Arial"}
+                            fontSize={"20px"}
+                            fontWeight={"bold"}
+                            color={"blue"}
+                            fontStyle={"italic"}>
+                            <Link className={"userLink"} to={/users/ + userId}>{authorUsername}</Link>
 
+                        </Typography>}
                 />
 
                 <CardContent>
                     <Typography
                         variant="body2"
                         className="typography"
-                        sx={{color: 'text.primary'}}
+                        sx={{color: 'text.secondary'}}
                     >
-                        {content}
+                        {<h2>{content}</h2>}
                     </Typography>
                 </CardContent>
 
@@ -77,9 +127,11 @@ function Post(props) {
                     </>
                 </CardContent>
                 <CardActions disableSpacing>
-                    <IconButton aria-label="add to favorites">
-                        <FavoriteIcon/>
-                    </IconButton>
+                    <Tooltip title={!liked ? "Postu beğen" : "Posttan beğeniyi çek"}>
+                        <IconButton onClick={handleLike} aria-label="postu favorilere ekle">
+                            <FavoriteIcon style={{color: liked ? "red" : undefined}}/>
+                        </IconButton>
+                    </Tooltip>
                     <ExpandMore
                         expand={expanded}
                         onClick={handleExpandClick}
@@ -90,9 +142,24 @@ function Post(props) {
                     </ExpandMore>
                 </CardActions>
                 <Collapse in={expanded} timeout="auto" unmountOnExit>
-                    <CardContent>
+                    <Container className="commentContainer"
 
-                    </CardContent>
+                    >
+                        {error ? <div>Error!!</div>
+                            : !loading ? comments.map((comment, index) => (
+                                    <Comment
+                                        text={comment.text}
+                                        userId={comment.userId}
+                                        userName={comment.authorUsername}
+                                        key={index}
+                                        createdDAt={comment.createdAt}
+                                        updatedAt={comment.updatedAt}/>
+                                ))
+                                :
+                                "Loading..."
+                        }
+                        <Commentform text={""} userId={userId} userName={authorUsername}/>
+                    </Container>
                 </Collapse>
             </Card>
         </div>

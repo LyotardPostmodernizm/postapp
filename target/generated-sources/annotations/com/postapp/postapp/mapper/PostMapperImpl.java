@@ -1,17 +1,21 @@
 package com.postapp.postapp.mapper;
 
+import com.postapp.postapp.dto.CommentResponseDto;
 import com.postapp.postapp.dto.PostCreateDto;
 import com.postapp.postapp.dto.PostResponseDto;
+import com.postapp.postapp.entities.Comment;
 import com.postapp.postapp.entities.Post;
 import com.postapp.postapp.entities.User;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-05-09T10:17:11+0300",
+    date = "2025-05-20T11:44:56+0300",
     comments = "version: 1.6.3, compiler: javac, environment: Java 21.0.7 (Amazon.com Inc.)"
 )
 @Component
@@ -40,9 +44,14 @@ public class PostMapperImpl implements PostMapper {
         PostResponseDto postResponseDto = new PostResponseDto();
 
         postResponseDto.setAuthorUsername( postUserUsername( post ) );
+        Long id = postUserId( post );
+        if ( id != null ) {
+            postResponseDto.setUserId( String.valueOf( id ) );
+        }
         postResponseDto.setId( post.getId() );
         postResponseDto.setTitle( post.getTitle() );
         postResponseDto.setContent( post.getContent() );
+        postResponseDto.setComments( commentListToCommentResponseDtoList( post.getComments() ) );
         if ( post.getCreatedAt() != null ) {
             postResponseDto.setCreatedAt( LocalDateTime.ofInstant( post.getCreatedAt().toInstant(), ZoneId.of( "UTC" ) ) );
         }
@@ -76,5 +85,46 @@ public class PostMapperImpl implements PostMapper {
             return null;
         }
         return user.getUsername();
+    }
+
+    private Long postUserId(Post post) {
+        User user = post.getUser();
+        if ( user == null ) {
+            return null;
+        }
+        return user.getId();
+    }
+
+    protected CommentResponseDto commentToCommentResponseDto(Comment comment) {
+        if ( comment == null ) {
+            return null;
+        }
+
+        CommentResponseDto commentResponseDto = new CommentResponseDto();
+
+        commentResponseDto.setId( comment.getId() );
+        commentResponseDto.setText( comment.getText() );
+        commentResponseDto.setChildren( commentListToCommentResponseDtoList( comment.getChildren() ) );
+        if ( comment.getCreatedAt() != null ) {
+            commentResponseDto.setCreatedAt( LocalDateTime.ofInstant( comment.getCreatedAt().toInstant(), ZoneId.of( "UTC" ) ) );
+        }
+        if ( comment.getUpdatedAt() != null ) {
+            commentResponseDto.setUpdatedAt( LocalDateTime.ofInstant( comment.getUpdatedAt().toInstant(), ZoneId.of( "UTC" ) ) );
+        }
+
+        return commentResponseDto;
+    }
+
+    protected List<CommentResponseDto> commentListToCommentResponseDtoList(List<Comment> list) {
+        if ( list == null ) {
+            return null;
+        }
+
+        List<CommentResponseDto> list1 = new ArrayList<CommentResponseDto>( list.size() );
+        for ( Comment comment : list ) {
+            list1.add( commentToCommentResponseDto( comment ) );
+        }
+
+        return list1;
     }
 }
