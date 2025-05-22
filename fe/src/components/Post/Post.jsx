@@ -127,7 +127,7 @@ function Post(props) {
                     </>
                 </CardContent>
                 <CardActions disableSpacing>
-                    <Tooltip title={!liked ? "Postu beğen" : "Posttan beğeniyi çek"}>
+                    <Tooltip title={!liked ? "Gönderiyi beğen" : "Gönderiden beğeniyi çek"}>
                         <IconButton onClick={handleLike} aria-label="postu favorilere ekle">
                             <FavoriteIcon style={{color: liked ? "red" : undefined}}/>
                         </IconButton>
@@ -138,7 +138,9 @@ function Post(props) {
                         aria-expanded={expanded}
                         aria-label="show more"
                     >
+                        <Tooltip title={"Gönderiye yorum yap"}>
                         <AddCommentIcon/>
+                        </Tooltip>
                     </ExpandMore>
                 </CardActions>
                 <Collapse in={expanded} timeout="auto" unmountOnExit>

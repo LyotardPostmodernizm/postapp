@@ -1,79 +1,90 @@
-import React from 'react';
+import React, {useState} from 'react';
 import './Comment.scss';
 import {Link} from "react-router-dom";
 import Avatar from "@mui/material/Avatar";
 import {red} from "@mui/material/colors";
-import {InputAdornment, OutlinedInput, TextField} from "@mui/material";
-import Card from "@mui/material/Card";
+import {InputAdornment, OutlinedInput, TextField, Tooltip} from "@mui/material";
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import Typography from "@mui/material/Typography";
-import CardContent from "@mui/material/CardContent";
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import IconButton from "@mui/material/IconButton";
 
 const Comment = ({text, userId, userName, createdAt, updatedAt}) => {
+    const [liked,setLiked] = useState(false);
 
 
     return (
         <>
-            <div className="commentContainer">
-                <Card className="card">
-                    <CardContent>
-                        <Typography variant="h6" style={{}}>
-                            <IconButton
-                            >
-                                <Link
-                                    className="userLink"
-                                    to={{pathname: "/users/" + userId}}>
-                                    <Avatar
-                                    sx={{bgcolor: red[500], marginRight: "10px"}}
-                                    aria-label="recipe">
-                                    {userName.charAt(0).toUpperCase()}
-                                </Avatar>
-                                </Link>
-                                <Link className="userLink" to={{pathname: "/users/" + userId}}> <Typography
-                                    variant="body2"
-                                    color="blue"
-                                    fontFamily={"Arial"}
-                                    fontStyle={"italic"}
-                                    fontSize={"20px"}
-                                >
-                                    {userName}
-                                </Typography></Link>
+            <Typography className={"userInfoRow"} variant="h6">
+                <IconButton>
+                    <Link
+                        className="userLink"
+                        to={{pathname: "/users/" + userId}}>
+                        <Avatar
+                            sx={{bgcolor: red[500], marginRight: "10px"}}
+                            aria-label="recipe">
+                            {userName.charAt(0).toUpperCase()}
+                        </Avatar>
+                    </Link>
+                    <Link className="userLink" to={{pathname: "/users/" + userId}}>
+                        <Typography
+                        variant="body2"
+                        color="blue"
+                        fontFamily={"Arial"}
+                        fontStyle={"italic"}
+                        fontSize={"20px"}
+                    >
+                        {userName}
+                    </Typography></Link>
+                </IconButton>
 
-
-                            </IconButton>
+                {updatedAt ? (
+                        <Typography variant="subtitle1" style={{marginTop: "10px", fontStyle: "italic"}}>
+                            Güncelleme Tarihi: {updatedAt}
                         </Typography>
+                    )
+                    :
+                    <Typography variant="subtitle1" style={{marginTop: "10px", fontStyle: "italic"}}>
+                        Oluşturma Tarihi: {createdAt}
+                    </Typography>}
+            </Typography>
 
 
-                        <OutlinedInput
-                            id="outlined-adornment-amount"
-                            multiline
-                            fullWidth
-                            value={text}
-                            disabled
-                            style={{
-                                backgroundColor: "#e5e8e8",
-                                color: "black",
-                                border: "none",
-                                fontSize: "15px",
-                                fontFamily: "Arial",
 
-                            }}
+            <div className="relativeContainer">
+                <OutlinedInput
+                    id="outlined-adornment-amount"
+                    multiline
+                    fullWidth
+                    value={text}
+                    disabled
+                    style={{
+                        backgroundColor: "white",
+                        color: "black",
+                        border: "none",
+                        fontSize: "15px",
+                        fontFamily: "Arial",
+                    }}
+                />
+                <Tooltip title="Yoruma cevap verin">
+                <AddCircleIcon
+                    onClick={() => console.log("Icon clicked")}
+                    className="absoluteIcon"
+                />
+                </Tooltip>
+                <Tooltip title={liked ? "Beğeniyi kaldır" : "Yorumu beğen"}>
+                    <FavoriteIcon
+                        style={{color: liked ? "red" : undefined}}
+                        onClick={() =>setLiked(liked => !liked)}
+                        className="absoluteIcon2"
+                    />
+                </Tooltip>
 
-                        />
-                        {updatedAt ? (
-                                <Typography variant="body2" style={{marginTop: "10px", fontStyle: "italic"}}>
-                                    Güncelleme Tarihi: {updatedAt}
-                                </Typography>
-                            )
-                            :
-                            <Typography variant="body2" style={{marginTop: "10px", fontStyle: "italic"}}>
-                                Oluşturma Tarihi: {createdAt}
-                            </Typography>}
-
-                    </CardContent>
-                </Card>
             </div>
-        </>
-    )
+
+
+
+        </>)
+
 }
 export default Comment;
