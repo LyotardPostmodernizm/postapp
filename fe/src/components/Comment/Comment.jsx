@@ -8,9 +8,12 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import Typography from "@mui/material/Typography";
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import IconButton from "@mui/material/IconButton";
+import Commentform from "./Commentform.jsx";
+import Box from "@mui/material/Box";
 
 const Comment = ({text, userId, userName, createdAt, updatedAt}) => {
-    const [liked,setLiked] = useState(false);
+    const [liked, setLiked] = useState(false);
+    const [isReplying, setIsReplying] = useState(false);
 
 
     return (
@@ -28,14 +31,14 @@ const Comment = ({text, userId, userName, createdAt, updatedAt}) => {
                     </Link>
                     <Link className="userLink" to={{pathname: "/users/" + userId}}>
                         <Typography
-                        variant="body2"
-                        color="blue"
-                        fontFamily={"Arial"}
-                        fontStyle={"italic"}
-                        fontSize={"20px"}
-                    >
-                        {userName}
-                    </Typography></Link>
+                            variant="body2"
+                            color="blue"
+                            fontFamily={"Arial"}
+                            fontStyle={"italic"}
+                            fontSize={"20px"}
+                        >
+                            {userName}
+                        </Typography></Link>
                 </IconButton>
 
                 {updatedAt ? (
@@ -48,8 +51,6 @@ const Comment = ({text, userId, userName, createdAt, updatedAt}) => {
                         Oluşturma Tarihi: {createdAt}
                     </Typography>}
             </Typography>
-
-
 
             <div className="relativeContainer">
                 <OutlinedInput
@@ -66,25 +67,35 @@ const Comment = ({text, userId, userName, createdAt, updatedAt}) => {
                         fontFamily: "Arial",
                     }}
                 />
-                <Tooltip title="Yoruma cevap verin">
-                <AddCircleIcon
-                    onClick={() => console.log("Icon clicked")}
-                    className="absoluteIcon"
-                />
+                <Tooltip title="Yoruma cevap ver">
+                    <AddCircleIcon color={isReplying ? "disabled" : "default"}
+                        onClick={() => {
+                            console.log("Icon clicked")
+                            setIsReplying(isReplying => !isReplying)
+                        }}
+                        className="absoluteIcon"
+                    />
                 </Tooltip>
                 <Tooltip title={liked ? "Beğeniyi kaldır" : "Yorumu beğen"}>
                     <FavoriteIcon
                         style={{color: liked ? "red" : undefined}}
-                        onClick={() =>setLiked(liked => !liked)}
+                        onClick={() => setLiked(liked => !liked)}
                         className="absoluteIcon2"
                     />
                 </Tooltip>
-
             </div>
-
+            {isReplying && (
+                <Box className="replyForm">
+                    <Commentform
+                        userId={userId}
+                        postId={0}
+                        userName={userName}
+                        text={"Yoruma cevap yaz"}
+                    />
+                </Box>
+            )}
 
 
         </>)
-
 }
 export default Comment;

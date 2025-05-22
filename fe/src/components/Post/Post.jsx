@@ -42,9 +42,28 @@ function Post(props) {
                 }
             )
     }
+    const saveLike = () => {
+        fetch("/likes", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                postId: postId,
+                userId: userId,
+            })
+        }).then(r => r.json())
+        .catch(e => console.log(e))
+        .then(data => {
+                console.log(data)
+            }
+        )
+    }
 
     function handleLike() {
         setLiked(liked => !liked)
+        saveLike()
+
     }
 
     function handleExpandClick() {
@@ -131,6 +150,7 @@ function Post(props) {
                             <FavoriteIcon style={{color: liked ? "red" : undefined}}/>
                         </IconButton>
                     </Tooltip>
+                    <Typography variant={"subtitle2"}>{likeCount}</Typography>
                     <ExpandMore
                         expand={expanded}
                         onClick={handleExpandClick}
@@ -141,6 +161,7 @@ function Post(props) {
                         <AddCommentIcon/>
                         </Tooltip>
                     </ExpandMore>
+                    <Typography variant={"subtitle2"}>{commentCount}</Typography>
                 </CardActions>
                 <Collapse in={expanded} timeout="auto" unmountOnExit>
                     <Container className="commentContainer"
@@ -159,7 +180,7 @@ function Post(props) {
                                 :
                                 "Loading..."
                         }
-                        <Commentform text={""} userId={userId} userName={authorUsername}/>
+                        <Commentform userId={userId} postId={postId} userName={authorUsername} text={" Gönderiye yorum yap"} />
                     </Container>
                 </Collapse>
             </Card>

@@ -11,8 +11,8 @@ import lombok.Setter;
 @Setter
 public class CommentCreateDto {
     @NotBlank
-    @Size(max = 1000)
+    @Size(max = 250)
     private String text;
-
+    private Long postId;
     private Long parentCommentId;
 }

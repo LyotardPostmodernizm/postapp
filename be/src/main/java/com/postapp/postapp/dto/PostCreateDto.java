@@ -13,6 +13,6 @@ public class PostCreateDto {
     private String title;
 
     @NotBlank(message = "İçerik boş olamaz")
-    @Size(max = 200, message = "İçerik en fazla 200 karakter olabilir")
+    @Size(max = 250, message = "İçerik en fazla 250 karakter uzunluğunda olabilir")
     private String content;
 }
