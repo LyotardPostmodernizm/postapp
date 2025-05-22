@@ -2,15 +2,15 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  align-items: flex-start; /* Flex hatasına karşı öğeler üstten hizalanır */
-  width: 100%; /* Genişlik belirtilir */
+  align-items: flex-start;
+  width: 100%;
 }
 
 .homeContainer {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  align-items: flex-start; /* Yine üstten hizalanır */
-  gap: 1rem; /* Kartlar arası boşluk eklenir */
-  width: 100%; /* Tüm genişlik kullanılır */
+  align-items: flex-start;
+  gap: 1rem;
+  width: 100%;
 }
