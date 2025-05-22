@@ -44,7 +44,7 @@ function Home() {
         )
     } else {
         return (
-            <div className={"homeContainer"} style={{}}>
+            <div className={"homeContainer"} >
                 {posts.map((post, index) => (
                     <Container className={"home"} fixed style={{
                         display: "flex"

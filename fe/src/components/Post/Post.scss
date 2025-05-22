@@ -16,13 +16,10 @@
 .card {
   border-radius: 15px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  object-fit: cover;
+  max-width: 100%;
 }
 
-.cardMedia {
-  max-height: 300px;
-  object-fit: cover;
-  width: 100%;
-}
 .userLink {
   text-decoration: none;
   color: inherit;
