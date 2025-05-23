@@ -24,7 +24,7 @@ function Navbar() {
                         <MenuIcon/>
                     </IconButton>
                     <Typography variant="h6" component="div" >
-                        <Link className={"homeLink"} to="/">Home</Link>
+                        <Link className={"homeLink"} to="/">Ana sayfa</Link>
                     </Typography>
 
                     <Typography variant="h6" component="div" sx={{marginLeft: "auto"}}>

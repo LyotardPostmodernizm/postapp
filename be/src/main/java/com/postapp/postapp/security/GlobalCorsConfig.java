@@ -13,8 +13,8 @@ public class GlobalCorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:5173") // Frontend URL'iniz
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS"); // İzin verilen HTTP methodları
+                        .allowedOrigins("http://localhost:5173")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
             }
         };
     }

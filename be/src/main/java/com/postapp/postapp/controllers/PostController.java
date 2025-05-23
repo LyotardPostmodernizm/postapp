@@ -8,6 +8,7 @@ import com.postapp.postapp.exceptions.UnauthorizedException;
 import com.postapp.postapp.mapper.PostMapper;
 import com.postapp.postapp.services.PostService;
 import lombok.RequiredArgsConstructor;
+import net.bytebuddy.implementation.bind.MethodDelegationBinder;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,9 +24,11 @@ public class PostController {
 
     @GetMapping
     public List<PostResponseDto> getAllPosts(@RequestParam Optional<Long> userId) {
-        return postService.getAllPosts(userId).stream()
+        List<PostResponseDto>posts =  postService.getAllPosts(userId).stream()
                 .map(postMapper::toResponseDto)
                 .toList();
+        System.out.println(posts);
+        return posts;
     }
 
     @GetMapping("/id")

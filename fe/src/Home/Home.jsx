@@ -15,6 +15,7 @@ function Home() {
             .then(response => response.json())
             .then(data => {
                     setPosts(data);
+                    console.log("posts:"+data)
                     setLoading(false);
                 },
                 error => {

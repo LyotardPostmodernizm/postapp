@@ -22,6 +22,7 @@ import Commentform from "../Comment/Commentform.jsx";
 
 function Post(props) {
     const {postId, title, content, authorUsername, userId, commentCount, likeCount, createdAt, updatedAt} = props;
+    const [likecount,setLikecount] = useState(likeCount);
     const [expanded, setExpanded] = useState(false);
     const [liked, setLiked] = useState(false);
     const [comments, setComments] = useState([]);
@@ -39,6 +40,7 @@ function Post(props) {
                 error => {
                     setError(error);
                     setLoading(false);
+                    console.log("Yorumlar yüklenirken hata oluştu:"+error)
                 }
             )
     }
@@ -60,16 +62,49 @@ function Post(props) {
         )
     }
 
+    const checkIfLiked = async () => {
+        try {
+            const response = await fetch(`/likes?userId=${userId}&postId=${postId}`);
+            const likeList = await response.json();
+            console.log("likeList:", likeList);
+
+            const isPostLiked = likeList.some(
+                (like) => like.userId === userId && like.postId === postId
+            );
+            setLiked(isPostLiked);
+        } catch (error) {
+            console.error("Like durumu kontrol edilirken hata oluştu:", error);
+        }
+    };
+
+
+    useEffect(() => {
+        checkIfLiked();
+    }, []);
+
+
+
+
     function handleLike() {
         setLiked(liked => !liked)
-        saveLike()
+        if(!liked){
+            setLikecount(likecount => likecount + 1)
+            saveLike()
+        }
+        else{
+           deleteLike()
+        }
 
     }
+
 
     function handleExpandClick() {
         setExpanded(!expanded);
         loadAllComments()
 
+    }
+    const deleteLike = () => {
+                //Burası sonra düşünülecek!!!
     }
 
 
@@ -150,7 +185,7 @@ function Post(props) {
                             <FavoriteIcon style={{color: liked ? "red" : undefined}}/>
                         </IconButton>
                     </Tooltip>
-                    <Typography variant={"subtitle2"}>{likeCount}</Typography>
+                    <Typography variant={"subtitle2"}>{likecount}</Typography>
                     <ExpandMore
                         expand={expanded}
                         onClick={handleExpandClick}

@@ -19,7 +19,10 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/users").permitAll() // POST dahil tüm /users isteklerine izin veriyoruz ama şimdilik (DEĞİŞECEK!!!)
+                        .requestMatchers("/users/**").permitAll() // POST dahil tüm /users isteklerine izin veriyoruz ama şimdilik (DEĞİŞECEK!!!)
+                        .requestMatchers("/posts/**").permitAll()
+                        .requestMatchers("/comments/**").permitAll()
+                        .requestMatchers("/likes/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 // Basic Auth'yu modern DSL ile aktif ediyoruz.

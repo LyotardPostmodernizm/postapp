@@ -6,7 +6,8 @@ import com.postapp.postapp.entities.User;
 import org.mapstruct.*;
 import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring")
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE,
+        componentModel = "spring")
 @Component
 public interface UserMapper {
     // UserCreateDto → User

@@ -12,7 +12,7 @@ public class PostResponseDto {
     private String title;
     private String content;
     private String authorUsername;
-    private String userId;
+    private Long userId;
     private int commentCount;
     private List<CommentResponseDto> comments;
     private int likeCount;
