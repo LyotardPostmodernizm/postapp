@@ -1,6 +1,6 @@
 package com.postapp.postapp.security;
 
-deimport com.postapp.postapp.services.UserDetailsServiceImpl;
+import com.postapp.postapp.services.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
