@@ -11,7 +11,7 @@ import java.util.Date;
 @Component
 public class JwtTokenGenerator {
 
-    @Value( "${postapp.jwt.secret}")
+    @Value("${postapp.jwt.secret}")
     private static String SECRET;
 
     @Value("${postapp.expiration.time}")
@@ -24,11 +24,14 @@ public class JwtTokenGenerator {
 
         Date expireDate = new Date(new Date().getTime() + EXPIRATION_TIME);
 
-
+        if (jwtUserDetails == null) {
+            throw new SignatureException("Invalid token");
+        }
         return Jwts.builder().setSubject(Long.toString(jwtUserDetails.getId())).setIssuedAt(new Date())
                 .setExpiration(expireDate).signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, SECRET).compact();
 
     }
+
     public String getUsernameFromToken(String token) {
         return Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token).getBody().getSubject();
     }
@@ -43,8 +46,7 @@ public class JwtTokenGenerator {
             Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token);
 
             return !isExpired(token);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return false;
         }
     }
@@ -53,9 +55,6 @@ public class JwtTokenGenerator {
         Date expirationDate = Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token).getBody().getExpiration();
         return new Date().after(expirationDate);
     }
-
-
-
 
 
 }
