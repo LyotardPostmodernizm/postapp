@@ -12,7 +12,7 @@ import java.util.Date;
 public class JwtTokenGenerator {
 
     @Value("${postapp.jwt.secret}")
-    private static String SECRET;
+    private String SECRET;
 
     @Value("${postapp.expiration.time}")
     private long EXPIRATION_TIME;

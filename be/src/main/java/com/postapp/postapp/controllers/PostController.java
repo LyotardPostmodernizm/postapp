@@ -7,6 +7,13 @@ import com.postapp.postapp.entities.User;
 import com.postapp.postapp.exceptions.UnauthorizedException;
 import com.postapp.postapp.mapper.PostMapper;
 import com.postapp.postapp.services.PostService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import net.bytebuddy.implementation.bind.MethodDelegationBinder;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,10 +25,14 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/posts")
 @RequiredArgsConstructor
+@Tag(name = "Posts", description = "Post management APIs")
 public class PostController {
     private final PostService postService;
     private final PostMapper postMapper;
 
+    @Operation(summary = "Get all posts",
+            description = "Get all posts by optional userId",
+            tags = {"Posts"} )
     @GetMapping
     public List<PostResponseDto> getAllPosts(@RequestParam Optional<Long> userId) {
         List<PostResponseDto>posts =  postService.getAllPosts(userId).stream()
@@ -31,14 +42,29 @@ public class PostController {
         return posts;
     }
 
+    @Operation(summary = "Get post by id",
+            description = "Get post by id",
+            tags = {"Posts"} )
     @GetMapping("/id")
     public PostResponseDto getPostById(@PathVariable Long id) {
         Post post = postService.getPostById(id);
         return postMapper.toResponseDto(post);
     }
 
+
+    @Operation(summary = "Create a new book")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Post created successfully",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = PostCreateDto.class)) }),
+            @ApiResponse(responseCode = "400", description = "Invalid input provided") })
+
     @PostMapping
-    public PostResponseDto createPost(
+    public PostResponseDto createPost(@io.swagger.v3.oas.annotations.parameters.RequestBody(
+                                                  description = "Post to create", required = true,
+                                                  content = @Content(mediaType = "application/json",
+                                                          schema = @Schema(implementation = PostCreateDto.class),
+                                                          examples = @ExampleObject(value = "{ \"title\": \"Title of Post\", \"content\": \"Content of Post\" }")))
             @RequestBody PostCreateDto postCreateDto,
             @AuthenticationPrincipal User currentUser
     ) {
@@ -47,7 +73,7 @@ public class PostController {
         Post savedPost = postService.createPost(post);
         return postMapper.toResponseDto(savedPost);
     }
-
+    @Operation(summary = "Update a post",description = "Update a post by id",tags = {"Posts"})
     @PutMapping("/{id}")
     public PostResponseDto updatePost(
             @PathVariable Long id,

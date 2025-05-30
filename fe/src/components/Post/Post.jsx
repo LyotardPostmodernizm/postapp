@@ -66,7 +66,7 @@ function Post(props) {
         try {
             const response = await fetch(`/likes?userId=${userId}&postId=${postId}`);
             const likeList = await response.json();
-            console.log("likeList:", likeList);
+            console.log("likelist:", likeList);
 
             const isPostLiked = likeList.some(
                 (like) => like.userId === userId && like.postId === postId

@@ -26,7 +26,6 @@ public class User {
     private String username;
 
     @NotEmpty
-    @Size(max = 20,message = "Parola en fazla 20 karakter olabilir!")
     private String password;
 
     private String firstName;

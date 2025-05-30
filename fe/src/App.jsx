@@ -5,6 +5,7 @@ import Post from "./components/Post/Post.jsx";
 import Navbar from "./Navbar/Navbar.jsx";
 import Home from "./Home/Home.jsx"
 import User from "./User/User.jsx";
+import AuthRegister from "./components/Auth/AuthRegister.jsx";
 
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/posts" element={<Post />} />
           <Route path="/users/:userId" element={<User/>} />
+          <Route path="/auth" element={<AuthRegister />} />
         </Routes>
       </BrowserRouter>
     </div>
