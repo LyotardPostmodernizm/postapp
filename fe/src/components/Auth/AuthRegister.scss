@@ -1,0 +1,14 @@
+.authFormContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3rem;
+  margin-top: 5rem;
+  width: 100%;
+}
+
+.usernameForm,
+.passwordForm,
+.emailForm{
+  width: 300px;
+}

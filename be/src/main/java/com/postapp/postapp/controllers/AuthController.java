@@ -68,14 +68,18 @@ public class AuthController {
             return ResponseEntity.badRequest().body(authResponse);
         }
         if(userService.getUserByUsername(userCreateDto.getUsername()) != null){
-            authResponse.setMessage("Kullanıcı zaten var!");
+            authResponse.setMessage("Böyle bir kullanıcı zaten var!");
+            return ResponseEntity.badRequest().body(authResponse);
+        }
+        if(userService.getUserByEmail(userCreateDto.getEmail()) != null){
+            authResponse.setMessage("Bu email zaten kullanımda!");
             return ResponseEntity.badRequest().body(authResponse);
         }
 
         User user = userMapper.toEntity(userCreateDto);
         user.setPassword(passwordEncoder.encode(userCreateDto.getPassword()));
         userService.saveUser(user);
-        authResponse.setMessage("Kullanıcı, başarıyla kaydedildi!");
+        authResponse.setMessage("Kullanıcı başarıyla kaydedildi!");
         return ResponseEntity.ok(authResponse);
     }
 }

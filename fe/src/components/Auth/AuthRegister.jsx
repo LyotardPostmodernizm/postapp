@@ -1,146 +1,235 @@
 import React, {useState} from 'react';
 import {FormControl, InputLabel, Input, InputAdornment, AlertTitle, Alert} from "@mui/material";
-import HttpsIcon from '@mui/icons-material/Https';
+import AlternateEmailIcon from '@mui/icons-material/AlternateEmail';
+import LockIcon from '@mui/icons-material/Lock';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import Button from "@mui/material/Button";
 import {FormHelperText} from "@mui/material";
 import Link from "@mui/material/Link";
 import {useNavigate} from 'react-router-dom';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import IconButton from "@mui/material/IconButton";
+import {useForm, Controller} from 'react-hook-form';
+import {yupResolver} from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import "./AuthRegister.scss"
+
+const schema = yup.object().shape({
+    username: yup
+        .string()
+        .required("Kullanıcı Adı gerekli")
+        .min(6, "Kullanıcı adı en az 6 karakter olmalıdır")
+        .max(20, "Kullanıcı adı en fazla 20 karakter olabilir"),
+    password: yup
+        .string()
+        .required("Şifre gerekli!")
+        .min(6, "Şifre en az 6 karakter olmalıdır.")
+        .max(20, "Şifre en fazla 20 karakter olabilir."),
+    email: yup
+        .string()
+        .required("Email gerekli!")
+        .matches(
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+            "Geçerli bir email adresi giriniz"
+        )
+
+});
+
 
 function AuthRegister() {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
+    const {
+        handleSubmit,
+        control,
+        formState: {errors},
+    } = useForm({
+        resolver: yupResolver(schema),
+    });
     const [showSuccess, setShowSuccess] = useState(false);
     const [showError, setShowError] = useState(false);
-    const [errorMsg, setErrorMsg] = useState("");
-    const [validationError, setValidationError] = useState("");
     const navigate = useNavigate();
+    const [showPassword, setShowPassword] = useState(false);
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+    const handleMouseDownPassword = (event) => {
+        event.preventDefault();
+    };
+    const [alertMessage,setAlertMessage] = useState("");
+    const handleMouseUpPassword = (event) => {
+        event.preventDefault();
+    };
 
-    const handleUsernameChange = (input) => {
-        const value = input.target.value;
+    const onSubmit = (data) => {
+        setShowSuccess(false);
+        setShowError(false);
 
-        if (value.length > 30) {
-            setErrorMsg("Kullanıcı adı 30 karakterden uzun olamaz");
-        } else {
-            // Eğer hata yoksa temizle
-            setErrorMsg("");
-        }
-        setUsername(value);
+        sendRequest("register",data)
+            .then(() => {
+                setShowSuccess(true);
+                setTimeout(() => {
+                    navigate("/login");
+                }, 2000);
+            })
+            .catch(e => {
+                console.error(e)
+                setShowError(true);
+                setTimeout(() => setShowError(false), 2000);
+            });
     };
 
 
-    const handleRegister = () => {
-        const handleRegister = () => {
-            if (errorMsg) {
-                return;
-            }
-
-            setShowSuccess(false);
-            setShowError(false);
-            setValidationError("");
-
-            if (username.length > 28) {
-                setValidationError("Kullanıcı adı en fazla 28 karakter olabilir.");
-                return;
-            }
-
-
-            sendRequest("register")
-                .then(() => {
-                    setShowSuccess(true);
-                    setTimeout(() => {
-                        navigate("/login");
-                    }, 2000);
-                })
-                .catch(e => {
-                    console.error(e)
-                    setShowError(true);
-                });
-            setUsername("");
-            setPassword("");
-        };
-
-
-        const sendRequest = async (path) => {
-            const response = await fetch("/auth/" + path, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({username, password})
-            });
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.message || "Kayıt sırasında bir hata oluştu");
-            }
-
+    const sendRequest = async (path,data) => {
+        const response = await fetch("http://localhost:8080/auth/" + path, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: data.username,
+                password: data.password,
+                email: data.email
+            })
+        })
+        if (!response.ok) {
             const data = await response.json();
-            localStorage.setItem("token", data.message);
-            localStorage.setItem("userId", data.userId);
-            localStorage.setItem("username", data.username);
-            return data;
-        };
+            setAlertMessage(data.message)
+            throw new Error(data.message || "Kayıt sırasında bir hata oluştu");
+        }
+
+        const responseData = await response.json();
+        setAlertMessage(responseData.message)
+        localStorage.setItem("token", responseData.message);
+        localStorage.setItem("userId", responseData.userId);
+        localStorage.setItem("username", responseData.username);
+        return responseData;
+    };
 
 
-        return (
-            <FormControl variant={"outlined"} sx={{marginTop: "10px", marginBottom: "10px"}}>
+    return (
+            <form onSubmit={handleSubmit(onSubmit)} className="authFormContainer">
+                <FormControl variant={"outlined"}  className="usernameForm">
+
+                    <InputLabel htmlFor="username">
+                        Kullanıcı Adı
+                    </InputLabel>
+                    <Controller
+                        name="username"
+                        control={control}
+                        defaultValue=""
+                        render={({field}) => (
+
+                            <Input {...field}
+                                   id="username"
+                                   error={!!errors.username}
+                                   startAdornment={
+                                       <InputAdornment position="start">
+                                           <AccountCircle/>
+                                       </InputAdornment>}
+                                   type="text"
+                                   placeholder="Kullanıcı Adı"
+                            />
+                        )}
+                    />
+                    <FormHelperText error={!!errors.username}>
+                        {errors.username ? errors.username.message : ""}
+                    </FormHelperText>
+                </FormControl>
+
+                <FormControl variant={"outlined"} className="emailForm">
+                    <InputLabel htmlFor="email">
+                        Email
+                    </InputLabel>
+                    <Controller
+                        name="email"
+                        control={control}
+                        defaultValue=""
+                        render={({ field }) => (
+                            <Input
+                                {...field}
+                                id="email"
+                                error={!!errors.email}
+                                startAdornment={
+                                    <InputAdornment position="start">
+                                        <AlternateEmailIcon />
+                                    </InputAdornment>
+                                }
+                                type="email"
+                                placeholder="Email"
+                            />
+                        )}
+                    />
+                    <FormHelperText error={!!errors.email}>
+                        {errors.email ? errors.email.message : ""}
+                    </FormHelperText>
+                </FormControl>
+
+
+                <FormControl variant={"outlined"} className="passwordForm">
+
+                    <InputLabel htmlFor="password">
+                        Parola
+                    < /InputLabel>
+                    <Controller
+                        name="password"
+                        control={control}
+                        defaultValue=""
+                        render={({field}) => (
+
+                            <Input {...field}
+                                   id="password"
+                                   error={!!errors.password}
+                                   startAdornment={
+                                       <InputAdornment position="start">
+                                           <LockIcon/>
+                                       </InputAdornment>
+                                   }
+                                   type={showPassword ? 'text' : 'password'}
+
+                                   placeholder="Parola"
+                                   endAdornment={
+                                       <InputAdornment position="end">
+                                           <IconButton
+                                               aria-label={
+                                                   showPassword ? 'Parolayı gizle' : 'Parolayı göster'
+                                               }
+                                               onClick={handleClickShowPassword}
+                                               onMouseDown={handleMouseDownPassword}
+                                               onMouseUp={handleMouseUpPassword}
+                                               edge="end"
+                                           >
+                                               {showPassword ? <VisibilityOffIcon/> : <VisibilityIcon/>}
+                                           </IconButton>
+                                       </InputAdornment>
+                                   }
+
+                            />
+                        )}
+                    />
+                    <FormHelperText error={!!errors.password}>
+                        {errors.password ? errors.password.message : ""}
+                    </FormHelperText>
+
+                    <FormHelperText style={{marginTop: "50px"}}>
+                        Zaten hesabınız var mı? <Link href="/login">Giriş Yap</Link>
+                    </FormHelperText>
+                </FormControl>
+                <Button type="submit" style={{marginTop: "50px"}} variant={"contained"} color={"primary"}>
+                    Kayıt ol
+                </Button>
                 {showSuccess && (
-                    <Alert severity="success" style={{marginBottom: "20px"}}>
-                        <AlertTitle>Kayıt Başarılı!</AlertTitle>
+                    <Alert severity="success">
+                        <AlertTitle>{alertMessage}</AlertTitle>
                         Login Sayfasına Yönlendiriliyorsunuz.
                     </Alert>
                 )}
                 {showError && (
-                    <Alert severity="error" style={{marginBottom: "20px"}}>
-                        <AlertTitle>Error</AlertTitle>
-                        This is an error Alert with a scary title.
-                    </Alert>
-                )}
-                {validationError && (
-                    <Alert severity="error" style={{marginBottom: "20px"}}>
-                        <AlertTitle>Validation Hatası</AlertTitle>
-                        {validationError}
+                    <Alert severity="error" >
+                        <AlertTitle>Hata!</AlertTitle>
+                        {alertMessage}
                     </Alert>
                 )}
 
-
-                <InputLabel htmlFor="outlined-adornment-amount">
-                    Kullanıcı Adı
-                </InputLabel>
-                <Input inputProps={{minLength: 6, maxLength: 30}} onChange={(input) => {
-                    setUsername(input.target.value)
-                }}
-                       id="outlined-adornment-amount"
-                       startAdornment={
-                           <InputAdornment position="start">
-                               <AccountCircle/>
-                           </InputAdornment>
-                       }
-                />
-                <InputLabel style={{marginTop: "80px"}} htmlFor="outlined-adornment-amount">
-                    Parola
-                </InputLabel>
-                <Input style={{marginTop: "50px"}}
-                       onChange={(input) => {
-                           setUsername(input.target.value)
-                       }}
-                       id="outlined-adornment-amount"
-                       startAdornment={
-                           <InputAdornment position="start">
-                               <HttpsIcon/>
-                           </InputAdornment>
-                       }
-                />
-                <Button style={{marginTop: "50px"}} variant={"contained"} color={"primary"} onClick={
-                    handleRegister
-                }>
-                    Kayıt ol
-                </Button>
-                <FormHelperText style={{marginTop: "50px"}}>
-                    Zaten hesabınız var mı? <Link href="/login">Giriş Yap</Link>
-                </FormHelperText>
-            </FormControl>
-        )
-    }
+            </form>
+    )
 }
-    export default AuthRegister
+
+export default AuthRegister
