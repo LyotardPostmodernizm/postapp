@@ -97,9 +97,7 @@ function AuthRegister() {
 
         const responseData = await response.json();
         setAlertMessage(responseData.message)
-        localStorage.setItem("token", responseData.message);
-        localStorage.setItem("userId", responseData.userId);
-        localStorage.setItem("username", responseData.username);
+        localStorage.setItem("token", "register");
         return responseData;
     };
 

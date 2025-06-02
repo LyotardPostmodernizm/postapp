@@ -42,7 +42,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET,"/users/**").permitAll() // POST dahil tüm /users isteklerine izin veriyoruz ama şimdilik (DEĞİŞECEK!!!)
+                        .requestMatchers(HttpMethod.GET,"/users/**").permitAll() // tüm /users isteklerine izin veriyoruz ama şimdilik (DEĞİŞECEK!!!)
                         .requestMatchers(HttpMethod.GET,"/posts/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/comments/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/likes/**").permitAll()

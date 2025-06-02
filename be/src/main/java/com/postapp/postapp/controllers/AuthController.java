@@ -7,6 +7,7 @@ import com.postapp.postapp.entities.User;
 import com.postapp.postapp.mapper.UserMapper;
 import com.postapp.postapp.security.JwtTokenGenerator;
 import com.postapp.postapp.services.UserService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -30,20 +31,31 @@ public class AuthController {
     private  UserMapper userMapper;
     private  PasswordEncoder passwordEncoder;
 
+
     @PostMapping("/login") //Login olduktan sonra userId ve Bearer + jwt token dönecek
-    public AuthResponse login(@RequestBody UserLoginRequest userLoginRequest) {
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody UserLoginRequest userLoginRequest) {
+        AuthResponse authResponse = new AuthResponse();
+        String email = userLoginRequest.getEmail();
+        User user  = userService.getUserByEmail(email);
+        if(user == null){
+            authResponse.setMessage("Email ya da şifre yanlış!");
+            return ResponseEntity.status(401).body(authResponse);
+
+        }
+        if(!passwordEncoder.matches(userLoginRequest.getPassword(), user.getPassword())){
+            authResponse.setMessage("Email ya da şifre yanlış!");
+            return ResponseEntity.status(401).body(authResponse);
+        }
+        String username = user.getUsername();
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                userLoginRequest.getUsername(), userLoginRequest.getPassword());
+                username, userLoginRequest.getPassword());
 
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwtToken = jwtTokenGenerator.generateToken(authentication);
-
-        User user = userService.getUserByUsername(userLoginRequest.getUsername());
-        AuthResponse authResponse = new AuthResponse();
         authResponse.setMessage("Bearer " + jwtToken);
         authResponse.setUserId(user.getId());
-        return authResponse;
+        return ResponseEntity.ok(authResponse);
 
     }
 
@@ -79,6 +91,7 @@ public class AuthController {
         User user = userMapper.toEntity(userCreateDto);
         user.setPassword(passwordEncoder.encode(userCreateDto.getPassword()));
         userService.saveUser(user);
+        authResponse.setUserId(user.getId());
         authResponse.setMessage("Kullanıcı başarıyla kaydedildi!");
         return ResponseEntity.ok(authResponse);
     }
