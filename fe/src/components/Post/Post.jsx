@@ -13,21 +13,22 @@ import Typography from '@mui/material/Typography';
 import {red} from '@mui/material/colors';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import AddCommentIcon from '@mui/icons-material/AddComment';
 import {Link} from "react-router-dom";
 import {Container, Tooltip} from "@mui/material";
 import Comment from "../Comment/Comment.jsx";
 import Commentform from "../Comment/Commentform.jsx";
+import CommentIcon from '@mui/icons-material/Comment';
 
 
 function Post(props) {
     const {postId, title, content, authorUsername, userId, commentCount, likeCount, createdAt, updatedAt} = props;
-    const [likecount,setLikecount] = useState(likeCount);
+    const [likecount, setLikecount] = useState(likeCount);
     const [expanded, setExpanded] = useState(false);
     const [liked, setLiked] = useState(false);
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [iconClicked, setIconClicked] = useState(false);
 
     const loadAllComments = () => {
         fetch("/comments?postId=" + postId)
@@ -40,7 +41,7 @@ function Post(props) {
                 error => {
                     setError(error);
                     setLoading(false);
-                    console.log("Yorumlar yüklenirken hata oluştu:"+error)
+                    console.log("Yorumlar yüklenirken hata oluştu:" + error)
                 }
             )
     }
@@ -48,18 +49,19 @@ function Post(props) {
         fetch("/likes", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": localStorage.getItem("token")
             },
             body: JSON.stringify({
                 postId: postId,
-                userId: userId,
+                userId: localStorage.getItem("userId"),
             })
         }).then(r => r.json())
-        .catch(e => console.log(e))
-        .then(data => {
-                console.log(data)
-            }
-        )
+            .catch(e => console.log(e))
+            .then(data => {
+                    console.log(data)
+                }
+            )
     }
 
     const checkIfLiked = async () => {
@@ -69,7 +71,7 @@ function Post(props) {
             console.log("likelist:", likeList);
 
             const isPostLiked = likeList.some(
-                (like) => like.userId === userId && like.postId === postId
+                (like) => ""+like.userId === localStorage.getItem("userId") && like.postId === postId
             );
             setLiked(isPostLiked);
         } catch (error) {
@@ -83,29 +85,71 @@ function Post(props) {
     }, []);
 
 
-
-
-    function handleLike() {
+    async function handleLike() {
         setLiked(liked => !liked)
-        if(!liked){
+        if (!liked) {
             setLikecount(likecount => likecount + 1)
             saveLike()
-        }
-        else{
-           deleteLike()
-        }
+        } else {
 
+            const likeId = await fetchLikeId(userId, postId);
+            if (likeId) {
+                await deleteLike(likeId);
+            } else {
+                console.error("Beğeni ID alınamadı.");
+            }
+        }
     }
 
 
     function handleExpandClick() {
         setExpanded(!expanded);
         loadAllComments()
+    }
 
-    }
-    const deleteLike = () => {
-                //Burası sonra düşünülecek!!!
-    }
+    const fetchLikeId = async (userId, postId) => {
+        try {
+            const response = await fetch(`/likes?userId=${userId}&postId=${postId}`, {
+                headers: {
+                    Authorization: localStorage.getItem("token"),
+                },
+            });
+
+            const likeList = await response.json();
+
+            if (likeList.length > 0) {
+                return likeList[0].id; // İlk beğeninin ID'sini döndür
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.error("Beğeni bilgisi alınırken hata oluştu:", error);
+            return null;
+        }
+    };
+
+
+    const deleteLike = async (likeId) => {
+        try {
+            const response = await fetch(`/likes/${likeId}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: localStorage.getItem("token"),
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error("Beğeniyi silerken bir hata oluştu.");
+            }
+
+            console.log("Beğeni başarıyla silindi.");
+
+            setLiked(false);
+            setLikecount((prev) => prev - 1);
+        } catch (error) {
+            console.error("Beğeni silinemedi:", error);
+        }
+    };
 
 
     const ExpandMore = styled((props) => {
@@ -181,7 +225,8 @@ function Post(props) {
                 </CardContent>
                 <CardActions disableSpacing>
                     <Tooltip title={!liked ? "Gönderiyi beğen" : "Gönderiden beğeniyi çek"}>
-                        <IconButton onClick={handleLike} aria-label="postu favorilere ekle">
+                        <IconButton onClick={handleLike} aria-label="Postu favorilere ekle"
+                                    disabled={localStorage.getItem("userId") == null}>
                             <FavoriteIcon style={{color: liked ? "red" : undefined}}/>
                         </IconButton>
                     </Tooltip>
@@ -192,8 +237,12 @@ function Post(props) {
                         aria-expanded={expanded}
                         aria-label="show more"
                     >
-                        <Tooltip title={"Gönderiye yorum yap"}>
-                        <AddCommentIcon/>
+                        <Tooltip title={"Yorumları gör"}>
+                            <CommentIcon color={iconClicked ? "disabled" : "black"} onClick={() => {
+                                setIconClicked(iconClicked => !iconClicked)
+                            }} style={{
+                                color: iconClicked ? "black" : undefined,
+                            }}/>
                         </Tooltip>
                     </ExpandMore>
                     <Typography variant={"subtitle2"}>{commentCount}</Typography>
@@ -215,7 +264,9 @@ function Post(props) {
                                 :
                                 "Loading..."
                         }
-                        <Commentform userId={userId} postId={postId} userName={authorUsername} text={" Gönderiye yorum yap"} />
+                        {localStorage.getItem("userId") != null ?
+                            <Commentform userId={userId} postId={postId} userName={authorUsername}
+                                         text={" Gönderiye yorum yap"}/> : null}
                     </Container>
                 </Collapse>
             </Card>

@@ -15,6 +15,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -42,8 +45,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/").permitAll()
                         .requestMatchers(HttpMethod.GET,"/users/**").permitAll() // tüm /users isteklerine izin veriyoruz ama şimdilik (DEĞİŞECEK!!!)
                         .requestMatchers(HttpMethod.GET,"/posts/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/posts/**").authenticated()
                         .requestMatchers(HttpMethod.GET,"/comments/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/likes/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
@@ -52,10 +57,24 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
 
-                // Basic AuthRegister'yu modern DSL ile aktif ediyoruz.
-                .httpBasic(Customizer.withDefaults())
+
                 .build();
     }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOrigin("http://localhost:5173"); // Frontend için izin verilen URL
+        configuration.addAllowedMethod("*"); // Tüm HTTP metotlarına izin (GET, POST, PUT, DELETE vs.)
+        configuration.addAllowedHeader("*"); // Tüm header'lara izin
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration); // Tüm endpointler için bu yapılandırmayı uygula
+        return source;
+    }
+
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

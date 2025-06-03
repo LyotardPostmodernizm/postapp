@@ -70,7 +70,6 @@ const Comment = ({text, userId, userName, createdAt, updatedAt}) => {
                 <Tooltip title="Yoruma cevap ver">
                     <AddCircleIcon color={isReplying ? "disabled" : "default"}
                         onClick={() => {
-                            console.log("Icon clicked")
                             setIsReplying(isReplying => !isReplying)
                         }}
                         className="absoluteIcon"
@@ -85,6 +84,7 @@ const Comment = ({text, userId, userName, createdAt, updatedAt}) => {
                 </Tooltip>
             </div>
             {isReplying && (
+                localStorage.getItem("userId") != null ?
                 <Box className="replyForm">
                     <Commentform
                         userId={userId}
@@ -92,7 +92,7 @@ const Comment = ({text, userId, userName, createdAt, updatedAt}) => {
                         userName={userName}
                         text={"Yoruma cevap yaz"}
                     />
-                </Box>
+                </Box> : null
             )}
 
 

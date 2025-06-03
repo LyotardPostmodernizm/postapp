@@ -3,11 +3,13 @@ import Post from "../components/Post/Post.jsx";
 import './Home.scss';
 import {Container} from "@mui/material";
 import Postform from "../components/Post/Postform.jsx";
+import {AnimatedBackground} from 'animated-backgrounds';
 
 function Home() {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [userName, setUserName] = useState("");
 
 
     const refreshPosts = () => {
@@ -15,7 +17,7 @@ function Home() {
             .then(response => response.json())
             .then(data => {
                     setPosts(data);
-                    console.log("posts:"+data)
+                    console.log("posts:" + data)
                     setLoading(false);
                 },
                 error => {
@@ -25,9 +27,29 @@ function Home() {
                 }
             )
     }
+    const retrieveUsername = (userId) => {
+        fetch("/users/" + userId)
+            .then(response => response.json())
+            .then(data => {
+                    console.log("username:" + data.username)
+                    setUserName(data.username);
+                },
+                error => {
+                    setError(error);
+                    setLoading(false);
+                }
+            )
+    }
 
     useEffect(() => {
         refreshPosts();
+        {
+            if (localStorage.getItem("userId") != null) {
+                retrieveUsername(localStorage.getItem("userId"));
+            }
+
+        }
+
     }, [])
 
 
@@ -45,25 +67,23 @@ function Home() {
         )
     } else {
         return (
-            <div className={"homeContainer"}>
-                {posts.map((post, index) => (
-                    <Container className={"home"} fixed style={{
-                        display: "flex"
-                        , justifyContent: "center"
-                        , alignItems: "center"
-                        , height: "auto",
-                        width: "800",
-                        flexWrap: "wrap",
-                        backgroundColor: "#e5e8e8",
-                        marginBottom: "1rem"
 
-                    }}
+            <div className={"homeContainer"}>
+                <AnimatedBackground animationName="fireflyForest"
+                                    blendMode="normal"/>
+
+                <Container className={"home"} fixed>
+                    {localStorage.getItem("userId") != null ? <Postform
+                        authorUsername={userName}
+                        userId={localStorage.getItem("userId")}
+                        refreshPosts={refreshPosts}
+                    /> : null}
+
+                </Container>
+
+                {posts.map((post, index) => (
+                    <Container className={"home"} fixed
                                key={index}>
-                        { /* <Postform
-                                  authorUsername={post.authorUsername}
-                                  userId={post.userId}
-                                  refreshPosts={refreshPosts}
-                        /> */}
                         <Post
                             key={post.id}
                             postId={post.id}

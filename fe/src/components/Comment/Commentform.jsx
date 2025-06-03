@@ -16,7 +16,8 @@ const Commentform = ({userId, postId, userName, text}) => {
         fetch("/comments/posts/" + (postId), {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": localStorage.getItem("token")
             },
             body: JSON.stringify({
                 text: content,

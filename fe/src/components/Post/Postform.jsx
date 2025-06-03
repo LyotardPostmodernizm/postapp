@@ -32,22 +32,39 @@ function Postform(props) {
         setIsSent(false);
     }
     const savePost = () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            console.error("Token bulunamadı. Kullanıcı giriş yapmamış!");
+            return;
+        }
+
         fetch("/posts", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("token")}`
+
             },
             body: JSON.stringify({
                 title: title,
                 content: content,
             })
-        }).then(r => r.json())
-            .catch(e => console.log(e))
-            .then(data => {
-                    console.log(data)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    // Eğer yanıt HTTP 403, 401 veya başka bir hata ile dönerse
+                    throw new Error(`HTTP hata: ${response.status}`);
                 }
-            )
-    }
+                return response.json(); // Yanıt JSON'a dönüştürülüyor
+            })
+            .then(data => {
+                console.log("Başarılı Yanıt: ", data);
+            })
+            .catch(error => {
+                console.error("Hata: ", error.message);
+            });
+    };
+
 
     return (
         <>

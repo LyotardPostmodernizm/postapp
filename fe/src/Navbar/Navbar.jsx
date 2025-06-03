@@ -9,14 +9,15 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import './Navbar.scss';
 import LogoutIcon from '@mui/icons-material/Logout';
+import {Tooltip} from "@mui/material";
 
 function Navbar() {
     const userId = localStorage.getItem("userId")
     const navigate = useNavigate();
     const clickLogout = () => {
-            localStorage.removeItem("userId")
-            localStorage.removeItem("token")
-            navigate("/login")
+        localStorage.removeItem("userId")
+        localStorage.removeItem("token")
+        navigate("/login")
 
     }
     return (
@@ -46,19 +47,21 @@ function Navbar() {
                         }
 
                     </Typography>
-                    <IconButton size="large"
-                                edge="end"
-                                color="inherit"
-                                aria-label="menu"
-                                onClick={clickLogout}
-                    >
-                        {localStorage.getItem("userId") != null ?
+                    {localStorage.getItem("userId") != null ?
+                        <Tooltip title={"Çıkış Yap"}>
+                            <IconButton size="large"
+                                        edge="end"
+                                        color="inherit"
+                                        aria-label="menu"
+                                        onClick={clickLogout}
+                            >
 
-                            <Link className="userLink" to={{pathname: "/login"}}>
-                                <LogoutIcon/>
-                            </Link> :
-                            null}
-                    </IconButton>
+                                <Link className="userLink" to={{pathname: "/login"}}>
+                                    <LogoutIcon/>
+                                </Link>
+                            </IconButton>
+                        </Tooltip> :
+                        null}
                 </Toolbar>
             </AppBar>
         </Box>

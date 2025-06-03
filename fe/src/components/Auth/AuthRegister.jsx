@@ -14,6 +14,9 @@ import {useForm, Controller} from 'react-hook-form';
 import {yupResolver} from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import "./AuthRegister.scss"
+import Paper from '@mui/material/Paper';
+import { AnimatedBackground } from 'animated-backgrounds';
+
 
 const schema = yup.object().shape({
     username: yup
@@ -45,66 +48,72 @@ function AuthRegister() {
     } = useForm({
         resolver: yupResolver(schema),
     });
-    const [showSuccess, setShowSuccess] = useState(false);
-    const [showError, setShowError] = useState(false);
-    const navigate = useNavigate();
-    const [showPassword, setShowPassword] = useState(false);
-    const handleClickShowPassword = () => setShowPassword((show) => !show);
-    const handleMouseDownPassword = (event) => {
-        event.preventDefault();
-    };
-    const [alertMessage,setAlertMessage] = useState("");
-    const handleMouseUpPassword = (event) => {
-        event.preventDefault();
-    };
-
-    const onSubmit = (data) => {
-        setShowSuccess(false);
-        setShowError(false);
-
-        sendRequest("register",data)
-            .then(() => {
-                setShowSuccess(true);
-                setTimeout(() => {
-                    navigate("/login");
-                }, 2000);
-            })
-            .catch(e => {
-                console.error(e)
-                setShowError(true);
-                setTimeout(() => setShowError(false), 2000);
-            });
-    };
 
 
-    const sendRequest = async (path,data) => {
-        const response = await fetch("http://localhost:8080/auth/" + path, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                username: data.username,
-                password: data.password,
-                email: data.email
-            })
+const [showSuccess, setShowSuccess] = useState(false);
+const [showError, setShowError] = useState(false);
+const navigate = useNavigate();
+const [showPassword, setShowPassword] = useState(false);
+const handleClickShowPassword = () => setShowPassword((show) => !show);
+const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+};
+const [alertMessage, setAlertMessage] = useState("");
+const handleMouseUpPassword = (event) => {
+    event.preventDefault();
+};
+
+const onSubmit = (data) => {
+    setShowSuccess(false);
+    setShowError(false);
+
+    sendRequest("register", data)
+        .then(() => {
+            setShowSuccess(true);
+            setTimeout(() => {
+                navigate("/login");
+            }, 2000);
         })
-        if (!response.ok) {
-            const data = await response.json();
-            setAlertMessage(data.message)
-            throw new Error(data.message || "Kayıt sırasında bir hata oluştu");
-        }
-
-        const responseData = await response.json();
-        setAlertMessage(responseData.message)
-        localStorage.setItem("token", "register");
-        return responseData;
-    };
+        .catch(e => {
+            console.error(e)
+            setShowError(true);
+            setTimeout(() => setShowError(false), 2000);
+        });
+};
 
 
-    return (
+const sendRequest = async (path, data) => {
+    const response = await fetch("http://localhost:8080/auth/" + path, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            username: data.username,
+            password: data.password,
+            email: data.email
+        })
+    })
+    if (!response.ok) {
+        const data = await response.json();
+        setAlertMessage(data.message)
+        throw new Error(data.message || "Kayıt sırasında bir hata oluştu");
+    }
+
+    const responseData = await response.json();
+    setAlertMessage(responseData.message)
+    localStorage.setItem("token", "register");
+    return responseData;
+};
+
+
+return (
+    <div className="authContainer">
+        <AnimatedBackground animationName="floatingBubbles"
+                            blendMode="normal" />
+        <Paper className="authPaper" elevation={3}>
             <form onSubmit={handleSubmit(onSubmit)} className="authFormContainer">
-                <FormControl variant={"outlined"}  className="usernameForm">
+                <FormControl variant={"outlined"} className="usernameForm">
 
                     <InputLabel htmlFor="username">
                         Kullanıcı Adı
@@ -140,14 +149,14 @@ function AuthRegister() {
                         name="email"
                         control={control}
                         defaultValue=""
-                        render={({ field }) => (
+                        render={({field}) => (
                             <Input
                                 {...field}
                                 id="email"
                                 error={!!errors.email}
                                 startAdornment={
                                     <InputAdornment position="start">
-                                        <AlternateEmailIcon />
+                                        <AlternateEmailIcon/>
                                     </InputAdornment>
                                 }
                                 type="email"
@@ -207,7 +216,7 @@ function AuthRegister() {
                     </FormHelperText>
 
                     <FormHelperText style={{marginTop: "50px"}}>
-                        Zaten hesabınız var mı? <Link href="/login">Giriş Yap</Link>
+                        Zaten hesabınız var mı? <Link style={{textDecoration:"none"}} href="/login">Giriş Yap</Link>
                     </FormHelperText>
                 </FormControl>
                 <Button type="submit" style={{marginTop: "50px"}} variant={"contained"} color={"primary"}>
@@ -220,14 +229,17 @@ function AuthRegister() {
                     </Alert>
                 )}
                 {showError && (
-                    <Alert severity="error" >
+                    <Alert severity="error">
                         <AlertTitle>Hata!</AlertTitle>
                         {alertMessage}
                     </Alert>
                 )}
 
             </form>
-    )
+        </Paper>
+    </div>
+)
+
 }
 
 export default AuthRegister

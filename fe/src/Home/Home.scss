@@ -7,3 +7,13 @@
   gap: 1rem;
   width: 100%;
 }
+.home{
+  display: flex;
+  justify-content: center ;
+  align-items: center ;
+  height: auto;
+  width: 800px;
+  flex-wrap: wrap;
+  background-color: #e5e8e8;
+  margin-bottom: 1rem
+}

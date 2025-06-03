@@ -12,6 +12,9 @@ import IconButton from "@mui/material/IconButton";
 import {useForm, Controller} from 'react-hook-form';
 import {yupResolver} from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import Paper from '@mui/material/Paper';
+import { AnimatedBackground } from 'animated-backgrounds';
+import './AuthLogin.scss'
 
 
 const schema = yup.object().shape({
@@ -91,105 +94,114 @@ function AuthLogin() {
     };
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="authFormContainer">
+        <div className="loginContainer">
+            <AnimatedBackground animationName="floatingBubbles"
+                                blendMode="normal"/>
+            <Paper className="loginPaper" elevation={3}>
+                <form onSubmit={handleSubmit(onSubmit)} className="loginFormContainer">
 
 
-            <FormControl variant={"outlined"} className="emailForm">
-                <InputLabel htmlFor="email">
-                    Email
-                </InputLabel>
-                <Controller
-                    name="email"
-                    control={control}
-                    defaultValue=""
-                    render={({field}) => (
-                        <Input
-                            {...field}
-                            id="email"
-                            error={!!errors.email}
-                            startAdornment={
-                                <InputAdornment position="start">
-                                    <AlternateEmailIcon/>
-                                </InputAdornment>
-                            }
-                            type="email"
-                            placeholder="Email"
+                    <FormControl variant={"outlined"} className="emailForm">
+                        <InputLabel htmlFor="email">
+                            Email
+                        </InputLabel>
+                        <Controller
+                            name="email"
+                            control={control}
+                            defaultValue=""
+                            render={({field}) => (
+                                <Input
+                                    {...field}
+                                    id="email"
+                                    error={!!errors.email}
+                                    startAdornment={
+                                        <InputAdornment position="start">
+                                            <AlternateEmailIcon/>
+                                        </InputAdornment>
+                                    }
+                                    type="email"
+                                    placeholder="Email"
+                                />
+                            )}
                         />
-                    )}
-                />
-                <FormHelperText error={!!errors.email}>
-                    {errors.email ? errors.email.message : ""}
-                </FormHelperText>
-            </FormControl>
+                        <FormHelperText error={!!errors.email}>
+                            {errors.email ? errors.email.message : ""}
+                        </FormHelperText>
+                    </FormControl>
 
 
-            <FormControl variant={"outlined"} className="passwordForm">
+                    <FormControl variant={"outlined"} className="passwordForm">
 
-                <InputLabel htmlFor="password">
-                    Parola
-                < /InputLabel>
-                <Controller
-                    name="password"
-                    control={control}
-                    defaultValue=""
-                    render={({field}) => (
+                        <InputLabel htmlFor="password">
+                            Parola
+                        < /InputLabel>
+                        <Controller
+                            name="password"
+                            control={control}
+                            defaultValue=""
+                            render={({field}) => (
 
-                        <Input {...field}
-                               id="password"
-                               error={!!errors.password}
-                               startAdornment={
-                                   <InputAdornment position="start">
-                                       <LockIcon/>
-                                   </InputAdornment>
-                               }
-                               type={showPassword ? 'text' : 'password'}
+                                <Input {...field}
+                                       id="password"
+                                       error={!!errors.password}
+                                       startAdornment={
+                                           <InputAdornment position="start">
+                                               <LockIcon/>
+                                           </InputAdornment>
+                                       }
+                                       type={showPassword ? 'text' : 'password'}
 
-                               placeholder="Parola"
-                               endAdornment={
-                                   <InputAdornment position="end">
-                                       <IconButton
-                                           aria-label={
-                                               showPassword ? 'Parolayı gizle' : 'Parolayı göster'
-                                           }
-                                           onClick={handleClickShowPassword}
-                                           onMouseDown={handleMouseDownPassword}
-                                           onMouseUp={handleMouseUpPassword}
-                                           edge="end"
-                                       >
-                                           {showPassword ? <VisibilityOffIcon/> : <VisibilityIcon/>}
-                                       </IconButton>
-                                   </InputAdornment>
-                               }
+                                       placeholder="Parola"
+                                       endAdornment={
+                                           <InputAdornment position="end">
+                                               <IconButton
+                                                   aria-label={
+                                                       showPassword ? 'Parolayı gizle' : 'Parolayı göster'
+                                                   }
+                                                   onClick={handleClickShowPassword}
+                                                   onMouseDown={handleMouseDownPassword}
+                                                   onMouseUp={handleMouseUpPassword}
+                                                   edge="end"
+                                               >
+                                                   {showPassword ? <VisibilityOffIcon/> : <VisibilityIcon/>}
+                                               </IconButton>
+                                           </InputAdornment>
+                                       }
 
+                                />
+                            )}
                         />
+                        <FormHelperText error={!!errors.password}>
+                            {errors.password ? errors.password.message : ""}
+                        </FormHelperText>
+
+                        <FormHelperText style={{marginTop: "50px"}}>
+                            <Link style={{textDecoration:"none"}} href="/auth">Kayıt ekranına dön </Link>
+                        </FormHelperText>
+
+                    </FormControl>
+                    <Button type="submit" style={{marginTop: "50px"}} variant={"contained"} color={"primary"}>
+                        Giriş Yap
+                    </Button>
+                    {showSuccess && (
+                        <Alert severity="success">
+                            <AlertTitle>Giriş Başarılı!</AlertTitle>
+                            Kullanıcı Profilinize Yönlendiriliyorsunuz.
+                        </Alert>
                     )}
-                />
-                <FormHelperText error={!!errors.password}>
-                    {errors.password ? errors.password.message : ""}
-                </FormHelperText>
+                    {showError && (
+                        <Alert severity="error">
+                            <AlertTitle>Hata!</AlertTitle>
+                            {alertMessage}
+                        </Alert>
+                    )}
 
+                </form>
+            </Paper>
+        </div>
+                )
 
-            </FormControl>
-            <Button type="submit" style={{marginTop: "50px"}} variant={"contained"} color={"primary"}>
-                Giriş Yap
-            </Button>
-            {showSuccess && (
-                <Alert severity="success">
-                    <AlertTitle>Giriş Başarılı!</AlertTitle>
-                    Kullanıcı Profilinize Yönlendiriliyorsunuz.
-                </Alert>
-            )}
-            {showError && (
-                <Alert severity="error">
-                    <AlertTitle>Hata!</AlertTitle>
-                    {alertMessage}
-                </Alert>
-            )}
+                }
 
-        </form>
-    )
-
-}
-
-export default AuthLogin;
+                export default AuthLogin;
 
