@@ -68,6 +68,11 @@ public class PostController {
             @RequestBody PostCreateDto postCreateDto,
             @AuthenticationPrincipal User currentUser
     ) {
+        System.out.println("Current User: " + currentUser);
+        if (currentUser == null) {
+            throw new RuntimeException("Authentication failed: User is null");
+        }
+
         Post post = postMapper.toEntity(postCreateDto);
         post.setUser(currentUser);
         Post savedPost = postService.createPost(post);

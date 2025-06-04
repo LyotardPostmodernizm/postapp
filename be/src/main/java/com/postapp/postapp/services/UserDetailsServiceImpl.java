@@ -20,8 +20,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = userRepository.findByUsername(username);
         return user == null ? null : JwtUserDetails.create(user);
     }
-    public UserDetails loadUserById(Long id){
-        User user = userRepository.findById(id).isPresent() ? userRepository.findById(id).get() : null;
-        return user == null ? null : JwtUserDetails.create(user);
+
+    public UserDetails loadUserById(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with ID: " + userId));
+        System.out.println("Loaded UserDetails: " + user);
+        return JwtUserDetails.create(user);
     }
+
 }

@@ -26,19 +26,26 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         try {
             String token = extractJwtFromRequest(request);
+            System.out.println("JWT Token: " + token);
             if (token != null && jwtTokenGenerator.validateToken(token)) {
-                Long userId = jwtTokenGenerator.getUserIdFromToken(token);
-                UserDetails user = userDetailsService.loadUserById(userId);
+                String userName = jwtTokenGenerator.getUsernameFromToken(token);
+                System.out.println("UserName from Token: " + userName);
+                UserDetails user = userDetailsService.loadUserByUsername(userName);
+                System.out.println("User Details: " + user);
                 if (user != null) {
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                             user, null, user.getAuthorities());
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+                    System.out.println("Authentication set in SecurityContextHolder for: " + user.getUsername());
+
                 }
             }
             filterChain.doFilter(request, response);
         } catch (Exception e) {
+            System.err.println("Error in JwtAuthFilter: " + e.getMessage());
             throw new RuntimeException(e);
+
         }
 
     }
@@ -47,7 +54,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String bearer = httpServletRequest.getHeader("Authorization");
         System.out.println("Authorization Header: " + bearer);
         if (bearer != null && bearer.startsWith("Bearer ")) {
-            return bearer.substring(7);
+            return bearer.substring("Bearer".length() + 1);
         }
         return null;
     }

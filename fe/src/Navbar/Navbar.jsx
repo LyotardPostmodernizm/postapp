@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Link, useNavigate} from "react-router-dom";
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -14,12 +14,15 @@ import {Tooltip} from "@mui/material";
 function Navbar() {
     const userId = localStorage.getItem("userId")
     const navigate = useNavigate();
+    const [fullName,setFullName] = useState("");
+
     const clickLogout = () => {
         localStorage.removeItem("userId")
         localStorage.removeItem("token")
         navigate("/login")
 
     }
+
     return (
         <Box>
             <AppBar position="static">
