@@ -47,6 +47,7 @@ public class JwtTokenGenerator {
 
             return !isExpired(token);
         } catch (Exception e) {
+            System.out.println("Invalid JWT Token: " + e.getMessage());
             return false;
         }
     }

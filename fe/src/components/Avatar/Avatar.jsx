@@ -40,9 +40,8 @@ function Avatar() {
     const handleClose2 = () => setOpen(false);
     const avatars = (Array(30).fill().map((_, i) => i + 1))
 
-    const [selectedValue, setSelectedValue] = useState(1);
     const handleChange = (event) => {
-        setSelectedValue(event.target.value);
+        setAvatar(event.target.value);
     };
 
     const [fullName, setFullName] = React.useState("");
@@ -51,6 +50,7 @@ function Avatar() {
     const [commentCount, setCommentCount] = React.useState(0);
     const [likeCount, setLikeCount] = React.useState(0);
     const [postCount, setPostCount] = React.useState(0);
+    const [avatar, setAvatar] = useState(1);
 
     const userId = localStorage.getItem("userId");
 
@@ -65,12 +65,32 @@ function Avatar() {
                 setEmail(data.email)
                 setLikeCount(data.likeCount)
                 setPostCount(data.postCount)
+                setAvatar(data.avatar)
             })
             .catch(error => console.log("error fetching userResponse: " + error))
     }
     useEffect(() => {
         fetchUserResponse()
+        saveAvatar()
     }, [])
+
+    const saveAvatar = () => {
+        fetch("/users/" + userId,{
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("token")}`
+
+            },
+            body: JSON.stringify({
+                avatar: avatar,
+            })
+        }).catch(e => console.log(e))
+            .then(data => {
+                console.log(data)
+            }
+        )
+    }
 
 
     return (
@@ -79,7 +99,7 @@ function Avatar() {
             <Card className="AvatarCard">
                 <CardMedia className="AvatarCardMedia"
                            sx={{height: 256, width: 256}}
-                           image="/public/Avatars/avatar1.png"
+                           image={`/public/Avatars/avatar${avatar}.png`}
                            style={{marginLeft: "auto", marginRight: "auto", display: "block"}}
                            title="Avatar"
                 />
@@ -116,6 +136,7 @@ function Avatar() {
                     aria-describedby="modal-modal-description"
                 >
                     <Box sx={style}>
+                        <Typography> Lütfen avatarınızı seçin</Typography>
                         <List dense sx={{
                             width: '100%',
                             maxWidth: 360,
@@ -134,7 +155,7 @@ function Avatar() {
                                             edge="end"
                                             value={value}
                                             onChange={handleChange}
-                                            checked={"" + selectedValue === "" + value}
+                                            checked={"" + avatar === "" + value}
                                             inputProps={{'aria-labelledby': labelId}}
                                         />}>
                                         <CardMedia
