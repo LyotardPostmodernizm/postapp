@@ -1,12 +1,8 @@
 package com.postapp.postapp.entities;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.antlr.v4.runtime.misc.NotNull;
-
 import java.util.Date;
 import java.util.List;
 
@@ -20,6 +16,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private int avatar;
 
     @NotEmpty(message = "Kullanıcı adı boş olamaz!")

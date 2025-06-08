@@ -15,6 +15,7 @@ public interface UserMapper {
     @Mapping(target = "posts", ignore = true)
     @Mapping(target = "comments", ignore = true)
     @Mapping(target = "likes", ignore = true)
+    @Mapping(target = "avatar", defaultValue = "1")
     User toEntity(UserCreateDto userCreateDto);
 
     // User → UserResponseDto

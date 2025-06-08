@@ -52,7 +52,7 @@ public class PostController {
     }
 
 
-    @Operation(summary = "Create a new book")
+    @Operation(summary = "Create a new post")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Post created successfully",
                     content = { @Content(mediaType = "application/json",

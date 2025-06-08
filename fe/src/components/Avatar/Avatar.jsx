@@ -31,7 +31,7 @@ const style = {
 };
 
 
-function Avatar() {
+function Avatar({userId}) {
 
     const [open, setOpen] = useState(false);
     const handleOpen = () => setOpen(true);
@@ -52,11 +52,38 @@ function Avatar() {
     const [postCount, setPostCount] = React.useState(0);
     const [avatar, setAvatar] = useState(1);
 
-    const userId = localStorage.getItem("userId");
+
 
     const fetchUserResponse = () => {
         fetch("/users/" + userId,
-            {method: "GET"})
+            {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                    "Content-Type": "application/json"
+                }}
+        )
+            .then(response => response.json())
+            .then(data => {
+                setUsername(data.username)
+                setFullName(data.fullName)
+                setCommentCount(data.commentCount)
+                setEmail(data.email)
+                setLikeCount(data.likeCount)
+                setPostCount(data.postCount)
+                setAvatar(data.avatar)
+            })
+            .catch(error => console.log("error fetching userResponse: " + error))
+    }
+    const fetchUserResponseMe = () => {
+        fetch("/users/me",
+            {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                    "Content-Type": "application/json"
+                }
+            })
             .then(response => response.json())
             .then(data => {
                 setUsername(data.username)
@@ -75,7 +102,7 @@ function Avatar() {
     }, [])
 
     const saveAvatar = () => {
-        fetch("/users/" + userId,{
+        fetch("/users/" + userId, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -87,14 +114,14 @@ function Avatar() {
             })
         }).catch(e => console.log(e))
             .then(data => {
-                console.log(data)
-            }
-        )
+                    console.log(data)
+                }
+            )
     }
 
 
     return (
-        <>
+        <div className="AvatarContainer">
 
             <Card className="AvatarCard">
                 <CardMedia className="AvatarCardMedia"
@@ -174,7 +201,7 @@ function Avatar() {
                 </Modal>
             </div>
 
-        </>
+        </div>
     );
 }
 

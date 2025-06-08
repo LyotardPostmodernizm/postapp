@@ -24,6 +24,6 @@ public class UserCreateDto {
     @NotBlank(message = "email boş olamaz!")
     private String email;
 
-    private int avatar;
+    private int avatar=1;
 
 }

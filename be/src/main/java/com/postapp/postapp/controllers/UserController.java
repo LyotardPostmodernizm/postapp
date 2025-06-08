@@ -76,4 +76,13 @@ public class UserController {
         userService.deleteUserById(id);
     }
 
+    @GetMapping("/me")
+    public UserResponseDto getCurrentUser(@AuthenticationPrincipal JwtUserDetails currentUser) {
+        User user = userService.getUserById(currentUser.getId());
+        return userMapper.toResponseDto(user);
+    }
+    @GetMapping("/activity/{userId}")
+    public List<Object> getActivity(@PathVariable Long userId) {
+        return userService.getUserActivity(userId);
+    }
 }
