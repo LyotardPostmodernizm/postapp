@@ -31,7 +31,7 @@ const customFullScreenDialog = ({isOpen, postId, setIsOpen}) => {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("token")}`
+                "Authorization": localStorage.getItem("token")
             }
         })
             .then(res => res.json())
@@ -101,7 +101,7 @@ function UserActivity({userId}) {
     const fetchActivities = () => {
         fetch("/users/activity/" + userId, {
             method: "GET",
-            headers: {"Authorization": `Bearer ${localStorage.getItem("token")}`}
+            headers: {"Authorization": localStorage.getItem("token")}
         })
             .then(response => response.json())
             .then(data => {

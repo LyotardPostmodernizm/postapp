@@ -53,15 +53,15 @@ function Avatar({userId}) {
     const [avatar, setAvatar] = useState(1);
 
 
-
     const fetchUserResponse = () => {
         fetch("/users/" + userId,
             {
                 method: "GET",
                 headers: {
-                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                    "Authorization": localStorage.getItem("token"),
                     "Content-Type": "application/json"
-                }}
+                }
+            }
         )
             .then(response => response.json())
             .then(data => {
@@ -80,7 +80,7 @@ function Avatar({userId}) {
             {
                 method: "GET",
                 headers: {
-                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                    "Authorization": localStorage.getItem("token"),
                     "Content-Type": "application/json"
                 }
             })
@@ -106,7 +106,7 @@ function Avatar({userId}) {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("token")}`
+                "Authorization": localStorage.getItem("token")
 
             },
             body: JSON.stringify({
@@ -150,9 +150,11 @@ function Avatar({userId}) {
                         Kullanıcının beğeni sayısı: {likeCount}
                     </Typography>
                 </CardContent>
+                {localStorage.getItem("userId") === userId ? <><Button variant={"contained"} onClick={handleOpen}>Avatarı
+                    Değiştir</Button>
+                    <Button style={{marginLeft: "20px"}} variant={"contained"}>Adı - Soyadı
+                        Değiştir</Button> </> : null}
 
-                <Button variant={"contained"} onClick={handleOpen}>Avatarı Değiştir</Button>
-                <Button style={{marginLeft: "20px"}} variant={"contained"}>Adı - Soyadı Değiştir</Button>
             </Card>
 
             <div className="AvatarModal">

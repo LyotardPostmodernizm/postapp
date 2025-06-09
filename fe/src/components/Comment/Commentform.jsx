@@ -8,7 +8,7 @@ import {InputAdornment, OutlinedInput, TextField} from "@mui/material";
 import SendIcon from '@mui/icons-material/Send';
 import IconButton from "@mui/material/IconButton";
 
-const Commentform = ({userId, postId, userName, text}) => {
+const Commentform = ({userId, postId, userName, text, setCommentsRefresh}) => {
 
     const [content, setContent] = useState("");
 
@@ -31,6 +31,7 @@ const Commentform = ({userId, postId, userName, text}) => {
                 }
             )
         setContent("");
+        setCommentsRefresh(true)
     }
 
 

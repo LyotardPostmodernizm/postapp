@@ -29,9 +29,15 @@ function Post(props) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [iconClicked, setIconClicked] = useState(false);
+    const [refresh, setRefresh] = useState(false);
+
+    const setCommentsRefresh = () => {
+        setRefresh(true)
+    }
 
     const loadAllComments = () => {
-        fetch("/comments?postId=" + postId)
+        fetch("/comments?postId=" + postId,
+            {method: "GET"})
             .then(response => response.json())
             .then(data => {
                     setComments(data);
@@ -44,6 +50,7 @@ function Post(props) {
                     console.log("Yorumlar yüklenirken hata oluştu:" + error)
                 }
             )
+        setRefresh(false)
     }
     const saveLike = () => {
         fetch("/likes", {
@@ -66,13 +73,16 @@ function Post(props) {
 
     const checkIfLiked = async () => {
         try {
-            const response = await fetch(`/likes?userId=${userId}&postId=${postId}`);
+            const response = await fetch(`/likes?userId=${userId}&postId=${postId}`, {
+                method: "GET",
+            });
             const likeList = await response.json();
             console.log("likelist:", likeList);
 
             const isPostLiked = likeList.some(
-                (like) => ""+like.userId === localStorage.getItem("userId") && like.postId === postId
+                (like) => "" + like.userId === localStorage.getItem("userId") && like.postId === postId
             );
+            console.log("isPostLiked: "+isPostLiked)
             setLiked(isPostLiked);
         } catch (error) {
             console.error("Like durumu kontrol edilirken hata oluştu:", error);
@@ -83,6 +93,12 @@ function Post(props) {
     useEffect(() => {
         checkIfLiked();
     }, []);
+
+    useEffect(() => {
+        if (refresh) {
+            loadAllComments()
+        }
+    }, [refresh])
 
 
     async function handleLike() {
@@ -265,8 +281,8 @@ function Post(props) {
                                 "Loading..."
                         }
                         {localStorage.getItem("userId") != null ?
-                            <Commentform userId={userId} postId={postId} userName={authorUsername}
-                                         text={" Gönderiye yorum yap"}/> : null}
+                            <Commentform userId={localStorage.getItem("userId")} postId={postId} userName={authorUsername}
+                                         text={" Gönderiye yorum yap"} setCommentsRefresh={setCommentsRefresh}/> : null}
                     </Container>
                 </Collapse>
             </Card>

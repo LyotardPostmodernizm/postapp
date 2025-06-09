@@ -12,7 +12,8 @@ function User() {
         <div>
 
             <Avatar userId={userId}/>
-            <UserActivity userId={userId}/>
+            {localStorage.getItem("userId") === userId ?  <UserActivity userId={userId}/> :  null}
+
 
         </div>
     )

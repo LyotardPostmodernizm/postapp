@@ -39,6 +39,7 @@ function AuthLogin() {
     const [showError, setShowError] = useState(false);
     const [alertMessage, setAlertMessage] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+
     const handleClickShowPassword = () => setShowPassword((show) => !show);
     const handleMouseDownPassword = (event) => {
         event.preventDefault();
