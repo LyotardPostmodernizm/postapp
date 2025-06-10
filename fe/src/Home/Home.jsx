@@ -28,7 +28,8 @@ function Home() {
             )
     }
     const retrieveUsername = (userId) => {
-        fetch("/users/" + userId)
+        fetch("/users/" + userId, {method: "GET",
+            headers: {"Authorization": localStorage.getItem("token")}})
             .then(response => response.json())
             .then(data => {
                     console.log("username:" + data.username)
@@ -36,6 +37,7 @@ function Home() {
                 },
                 error => {
                     setError(error);
+                    console.log(error)
                     setLoading(false);
                 }
             )

@@ -1,9 +1,13 @@
 package com.postapp.postapp.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class AuthResponse {
     private String message;
     private Long userId;
+    String accessToken;
+    String refreshToken;
 }

@@ -19,7 +19,8 @@ function Navbar() {
     const clickLogout = () => {
         localStorage.removeItem("userId")
         localStorage.removeItem("token")
-        navigate("/login")
+        navigate("/auth", { replace: true });
+
 
     }
 
@@ -59,7 +60,7 @@ function Navbar() {
                                         onClick={clickLogout}
                             >
 
-                                <Link className="userLink" to={{pathname: "/login"}}>
+                                <Link className="userLink" to={{pathname: "/auth"}}>
                                     <LogoutIcon/>
                                 </Link>
                             </IconButton>

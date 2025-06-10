@@ -3,13 +3,16 @@ package com.postapp.postapp.controllers;
 import com.postapp.postapp.dto.AuthResponse;
 import com.postapp.postapp.dto.UserCreateDto;
 import com.postapp.postapp.dto.UserLoginRequest;
+import com.postapp.postapp.entities.RefreshToken;
 import com.postapp.postapp.entities.User;
 import com.postapp.postapp.mapper.UserMapper;
 import com.postapp.postapp.security.JwtTokenGenerator;
+import com.postapp.postapp.services.RefreshTokenService;
 import com.postapp.postapp.services.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,6 +33,7 @@ public class AuthController {
     private  UserService userService;
     private  UserMapper userMapper;
     private  PasswordEncoder passwordEncoder;
+    private RefreshTokenService refreshTokenService;
 
 
     @PostMapping("/login") //Login olduktan sonra userId ve Bearer + jwt token dönecek
@@ -53,7 +57,8 @@ public class AuthController {
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwtToken = jwtTokenGenerator.generateToken(authentication);
-        authResponse.setMessage("Bearer "+jwtToken);
+        authResponse.setAccessToken("Bearer " + jwtToken);
+        authResponse.setRefreshToken(refreshTokenService.createRefreshToken(user));
         authResponse.setUserId(user.getId());
         return ResponseEntity.ok(authResponse);
 
@@ -91,8 +96,37 @@ public class AuthController {
         User user = userMapper.toEntity(userCreateDto);
         user.setPassword(passwordEncoder.encode(userCreateDto.getPassword()));
         userService.saveUser(user);
-        authResponse.setUserId(user.getId());
+
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+                new UsernamePasswordAuthenticationToken(userCreateDto.getUsername(), userCreateDto.getPassword());
+        Authentication authentication = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwtToken = jwtTokenGenerator.generateToken(authentication);
+
         authResponse.setMessage("Kullanıcı başarıyla kaydedildi!");
+        authResponse.setAccessToken("Bearer " + jwtToken);
+        authResponse.setRefreshToken(refreshTokenService.createRefreshToken(user));
+        authResponse.setUserId(user.getId());
         return ResponseEntity.ok(authResponse);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(@RequestBody Long userId, @RequestBody String refreshToken){
+        AuthResponse authResponse = new AuthResponse();
+        RefreshToken token = refreshTokenService.getByUserId(userId);
+        if(token.getToken().equals(refreshToken) && !refreshTokenService.isExpired(token)){
+
+            User user = token.getUser();
+            String jwtToken = jwtTokenGenerator.generateTokenByUserId(user.getId());
+            authResponse.setMessage("Token Yenilendi!");
+            authResponse.setAccessToken("Bearer " + jwtToken);
+            authResponse.setRefreshToken(refreshTokenService.createRefreshToken(userService.getUserById(userId)));
+            return ResponseEntity.ok(authResponse);
+        }
+        else{
+            authResponse.setMessage("Refresh Token Geçerli Değil!");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(authResponse);
+        }
+
     }
 }

@@ -13,14 +13,6 @@ function App() {
 
 
 
-
-    const userId = localStorage.getItem("userId");
-    const token = localStorage.getItem("token");
-
-    console.log("userId:"+userId)
-    console.log("token:"+token)
-
-
     return (
         <div className="App">
             <BrowserRouter>
