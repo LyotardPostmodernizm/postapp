@@ -1,6 +1,7 @@
 package com.postapp.postapp.controllers;
 
 import com.postapp.postapp.dto.AuthResponse;
+import com.postapp.postapp.dto.RefreshTokenRequest;
 import com.postapp.postapp.dto.UserCreateDto;
 import com.postapp.postapp.dto.UserLoginRequest;
 import com.postapp.postapp.entities.RefreshToken;
@@ -25,15 +26,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/auth")
 public class AuthController {
-    private  AuthenticationManager authenticationManager;
-    private  JwtTokenGenerator jwtTokenGenerator;
-    private  UserService userService;
-    private  UserMapper userMapper;
-    private  PasswordEncoder passwordEncoder;
-    private RefreshTokenService refreshTokenService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenGenerator jwtTokenGenerator;
+    private final UserService userService;
+    private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenService refreshTokenService;
 
 
     @PostMapping("/login") //Login olduktan sonra userId ve Bearer + jwt token dönecek
@@ -64,7 +65,7 @@ public class AuthController {
 
     }
 
-    @PostMapping("/register") //register olduktan sonra sadece message dönecek
+    @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody UserCreateDto userCreateDto) {
         AuthResponse authResponse = new AuthResponse();
 
@@ -111,16 +112,16 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponse> refresh(@RequestBody Long userId, @RequestBody String refreshToken){
+    public ResponseEntity<AuthResponse> refresh(@RequestBody RefreshTokenRequest refreshTokenRequest) {
         AuthResponse authResponse = new AuthResponse();
-        RefreshToken token = refreshTokenService.getByUserId(userId);
-        if(token.getToken().equals(refreshToken) && !refreshTokenService.isExpired(token)){
+        RefreshToken token = refreshTokenService.getByUserId(refreshTokenRequest.getUserId());
+        if(token.getToken().equals(refreshTokenRequest.getRefreshToken()) && !refreshTokenService.isExpired(token)){
 
             User user = token.getUser();
             String jwtToken = jwtTokenGenerator.generateTokenByUserId(user.getId());
             authResponse.setMessage("Token Yenilendi!");
             authResponse.setAccessToken("Bearer " + jwtToken);
-            authResponse.setRefreshToken(refreshTokenService.createRefreshToken(userService.getUserById(userId)));
+            authResponse.setUserId(user.getId());
             return ResponseEntity.ok(authResponse);
         }
         else{

@@ -102,7 +102,10 @@ const sendRequest = async (path, data) => {
 
     const responseData = await response.json();
     setAlertMessage(responseData.message)
-    localStorage.setItem("token", "register");
+    localStorage.setItem("token", responseData.accessToken);
+    localStorage.setItem("refreshToken", responseData.refreshToken);
+    localStorage.setItem("userId", responseData.userId);
+
     return responseData;
 };
 

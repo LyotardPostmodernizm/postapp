@@ -7,32 +7,64 @@ import {red} from "@mui/material/colors";
 import {InputAdornment, OutlinedInput, TextField} from "@mui/material";
 import SendIcon from '@mui/icons-material/Send';
 import IconButton from "@mui/material/IconButton";
+import {makeAuthenticatedRequest} from "../../services/ApiService.js";
 
-const Commentform = ({userId, postId, userName, text, setCommentsRefresh}) => {
+const Commentform = ({userId, postId,commentId, userName, text, setCommentsRefresh, isReplyToComment}) => {
 
     const [content, setContent] = useState("");
 
-    const handleSubmitOnPost = () => {
-        fetch("/comments/posts/" + (postId), {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": localStorage.getItem("token")
-            },
-            body: JSON.stringify({
-                text: content,
-                userId: userId,
-                postId: postId,
-            })
-        }).then(r => r.json())
-            .catch(e => console.log(e))
-            .then(data => {
-                    console.log(data)
-                }
-            )
-        setContent("");
-        setCommentsRefresh(true)
+    const handleSubmit = async () => {
+        if (isReplyToComment) {
+            await handleSubmitOnComment(commentId, content);
+        } else {
+            await handleSubmitOnPost(postId, content);
+        }
+    };
+
+
+
+    //Posta yorum yazma
+    const handleSubmitOnPost = async (content) => {
+        try {
+            const response = await makeAuthenticatedRequest(`/comments/posts/${postId}`, {
+                method: "POST",
+                body: JSON.stringify({
+                    text: content,
+                })
+            });
+            if(response.ok){
+                const result = await response.json();
+                console.log("Gönderiye yorum başarıyla gönderildi:", result);
+                setContent("");
+                setCommentsRefresh(true);
+            }
+
+        } catch (error){
+            console.error("Yorum gönderme hatası:", error);
+        }
+
     }
+
+    // Commente yorum yazma
+    const handleSubmitOnComment = async (commentId, content) => {
+        try {
+            const response = await makeAuthenticatedRequest(`/comments/${commentId}/replies`, {
+                method: "POST",
+                body: JSON.stringify({
+                    text: content,
+                })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log("Yoruma cevap başarıyla gönderildi:", result);
+                setContent("");
+                setCommentsRefresh(true);
+            }
+        } catch (error) {
+            console.error("Yorum gönderme hatası:", error);
+        }
+    };
 
 
     return (
@@ -60,7 +92,7 @@ const Commentform = ({userId, postId, userName, text, setCommentsRefresh}) => {
 
             endAdornment={
                 <InputAdornment position="end">
-                    <IconButton onClick={handleSubmitOnPost} aria-label="send">
+                    <IconButton onClick={handleSubmit} aria-label="send">
                         <SendIcon color={"primary"}/>
                     </IconButton>
                 </InputAdornment>}

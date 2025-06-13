@@ -2,8 +2,10 @@ package com.postapp.postapp.controllers;
 
 import com.postapp.postapp.dto.UserCreateDto;
 import com.postapp.postapp.dto.UserResponseDto;
+import com.postapp.postapp.dto.UserUpdateDto;
 import com.postapp.postapp.entities.User;
 import com.postapp.postapp.exceptions.ForbiddenException;
+import com.postapp.postapp.exceptions.UserNotFoundException;
 import com.postapp.postapp.mapper.UserMapper;
 import com.postapp.postapp.security.JwtUserDetails;
 import com.postapp.postapp.services.UserService;
@@ -11,6 +13,7 @@ import com.postapp.postapp.services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +39,7 @@ public class UserController {
     @GetMapping("/{id}")
     public UserResponseDto getUserById(@PathVariable Long id) {
         User user =userService.getUserById(id);
+        if(user == null) throw new UserNotFoundException("User not found!");
         return userMapper.toResponseDto(user);
     }
 
@@ -47,7 +51,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public UserResponseDto updateUser(@PathVariable Long id, @RequestBody @Valid UserCreateDto userCreateDto,
+    public UserResponseDto updateUser(@PathVariable Long id, @RequestBody @Valid UserUpdateDto userUpdateDto,
                                       @AuthenticationPrincipal JwtUserDetails currentUser
     ) {
         if (!currentUser.getId().equals(id)) {
@@ -58,11 +62,11 @@ public class UserController {
 
         User user = userService.getUserById(id);
         
-        userMapper.partialUpdate(userCreateDto, user);
+        userMapper.partialUpdate(userUpdateDto, user);
 
         // Parolayı hashliyoruz
-        if (userCreateDto.getPassword() != null && !userCreateDto.getPassword().isEmpty()) {
-            String hashedPassword = passwordEncoder.encode(userCreateDto.getPassword());
+        if (userUpdateDto.getPassword() != null && !userUpdateDto.getPassword().isEmpty()) {
+            String hashedPassword = passwordEncoder.encode(userUpdateDto.getPassword());
             user.setPassword(hashedPassword);
         }
 
@@ -84,5 +88,10 @@ public class UserController {
     @GetMapping("/activity/{userId}")
     public List<Object> getActivity(@PathVariable Long userId) {
         return userService.getUserActivity(userId);
+    }
+    @ExceptionHandler(UserNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    private void userNotFoundHandler(UserNotFoundException ex) {
+        System.out.println(ex.getMessage());
     }
 }

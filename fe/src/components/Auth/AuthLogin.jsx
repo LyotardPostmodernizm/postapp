@@ -89,7 +89,7 @@ function AuthLogin() {
 
         const responseData = await response.json();
         setAlertMessage(responseData.message)
-        localStorage.setItem("token", responseData.message);
+        localStorage.setItem("token", responseData.accessToken);
         localStorage.setItem("userId", responseData.userId);
         return responseData;
     };

@@ -2,6 +2,7 @@ package com.postapp.postapp.mapper;
 
 import com.postapp.postapp.dto.UserCreateDto;
 import com.postapp.postapp.dto.UserResponseDto;
+import com.postapp.postapp.dto.UserUpdateDto;
 import com.postapp.postapp.entities.User;
 import org.mapstruct.*;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,8 @@ public interface UserMapper {
     @Mapping(target = "avatar", defaultValue = "1")
     User toEntity(UserCreateDto userCreateDto);
 
+    User toEntity(UserUpdateDto userUpdateDto);
+
     // User → UserResponseDto
     @Mapping(target = "fullName", expression = "java(user.getFirstName() + \" \" + user.getLastName())")
     @Mapping(target = "commentCount", expression = "java(user.getComments() != null ? user.getComments().size() : 0)")
@@ -27,5 +30,5 @@ public interface UserMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "email", ignore = true) //Kayıtlı bir userin emaili güncellenemez
-    void partialUpdate(UserCreateDto userCreateDto, @MappingTarget User user);
+    void partialUpdate(UserUpdateDto userUpdateDto, @MappingTarget User user);
 }

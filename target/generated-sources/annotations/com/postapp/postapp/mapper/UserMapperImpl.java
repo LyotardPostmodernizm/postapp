@@ -2,6 +2,7 @@ package com.postapp.postapp.mapper;
 
 import com.postapp.postapp.dto.UserCreateDto;
 import com.postapp.postapp.dto.UserResponseDto;
+import com.postapp.postapp.dto.UserUpdateDto;
 import com.postapp.postapp.entities.User;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-06-08T19:07:21+0300",
+    date = "2025-06-13T14:33:43+0300",
     comments = "version: 1.6.3, compiler: javac, environment: Java 21.0.7 (Amazon.com Inc.)"
 )
 @Component
@@ -30,6 +31,24 @@ public class UserMapperImpl implements UserMapper {
         user.setFirstName( userCreateDto.getFirstName() );
         user.setLastName( userCreateDto.getLastName() );
         user.setEmail( userCreateDto.getEmail() );
+
+        return user;
+    }
+
+    @Override
+    public User toEntity(UserUpdateDto userUpdateDto) {
+        if ( userUpdateDto == null ) {
+            return null;
+        }
+
+        User user = new User();
+
+        user.setAvatar( userUpdateDto.getAvatar() );
+        user.setUsername( userUpdateDto.getUsername() );
+        user.setPassword( userUpdateDto.getPassword() );
+        user.setFirstName( userUpdateDto.getFirstName() );
+        user.setLastName( userUpdateDto.getLastName() );
+        user.setEmail( userUpdateDto.getEmail() );
 
         return user;
     }
@@ -62,23 +81,23 @@ public class UserMapperImpl implements UserMapper {
     }
 
     @Override
-    public void partialUpdate(UserCreateDto userCreateDto, User user) {
-        if ( userCreateDto == null ) {
+    public void partialUpdate(UserUpdateDto userUpdateDto, User user) {
+        if ( userUpdateDto == null ) {
             return;
         }
 
-        user.setAvatar( userCreateDto.getAvatar() );
-        if ( userCreateDto.getUsername() != null ) {
-            user.setUsername( userCreateDto.getUsername() );
+        user.setAvatar( userUpdateDto.getAvatar() );
+        if ( userUpdateDto.getUsername() != null ) {
+            user.setUsername( userUpdateDto.getUsername() );
         }
-        if ( userCreateDto.getPassword() != null ) {
-            user.setPassword( userCreateDto.getPassword() );
+        if ( userUpdateDto.getPassword() != null ) {
+            user.setPassword( userUpdateDto.getPassword() );
         }
-        if ( userCreateDto.getFirstName() != null ) {
-            user.setFirstName( userCreateDto.getFirstName() );
+        if ( userUpdateDto.getFirstName() != null ) {
+            user.setFirstName( userUpdateDto.getFirstName() );
         }
-        if ( userCreateDto.getLastName() != null ) {
-            user.setLastName( userCreateDto.getLastName() );
+        if ( userUpdateDto.getLastName() != null ) {
+            user.setLastName( userUpdateDto.getLastName() );
         }
     }
 }

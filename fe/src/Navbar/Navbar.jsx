@@ -14,11 +14,11 @@ import {Tooltip} from "@mui/material";
 function Navbar() {
     const userId = localStorage.getItem("userId")
     const navigate = useNavigate();
-    const [fullName,setFullName] = useState("");
 
     const clickLogout = () => {
         localStorage.removeItem("userId")
         localStorage.removeItem("token")
+        localStorage.removeItem("refreshToken")
         navigate("/auth", { replace: true });
 
 

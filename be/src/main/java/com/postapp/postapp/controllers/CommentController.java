@@ -70,11 +70,11 @@ public class CommentController {
         comment.setUser(currentUser);
         comment.setPost(post);
 
-        // Parent comment varsa ekliyoruz.
-        if (commentCreateDto.getParentCommentId() != null) {
-            Comment parent = commentService.getCommentById(commentCreateDto.getParentCommentId());
-            comment.setParent(parent);
-        }
+//        // Parent comment varsa ekliyoruz.
+//        if (commentCreateDto.getParentCommentId() != null) {
+//            Comment parent = commentService.getCommentById(commentCreateDto.getParentCommentId());
+//            comment.setParent(parent);
+//        }
 
         Comment savedComment = commentService.saveComment(comment);
         return commentMapper.toResponseDto(savedComment);

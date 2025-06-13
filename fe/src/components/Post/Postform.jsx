@@ -11,6 +11,7 @@ import {red} from '@mui/material/colors';
 import {Link} from "react-router-dom";
 import {InputAdornment, Snackbar, TextField} from "@mui/material";
 import SendIcon from '@mui/icons-material/Send';
+import {makeAuthenticatedRequest} from "../../services/ApiService.js";
 
 function Postform(props) {
     const {authorUsername, userId, refreshPosts} = props;
@@ -31,38 +32,25 @@ function Postform(props) {
         }
         setIsSent(false);
     }
-    const savePost = () => {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            console.error("Token bulunamadı. Kullanıcı giriş yapmamış!");
-            return;
+    const savePost = async () => {
+        try {
+            const response = await makeAuthenticatedRequest("/posts", {
+                method: "POST",
+                body: JSON.stringify({
+                    title: title,
+                    content: content,
+                })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log("Post başarıyla gönderildi:", result);
+
+            }
+        } catch (error) {
+            console.error("Post gönderme hatası:", error);
         }
 
-        fetch("/posts", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": localStorage.getItem("token")
-
-            },
-            body: JSON.stringify({
-                title: title,
-                content: content,
-            })
-        })
-            .then(response => {
-                if (!response.ok) {
-                    // Eğer yanıt HTTP 403, 401 veya başka bir hata ile dönerse
-                    throw new Error(`HTTP hata: ${response.status}`);
-                }
-                return response.json(); // Yanıt JSON'a dönüştürülüyor
-            })
-            .then(data => {
-                console.log("Başarılı Yanıt: ", data);
-            })
-            .catch(error => {
-                console.error("Hata: ", error.message);
-            });
     };
 
 

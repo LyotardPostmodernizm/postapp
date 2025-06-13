@@ -17,6 +17,7 @@ import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
 import CloseIcon from '@mui/icons-material/Close';
 import Slide from '@mui/material/Slide';
+import {makeAuthenticatedRequest} from "../services/ApiService.js";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -98,23 +99,21 @@ function UserActivity({userId}) {
 
     }
 
-    const fetchActivities = () => {
-        fetch("/users/activity/" + userId, {
-            method: "GET",
-            headers: {"Authorization": localStorage.getItem("token")}
-        })
-            .then(response => response.json())
-            .then(data => {
-                    setActivities(data);
-                    console.log("activities:" + data)
-                    setLoading(false);
-                },
-                error => {
-                    setError(error);
-                    setLoading(false);
-                    console.log(error)
-                }
-            )
+    const fetchActivities = async () => {
+        try {
+           const response = await makeAuthenticatedRequest(`/users/activity/${userId}`,
+                {method: "GET"});
+            if(response.ok){
+                const result = await response.json();
+                setActivities(result);
+                setLoading(false);
+            }
+        }
+        catch (error) {
+            setError(error);
+            setLoading(false);
+            console.log(error)
+        }
     }
     useEffect(() => {
         fetchActivities();
@@ -135,10 +134,10 @@ function UserActivity({userId}) {
                     <TableBody>
                         {activities.map((activity) => (
                             <Button onClick={() => handleNotification(activity[1])} variant="contained" color="primary">
-                                <TableRow hover role="checkbox" tabIndex={-1} key={activity.id}>
+                                <TableRow hover role="checkbox" tabIndex={-1} key={activity.id}
 
                                     sx={{'&:last-child td, &:last-child th': {border: 0}}}
-                                    >
+                                >
                                     {activity[0] === "beğendi" ? activity[3] + " kullanıcısı, postunuzu " + activity[0]
                                         : activity[3] + " kullanıcısı, postunuza " + activity[0]}
                                 </TableRow>

@@ -15,8 +15,8 @@ import java.util.Date;
 @Service
 @RequiredArgsConstructor
 public class RefreshTokenService {
-    @Value("${refreshToken.expirationTime}")
-    private Long expirationTime;
+    @Value("${postapp.refresh.token.expires.in}")
+    private  Long expirationTime;
     private final RefreshTokenRepository refreshTokenRepository;
 
     public boolean isExpired(RefreshToken refreshToken){

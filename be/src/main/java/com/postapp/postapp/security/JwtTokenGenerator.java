@@ -33,7 +33,7 @@ public class JwtTokenGenerator {
     }
     public String generateTokenByUserId(Long userId) {
         Date expireDate = new Date(new Date().getTime() + EXPIRATION_TIME);
-        return Jwts.builder().setSubject(userId).setIssuedAt(new Date())
+        return Jwts.builder().setSubject(Long.toString(userId)).setIssuedAt(new Date())
                 .setExpiration(expireDate).signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, SECRET).compact();
     }
 

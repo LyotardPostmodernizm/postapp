@@ -11,7 +11,7 @@ import IconButton from "@mui/material/IconButton";
 import Commentform from "./Commentform.jsx";
 import Box from "@mui/material/Box";
 
-const Comment = ({text, userId, userName, createdAt, updatedAt}) => {
+const Comment = ({text, userId,postId, userName, createdAt, updatedAt}) => {
     const [liked, setLiked] = useState(false);
     const [isReplying, setIsReplying] = useState(false);
 
@@ -88,9 +88,12 @@ const Comment = ({text, userId, userName, createdAt, updatedAt}) => {
                 <Box className="replyForm">
                     <Commentform
                         userId={userId}
-                        postId={0}
+                        postId={postId}
                         userName={userName}
-                        text={"Yoruma cevap yaz"}
+                        text={"Yoruma cevap yazın..."}
+                        setCommentsRefresh={setCommentsRefresh}
+                        isReplyToComment={true}
+
                     />
                 </Box> : null
             )}

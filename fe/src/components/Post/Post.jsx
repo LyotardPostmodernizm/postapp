@@ -18,6 +18,7 @@ import {Container, Tooltip} from "@mui/material";
 import Comment from "../Comment/Comment.jsx";
 import Commentform from "../Comment/Commentform.jsx";
 import CommentIcon from '@mui/icons-material/Comment';
+import {makeAuthenticatedRequest} from "../../services/ApiService.js";
 
 
 function Post(props) {
@@ -82,7 +83,7 @@ function Post(props) {
             const isPostLiked = likeList.some(
                 (like) => "" + like.userId === localStorage.getItem("userId") && like.postId === postId
             );
-            console.log("isPostLiked: "+isPostLiked)
+            console.log("isPostLiked: " + isPostLiked)
             setLiked(isPostLiked);
         } catch (error) {
             console.error("Like durumu kontrol edilirken hata oluştu:", error);
@@ -95,27 +96,31 @@ function Post(props) {
     }, []);
 
     useEffect(() => {
-        if (refresh) {
-            loadAllComments()
-        }
+
+        loadAllComments()
+
     }, [refresh])
 
 
-    async function handleLike() {
-        setLiked(liked => !liked)
-        if (!liked) {
-            setLikecount(likecount => likecount + 1)
-            saveLike()
-        } else {
+    const handleLike = async (postId) => {
+        try {
+            const response = await makeAuthenticatedRequest("/likes", {
+                method: "POST",
+                body: JSON.stringify({
+                    postId: postId
+                })
+            });
 
-            const likeId = await fetchLikeId(userId, postId);
-            if (likeId) {
-                await deleteLike(likeId);
-            } else {
-                console.error("Beğeni ID alınamadı.");
+            if (response.ok) {
+                const result = await response.json();
+                console.log("Gönderiye beğeni başarıyla gönderildi:", result);
+                setLiked(true);
+                setLikecount(prev => prev + 1);
             }
+        } catch (error) {
+            console.error("Like gönderme hatası:", error);
         }
-    }
+    };
 
 
     function handleExpandClick() {
@@ -126,15 +131,13 @@ function Post(props) {
     const fetchLikeId = async (userId, postId) => {
         try {
             const response = await fetch(`/likes?userId=${userId}&postId=${postId}`, {
-                headers: {
-                    Authorization: localStorage.getItem("token"),
-                },
+                method: "GET"
             });
 
             const likeList = await response.json();
 
             if (likeList.length > 0) {
-                return likeList[0].id; // İlk beğeninin ID'sini döndür
+                return likeList[0].id;
             } else {
                 return null;
             }
@@ -147,11 +150,8 @@ function Post(props) {
 
     const deleteLike = async (likeId) => {
         try {
-            const response = await fetch(`/likes/${likeId}`, {
+            const response =await makeAuthenticatedRequest(`/likes/${likeId}`, {
                 method: "DELETE",
-                headers: {
-                    Authorization: localStorage.getItem("token"),
-                },
             });
 
             if (!response.ok) {
@@ -271,6 +271,7 @@ function Post(props) {
                             : !loading ? comments.map((comment, index) => (
                                     <Comment
                                         text={comment.text}
+                                        postId={comment.postId}
                                         userId={comment.userId}
                                         userName={comment.authorUsername}
                                         key={index}
@@ -281,8 +282,12 @@ function Post(props) {
                                 "Loading..."
                         }
                         {localStorage.getItem("userId") != null ?
-                            <Commentform userId={localStorage.getItem("userId")} postId={postId} userName={authorUsername}
-                                         text={" Gönderiye yorum yap"} setCommentsRefresh={setCommentsRefresh}/> : null}
+                            <Commentform userId={localStorage.getItem("userId")}
+                                         postId={postId}
+                                         userName={authorUsername}
+                                         text={" Gönderiye yorum yap"}
+                                         setCommentsRefresh={setCommentsRefresh}
+                                         isReplyToComment={false}/> : null}
                     </Container>
                 </Collapse>
             </Card>

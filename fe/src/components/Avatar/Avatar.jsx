@@ -17,6 +17,7 @@ import Box from "@mui/material/Box";
 import List from '@mui/material/List';
 import Radio from '@mui/joy/Radio';
 import React from "react";
+import {makeAuthenticatedRequest} from "../../services/ApiService.js";
 
 const style = {
     position: 'absolute',
@@ -53,18 +54,46 @@ function Avatar({userId}) {
     const [avatar, setAvatar] = useState(1);
 
 
-    const fetchUserResponse = () => {
-        fetch("/users/" + userId,
-            {
-                method: "GET",
-                headers: {
-                    "Authorization": localStorage.getItem("token"),
-                    "Content-Type": "application/json"
-                }
+    const fetchUserResponse = async () => {
+        try {
+            const response = await makeAuthenticatedRequest("/users/" + userId,
+                {
+                    method: "GET",
+                    headers: {
+                        "Authorization": localStorage.getItem("token"),
+                        "Content-Type": "application/json"
+                    }
+                })
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Kullanıcı bilgileri başarıyla çekildi", data);
+                setUsername(data.username)
+                setFullName(data.fullName)
+                setCommentCount(data.commentCount)
+                setEmail(data.email)
+                setLikeCount(data.likeCount)
+                setPostCount(data.postCount)
+                setAvatar(data.avatar)
             }
-        )
-            .then(response => response.json())
-            .then(data => {
+        } catch (e) {
+            console.error("Kullanıcı bilgileri çekilirken hata ile karşılaşıldı: " + e);
+        }
+
+
+    }
+    const fetchUserResponseMe = async () => {
+        try {
+            const response = await makeAuthenticatedRequest("/users/me",
+                {
+                    method: "GET",
+                    headers: {
+                        "Authorization": localStorage.getItem("token"),
+                        "Content-Type": "application/json"
+                    }
+                })
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Kullanıcı bilgileri başarıyla çekildi", data);
                 setUsername(data.username)
                 setFullName(data.fullName)
                 setCommentCount(data.commentCount)
@@ -72,51 +101,39 @@ function Avatar({userId}) {
                 setLikeCount(data.likeCount)
                 setPostCount(data.postCount)
                 setAvatar(data.avatar)
-            })
-            .catch(error => console.log("error fetching userResponse: " + error))
+            }
+        } catch (e) {
+            console.error("Kullanıcı bilgileri çekilirken hata ile karşılaşıldı: " + e);
+        }
     }
-    const fetchUserResponseMe = () => {
-        fetch("/users/me",
-            {
-                method: "GET",
-                headers: {
-                    "Authorization": localStorage.getItem("token"),
-                    "Content-Type": "application/json"
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                setUsername(data.username)
-                setFullName(data.fullName)
-                setCommentCount(data.commentCount)
-                setEmail(data.email)
-                setLikeCount(data.likeCount)
-                setPostCount(data.postCount)
-                setAvatar(data.avatar)
-            })
-            .catch(error => console.log("error fetching userResponse: " + error))
-    }
+
     useEffect(() => {
         fetchUserResponse()
         saveAvatar()
     }, [])
 
-    const saveAvatar = () => {
-        fetch("/users/" + userId, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": localStorage.getItem("token")
+    const saveAvatar = async () => {
+        try {
+            const response = await makeAuthenticatedRequest("/users/" + userId, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": localStorage.getItem("token")
 
-            },
-            body: JSON.stringify({
-                avatar: avatar,
-            })
-        }).catch(e => console.log(e))
-            .then(data => {
-                    console.log(data)
-                }
-            )
+                },
+                body: JSON.stringify({
+                    avatar: avatar,
+                })
+            });
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Avatar başarıyla güncellendi", data);
+            }
+
+        }
+        catch (e) {
+            console.error("Avatar güncellenirken hata ile karşılaşıldı: " + e);
+        }
     }
 
 
