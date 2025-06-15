@@ -91,6 +91,7 @@ function AuthLogin() {
         setAlertMessage(responseData.message)
         localStorage.setItem("token", responseData.accessToken);
         localStorage.setItem("userId", responseData.userId);
+        localStorage.setItem("refreshToken", responseData.refreshToken);
         return responseData;
     };
 

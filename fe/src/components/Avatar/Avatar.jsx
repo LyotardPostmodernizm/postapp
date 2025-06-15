@@ -36,7 +36,10 @@ function Avatar({userId}) {
 
     const [open, setOpen] = useState(false);
     const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
+    const handleClose = () => {
+        setOpen(false);
+        saveAvatar();
+    }
     const handleOpen2 = () => setOpen(true);
     const handleClose2 = () => setOpen(false);
     const avatars = (Array(30).fill().map((_, i) => i + 1))
@@ -108,9 +111,10 @@ function Avatar({userId}) {
     }
 
     useEffect(() => {
-        fetchUserResponse()
-        saveAvatar()
-    }, [])
+        if (localStorage.getItem("token")) {
+            fetchUserResponse();
+        }
+    }, []);
 
     const saveAvatar = async () => {
         try {

@@ -23,29 +23,26 @@ const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const customFullScreenDialog = ({isOpen, postId, setIsOpen}) => {
+const CustomFullScreenDialog = ({isOpen, postId, setIsOpen}) => {
     const [open, setOpen] = useState(isOpen);
     const [post, setPost] = useState();
 
-    const fetchPost = () => {
-        fetch("/posts/" + postId, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": localStorage.getItem("token")
+    const fetchPost = async () => {
+        try {
+            const response = await makeAuthenticatedRequest(`/posts/${postId}`, {
+                method: "GET"
+            });
+
+            if (!response.ok) {
+                throw new Error('Post fetch failed');
             }
-        })
-            .then(res => res.json())
-            .then(
-                (result) => {
-                    console.log(result);
-                    setPost(result);
-                },
-                (error) => {
-                    console.log(error);
-                }
-            )
-    }
+
+            const result = await response.json();
+            setPost(result);
+        } catch (error) {
+            console.error("Error fetching post:", error);
+        }
+    };
 
     const handleClose = () => {
         setOpen(false);
@@ -60,6 +57,8 @@ const customFullScreenDialog = ({isOpen, postId, setIsOpen}) => {
     useEffect(() => {
         fetchPost();
     }, [postId])
+
+
 
     return (
         <Dialog fullScreen open={open} onClose={handleClose} slots={{
@@ -89,7 +88,7 @@ const customFullScreenDialog = ({isOpen, postId, setIsOpen}) => {
 function UserActivity({userId}) {
     const [activities, setActivities] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState(false)
     const [isOpen, setIsOpen] = useState(false);
     const [selectedPost, setSelectedPost] = useState();
 
@@ -101,35 +100,51 @@ function UserActivity({userId}) {
 
     const fetchActivities = async () => {
         try {
-           const response = await makeAuthenticatedRequest(`/users/activity/${userId}`,
+            const response = await makeAuthenticatedRequest(`/users/activity/${userId}`,
                 {method: "GET"});
-            if(response.ok){
-                const result = await response.json();
-                setActivities(result);
-                setLoading(false);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
+
+            const text = await response.text();
+            if (!text) {
+                setActivities([]);
+                setLoading(false);
+                return;
+            }
+
+            const result = JSON.parse(text);
+            setActivities(result);
+            setLoading(false);
         }
         catch (error) {
-            setError(error);
+            setError(true);
             setLoading(false);
-            console.log(error)
+            console.log("error in fetching activities:", error);
         }
     }
     useEffect(() => {
-        fetchActivities();
-    }, [])
+        if (localStorage.getItem("token")) {
+            fetchActivities();
+        }
+    }, []);
 
-    return (
-        loading ? <div>Loading...</div> : error ? <div>Error...</div> :
-        <>
+
+
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>Veriler yüklenirken bir hata oluştu</div>;
+    if(activities.length === 0) {
+        return <div className="ActivitiesInfo">Bu kullanıcıya ait herhangi bir faaliyet bulunmamaktadır.</div>;
+    }
+
+    return(
+        <div className="UserActivityContainer">
             <Typography className={"UserActivityTypography"} variant="h6">Kullanıcı Faaliyetleri</Typography>
-            {isOpen ? <customFullScreenDialog postId={selectedPost} setIsOpen={setIsOpen} isOpen={isOpen}/> : null}
+            {isOpen && <CustomFullScreenDialog postId={selectedPost} setIsOpen={setIsOpen} isOpen={isOpen}/>}
             <TableContainer className="TableContainer" component={Paper}>
                 <Table sx={{minWidth: 650}} aria-label="simple table">
                     <TableHead>
-                        <TableRow>
-                            Kullanıcı Bildirimleri
-                        </TableRow>
                     </TableHead>
                     <TableBody>
                         {activities.map((activity) => (
@@ -146,7 +161,7 @@ function UserActivity({userId}) {
                     </TableBody>
                 </Table>
             </TableContainer>
-        </>
+        </div>
     );
 }
 
