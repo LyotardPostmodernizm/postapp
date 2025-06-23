@@ -4,6 +4,7 @@ import './Home.scss';
 import {Container} from "@mui/material";
 import Postform from "../components/Post/Postform.jsx";
 import {AnimatedBackground} from 'animated-backgrounds';
+import {logout} from "../services/ApiService.js";
 
 function Home() {
     const [posts, setPosts] = useState([]);
@@ -28,20 +29,30 @@ function Home() {
             )
     }
     const retrieveUsername = (userId) => {
-        fetch("/users/" + userId, {method: "GET",
-            headers: {"Authorization": localStorage.getItem("token")}})
-            .then(response => response.json())
-            .then(data => {
-                    console.log("username:" + data.username)
-                    setUserName(data.username);
-                },
-                error => {
-                    setError(error);
-                    console.log(error)
-                    setLoading(false);
+        fetch("/users/" + userId, {
+            method: "GET",
+            headers: {"Authorization": `Bearer ${localStorage.getItem("token")}`}
+        })
+            .then(response => {
+                if (response.status === 401) { // Token geçersizse
+                    console.error("Geçersiz Token. Çıkış yapılıyor...");
+                    logout()
+                    return;
                 }
-            )
-    }
+                return response.json();
+            })
+            .then(data => {
+                if (data) {
+                    console.log("username:" + data.username);
+                    setUserName(data.username);
+                }
+            })
+            .catch(error => {
+                setError(error);
+                console.log(error);
+                setLoading(false);
+            });
+    };
 
     useEffect(() => {
         refreshPosts();

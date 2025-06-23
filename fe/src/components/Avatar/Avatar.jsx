@@ -32,9 +32,10 @@ const style = {
 };
 
 
-function Avatar({userId}) {
+function Avatar({userId,fullName,username,email,commentCount,likeCount,postCount}) {
 
     const [open, setOpen] = useState(false);
+    const [avatar, setAvatar] = useState(1);
     const handleOpen = () => setOpen(true);
     const handleClose = () => {
         setOpen(false);
@@ -48,77 +49,10 @@ function Avatar({userId}) {
         setAvatar(event.target.value);
     };
 
-    const [fullName, setFullName] = React.useState("");
-    const [username, setUsername] = React.useState("");
-    const [email, setEmail] = React.useState("");
-    const [commentCount, setCommentCount] = React.useState(0);
-    const [likeCount, setLikeCount] = React.useState(0);
-    const [postCount, setPostCount] = React.useState(0);
-    const [avatar, setAvatar] = useState(1);
-
-
-    const fetchUserResponse = async () => {
-        try {
-            const response = await makeAuthenticatedRequest("/users/" + userId,
-                {
-                    method: "GET",
-                    headers: {
-                        "Authorization": localStorage.getItem("token"),
-                        "Content-Type": "application/json"
-                    }
-                })
-            if (response.ok) {
-                const data = await response.json();
-                console.log("Kullanıcı bilgileri başarıyla çekildi", data);
-                setUsername(data.username)
-                setFullName(data.fullName)
-                setCommentCount(data.commentCount)
-                setEmail(data.email)
-                setLikeCount(data.likeCount)
-                setPostCount(data.postCount)
-                setAvatar(data.avatar)
-            }
-        } catch (e) {
-            console.error("Kullanıcı bilgileri çekilirken hata ile karşılaşıldı: " + e);
-        }
-
-
-    }
-    const fetchUserResponseMe = async () => {
-        try {
-            const response = await makeAuthenticatedRequest("/users/me",
-                {
-                    method: "GET",
-                    headers: {
-                        "Authorization": localStorage.getItem("token"),
-                        "Content-Type": "application/json"
-                    }
-                })
-            if (response.ok) {
-                const data = await response.json();
-                console.log("Kullanıcı bilgileri başarıyla çekildi", data);
-                setUsername(data.username)
-                setFullName(data.fullName)
-                setCommentCount(data.commentCount)
-                setEmail(data.email)
-                setLikeCount(data.likeCount)
-                setPostCount(data.postCount)
-                setAvatar(data.avatar)
-            }
-        } catch (e) {
-            console.error("Kullanıcı bilgileri çekilirken hata ile karşılaşıldı: " + e);
-        }
-    }
-
-    useEffect(() => {
-        if (localStorage.getItem("token")) {
-            fetchUserResponse();
-        }
-    }, []);
 
     const saveAvatar = async () => {
         try {
-            const response = await makeAuthenticatedRequest("/users/" + userId, {
+            const response = await makeAuthenticatedRequest(`/users/${userId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -153,7 +87,7 @@ function Avatar({userId}) {
                 />
                 <CardContent>
                     <Typography gutterBottom variant="h5" component="div">
-                        Kullanıcının Adı: {username}
+                        Kullanıcı Adı: {username}
                     </Typography>
                     <Typography gutterBottom variant="h5" component="div">
                         Kullanıcının Adı - Soyadı: {fullName === "null null" ? " " : fullName}

@@ -74,7 +74,7 @@ import {RefreshToken} from "./RefreshTokenService.js";
         }
     };
 
-const logout = () => {
+export const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
     localStorage.removeItem("refreshToken");

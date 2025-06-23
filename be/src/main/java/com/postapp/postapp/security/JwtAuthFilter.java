@@ -1,6 +1,8 @@
 package com.postapp.postapp.security;
 
 import com.postapp.postapp.services.UserDetailsServiceImpl;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,6 +16,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+import static java.security.KeyRep.Type.SECRET;
+
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
@@ -26,9 +30,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         try {
             String token = extractJwtFromRequest(request);
-            System.out.println("JWT Token: " + token);
+            System.out.println("Extracted JWT Token: " + token);
             if (token != null && jwtTokenGenerator.validateToken(token)) {
-                String userId = jwtTokenGenerator.getUsernameFromToken(token);
+                //String userId = jwtTokenGenerator.getUsernameFromToken(token);
+                Claims claims = Jwts.parser()
+                        .setSigningKey(jwtTokenGenerator.getSecretKey())
+                        .parseClaimsJws(token)
+                        .getBody();
+                Long userId = claims.get("userId", Long.class);
                 System.out.println("UserId from Token: " + userId);
                 UserDetails user = userDetailsService.loadUserById(Long.valueOf(userId));
                 System.out.println("User Details: " + user);
@@ -44,6 +53,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } catch (Exception e) {
             System.err.println("Error in JwtAuthFilter: " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException(e);
 
         }
