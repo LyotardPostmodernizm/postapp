@@ -14,18 +14,37 @@ import SendIcon from '@mui/icons-material/Send';
 import {makeAuthenticatedRequest} from "../../services/ApiService.js";
 
 function Postform(props) {
-    const {authorUsername, userId, refreshPosts} = props;
+    const {authorUsername, userId, refreshPosts, addNewPost} = props;
     const [content, setContent] = useState("");
     const [title, setTitle] = useState("");
     const [isSent, setIsSent] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = () => {
-        savePost();
-        setIsSent(true);
-        setTitle("")
-        setContent("")
-        refreshPosts();
+
+    const handleSubmit = async () => {
+        if (!title.trim() || !content.trim()) {
+            alert("Başlık ve içerik boş olamaz!");
+            return;
+        }
+        setIsLoading(true);
+
+        try {
+            const newPost = await savePost();
+            if (newPost) {
+
+                addNewPost(newPost);
+                setIsSent(true);
+                setTitle("");
+                setContent("");
+            }
+        } catch (error) {
+            console.error("Post gönderme hatası:", error);
+            alert("Post gönderilirken bir hata oluştu!");
+        } finally {
+            setIsLoading(false);
+        }
     }
+
     const handleClose = (event, reason) => {
         if (reason === 'clickaway' || reason === 'escapeKeyDown') {
             return;
@@ -39,16 +58,21 @@ function Postform(props) {
                 body: JSON.stringify({
                     title: title,
                     content: content,
+                    userId:parseInt(userId),
                 })
             });
 
-            if (response.ok) {
+            if (response && response.ok) {
                 const result = await response.json();
                 console.log("Post başarıyla gönderildi:", result);
-
+                return result;
+            }
+            else{
+                console.log("Post gönderme hatası:",response?.status);
             }
         } catch (error) {
             console.error("Post gönderme hatası:", error);
+            throw error;
         }
 
     };

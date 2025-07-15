@@ -19,7 +19,7 @@ function Navbar() {
         localStorage.removeItem("userId")
         localStorage.removeItem("token")
         localStorage.removeItem("refreshToken")
-        navigate("/auth", { replace: true });
+        navigate("/auth", {replace: true});
 
 
     }

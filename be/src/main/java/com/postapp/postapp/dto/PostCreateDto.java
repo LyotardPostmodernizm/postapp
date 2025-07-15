@@ -1,6 +1,7 @@
 package com.postapp.postapp.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,4 +16,8 @@ public class PostCreateDto {
     @NotBlank(message = "İçerik boş olamaz")
     @Size(max = 250, message = "İçerik en fazla 250 karakter uzunluğunda olabilir")
     private String content;
+
+    @NotNull(message = "Kullanıcı ID boş olamaz")
+    private Long userId;
+
 }

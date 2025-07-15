@@ -13,7 +13,7 @@ import {useForm, Controller} from 'react-hook-form';
 import {yupResolver} from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import Paper from '@mui/material/Paper';
-import { AnimatedBackground } from 'animated-backgrounds';
+import {AnimatedBackground} from 'animated-backgrounds';
 import './AuthLogin.scss'
 
 
@@ -61,7 +61,7 @@ function AuthLogin() {
             .then(() => {
                 setShowSuccess(true);
                 setTimeout(() => {
-                    navigate(`/users/${localStorage.getItem("userId")}`);
+                    navigate("/");
                 }, 2000);
             })
             .catch(e => {
@@ -178,7 +178,7 @@ function AuthLogin() {
                         </FormHelperText>
 
                         <FormHelperText style={{marginTop: "50px"}}>
-                            <Link style={{textDecoration:"none"}} href="/auth">Kayıt ekranına dön </Link>
+                            <Link style={{textDecoration: "none"}} href="/auth">Kayıt ekranına dön </Link>
                         </FormHelperText>
 
                     </FormControl>
@@ -201,9 +201,9 @@ function AuthLogin() {
                 </form>
             </Paper>
         </div>
-                )
+    )
 
-                }
+}
 
-                export default AuthLogin;
+export default AuthLogin;
 

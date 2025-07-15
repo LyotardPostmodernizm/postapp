@@ -37,24 +37,31 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         .setSigningKey(jwtTokenGenerator.getSecretKey())
                         .parseClaimsJws(token)
                         .getBody();
+
                 Long userId = claims.get("userId", Long.class);
                 System.out.println("UserId from Token: " + userId);
-                UserDetails user = userDetailsService.loadUserById(Long.valueOf(userId));
-                System.out.println("User Details: " + user);
-                if (user != null) {
-                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            user, null, user.getAuthorities());
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                    System.out.println("Authentication set in SecurityContextHolder for: " + user.getUsername());
+                if(userId != null) {
+                    UserDetails user = userDetailsService.loadUserById(userId);
+                    System.out.println("User Details: " + user);
 
+                    if (user != null) {
+                        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                                user, null, user.getAuthorities());
+                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                        System.out.println("Authentication set in SecurityContextHolder for: " + user.getUsername());
+
+                    }
+                } else {
+                    System.out.println("UserId is null in token claims");
                 }
             }
             filterChain.doFilter(request, response);
         } catch (Exception e) {
             System.err.println("Error in JwtAuthFilter: " + e.getMessage());
             e.printStackTrace();
-            throw new RuntimeException(e);
+            filterChain.doFilter(request, response);
+
 
         }
 

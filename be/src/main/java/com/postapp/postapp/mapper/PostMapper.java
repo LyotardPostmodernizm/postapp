@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 public interface PostMapper {
 
     // PostCreateDto → Post
-    @Mapping(target = "user", ignore = true) // Kullanıcı context'ten alınacak
+    @Mapping(target = "user", ignore = true) // Manuel olarak set edilecek
     @Mapping(target = "comments", ignore = true)
     @Mapping(target = "likes", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

@@ -9,4 +9,4 @@ export const RefreshToken = () => {
             refreshToken: localStorage.getItem("refreshToken")
         })
     });
-}
+};

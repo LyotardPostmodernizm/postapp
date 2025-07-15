@@ -7,6 +7,7 @@ import com.postapp.postapp.entities.User;
 import com.postapp.postapp.exceptions.UnauthorizedException;
 import com.postapp.postapp.mapper.PostMapper;
 import com.postapp.postapp.services.PostService;
+import com.postapp.postapp.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -14,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.bytebuddy.implementation.bind.MethodDelegationBinder;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,6 +31,7 @@ import java.util.Optional;
 public class PostController {
     private final PostService postService;
     private final PostMapper postMapper;
+    private final UserService userService;
 
     @Operation(summary = "Get all posts",
             description = "Get all posts by optional userId",
@@ -65,16 +68,15 @@ public class PostController {
                                                   content = @Content(mediaType = "application/json",
                                                           schema = @Schema(implementation = PostCreateDto.class),
                                                           examples = @ExampleObject(value = "{ \"title\": \"Title of Post\", \"content\": \"Content of Post\" }")))
-            @RequestBody PostCreateDto postCreateDto,
-            @AuthenticationPrincipal User currentUser
+            @RequestBody PostCreateDto postCreateDto
     ) {
-        System.out.println("Current User: " + currentUser);
-        if (currentUser == null) {
-            throw new RuntimeException("Authentication failed: User is null");
+        User user = userService.getUserById(postCreateDto.getUserId());
+        if (user == null) {
+            throw new RuntimeException("Kullanıcı bulunamadı!");
         }
 
         Post post = postMapper.toEntity(postCreateDto);
-        post.setUser(currentUser);
+        post.setUser(user);
         Post savedPost = postService.createPost(post);
         return postMapper.toResponseDto(savedPost);
     }
@@ -82,19 +84,25 @@ public class PostController {
     @PutMapping("/{id}")
     public PostResponseDto updatePost(
             @PathVariable Long id,
-            @RequestBody PostCreateDto postCreateDto,
-            @AuthenticationPrincipal User currentUser
+            @Valid @RequestBody PostCreateDto postCreateDto
+
     ) {
         Post existingPost = postService.getPostById(id);
 
+        User user = userService.getUserById(postCreateDto.getUserId());
+        if (user == null) {
+            throw new RuntimeException("Kullanıcı bulunamadı!");
+        }
 
-            // Kullanıcı yetkisi kontrolü
-            if (!existingPost.getUser().getId().equals(currentUser.getId())) {
-                throw new UnauthorizedException("Bu postu güncelleme yetkiniz yok!");
-            }
+        // Kullanıcı yetkisi kontrolü - sadece kendi postunu güncelleyebilir
+        if (!existingPost.getUser().getId().equals(postCreateDto.getUserId())) {
+            throw new UnauthorizedException("Bu postu güncelleme yetkiniz yok!");
+        }
 
-            // Post güncelleme işlemi
+
+        // Post güncelleme işlemi
             postMapper.partialUpdate(postCreateDto, existingPost);
+            existingPost.setUser(user);
             Post updatedPost = postService.createPost(existingPost);
             return postMapper.toResponseDto(updatedPost);
 
@@ -102,13 +110,20 @@ public class PostController {
 
     @DeleteMapping("/{id}")
     public void deletePostById(@PathVariable Long id,
-                               @AuthenticationPrincipal User currentUser) {
+                               @RequestParam Long userId) {
 
         Post post = postService.getPostById(id);
 
-        if (!post.getUser().getId().equals(currentUser.getId())) {
+        User user = userService.getUserById(userId);
+        if (user == null) {
+            throw new RuntimeException("Kullanıcı bulunamadı!");
+        }
+
+        // Kullanıcı yetkisi kontrolü - sadece kendi postunu silebilir
+        if (!post.getUser().getId().equals(userId)) {
             throw new UnauthorizedException("Bu postu silme yetkiniz yok!");
         }
+
         postService.deletePost(id);
     }
 

@@ -4,7 +4,7 @@ import './Home.scss';
 import {Container} from "@mui/material";
 import Postform from "../components/Post/Postform.jsx";
 import {AnimatedBackground} from 'animated-backgrounds';
-import {logout} from "../services/ApiService.js";
+import {logout, makeAuthenticatedRequest} from "../services/ApiService.js";
 
 function Home() {
     const [posts, setPosts] = useState([]);
@@ -28,30 +28,26 @@ function Home() {
                 }
             )
     }
-    const retrieveUsername = (userId) => {
-        fetch("/users/" + userId, {
-            method: "GET",
-            headers: {"Authorization": `Bearer ${localStorage.getItem("token")}`}
-        })
-            .then(response => {
-                if (response.status === 401) { // Token geçersizse
-                    console.error("Geçersiz Token. Çıkış yapılıyor...");
-                    logout()
-                    return;
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data) {
-                    console.log("username:" + data.username);
-                    setUserName(data.username);
-                }
-            })
-            .catch(error => {
-                setError(error);
-                console.log(error);
-                setLoading(false);
-            });
+    const addNewPost = (newPost) => {
+        setPosts(prevPosts => [newPost, ...prevPosts]);
+    }
+
+    const retrieveUsername = async (userId) => {
+    try {
+        const response = makeAuthenticatedRequest(`/users/${userId}`,
+            {method: "GET"})
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log("username: ", data.username)
+            setUserName(data.username);
+        }
+    }
+    catch (e) {
+        console.log("Username fetch hatası:",e)
+        setError(e)
+        setLoading(false)
+    }
     };
 
     useEffect(() => {
@@ -90,13 +86,14 @@ function Home() {
                         authorUsername={userName}
                         userId={localStorage.getItem("userId")}
                         refreshPosts={refreshPosts}
+                        addNewPost={addNewPost}
                     /> : null}
 
                 </Container>
 
                 {posts.map((post, index) => (
                     <Container className={"home"} fixed
-                               key={index}>
+                               key={post.id}>
                         <Post
                             key={post.id}
                             postId={post.id}
