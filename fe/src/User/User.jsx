@@ -62,7 +62,7 @@ function User() {
     }
     return (
         <div>
-            <Avatar userId={user.id} username={user.username} fullName={user.fullName} email={user.email}
+            <Avatar userId={user.id} avatarId={user.avatar} username={user.username} fullName={user.fullName} email={user.email}
                     commentCount={user.commentCount}
                     postCount={user.postCount} likeCount={user.likeCount}/>
 

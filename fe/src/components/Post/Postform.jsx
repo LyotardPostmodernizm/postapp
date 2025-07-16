@@ -108,6 +108,7 @@ function Postform(props) {
                             fullWidth
                             required
                             value={title}
+                            disabled={isLoading}
                             onChange={(e) => {setTitle(e.target.value)
                                              setIsSent(false)}}
                         />
@@ -127,6 +128,7 @@ function Postform(props) {
                             fullWidth
                             required
                             value={content}
+                            disabled={isLoading}
                             onChange={(e) => {setContent(e.target.value)
                                               setIsSent(false)}}
                             slotProps={{
@@ -134,8 +136,9 @@ function Postform(props) {
                                     endAdornment: <InputAdornment position="end">
                                         <IconButton
                                         onClick={handleSubmit}
+                                        disabled={isLoading}
                                         aria-label="send">
-                                        <SendIcon color="primary"/>
+                                        <SendIcon color={isLoading? "disabled":"primary"}/>
                                     </IconButton>
                                     </InputAdornment>
                                 }

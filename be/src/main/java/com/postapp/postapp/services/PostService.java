@@ -16,9 +16,9 @@ public class PostService {
 
     public List<Post> getAllPosts(Optional<Long> userId) {
         if (userId.isPresent()) {
-            return postRepository.findByUserId(userId.get());
+            return postRepository.findPostsByUserIdOrderByCreatedAtDesc(userId.get());
         } else {
-            return postRepository.findAll();
+            return postRepository.findAllPostsOrderByCreatedAtDesc();
         }
     }
 

@@ -32,10 +32,10 @@ const style = {
 };
 
 
-function Avatar({userId,fullName,username,email,commentCount,likeCount,postCount}) {
+function Avatar({userId,avatarId,fullName,username,email,commentCount,likeCount,postCount}) {
 
     const [open, setOpen] = useState(false);
-    const [avatar, setAvatar] = useState(1);
+    const [avatar, setAvatar] = useState(avatarId);
     const handleOpen = () => setOpen(true);
     const handleClose = () => {
         setOpen(false);
@@ -105,7 +105,7 @@ function Avatar({userId,fullName,username,email,commentCount,likeCount,postCount
                         Kullanıcının beğeni sayısı: {likeCount}
                     </Typography>
                 </CardContent>
-                {localStorage.getItem("userId") === userId ? <><Button variant={"contained"} onClick={handleOpen}>Avatarı
+                {parseInt(localStorage.getItem("userId")) === userId ? <><Button variant={"contained"} onClick={handleOpen}>Avatarı
                     Değiştir</Button>
                     <Button style={{marginLeft: "20px"}} variant={"contained"}>Adı - Soyadı
                         Değiştir</Button> </> : null}

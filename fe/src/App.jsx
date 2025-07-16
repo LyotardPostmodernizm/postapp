@@ -11,35 +11,32 @@ import AuthLogin from "./components/Auth/AuthLogin.jsx";
 
 function App() {
 
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+    useEffect(() => {
+        // localStorage'dan token kontrolü
+        const token = localStorage.getItem("token");
+        setIsAuthenticated(!!token);
+    }, []);
 
 
     return (
         <div className="App">
             <BrowserRouter>
-                <Navbar />
+                <Navbar isAuthenticated={isAuthenticated}
+                        setIsAuthenticated={setIsAuthenticated}
+                />
                 <Routes>
                     <Route exact path="/" element={<Home />} />
                     <Route exact path="/users/:userId" element={<User />} />
                     <Route
                         exact path="/auth"
-                        element={
-                            localStorage.getItem("userId") != null ? (
-                                <Navigate to="/" replace />
-                            ) : (
-                                <AuthRegister />
-                            )
-                        }
+                        element={<AuthRegister />}
                     />
                     <Route
                         exact path="/login"
-                        element={
-                            localStorage.getItem("userId") != null ? (
-                                <Navigate to="/" replace />
-                            ) : (
-                                <AuthLogin />
-                            )
-                        }
-                        />
+                        element={<AuthLogin />}
+                    />
                 </Routes>
             </BrowserRouter>
 
