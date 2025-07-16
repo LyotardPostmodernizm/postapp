@@ -33,7 +33,7 @@ const schema = yup.object().shape({
 
 });
 
-function AuthLogin() {
+function AuthLogin({setIsAuthenticated}) {
     const navigate = useNavigate();
     const [showSuccess, setShowSuccess] = useState(false);
     const [showError, setShowError] = useState(false);
@@ -60,6 +60,7 @@ function AuthLogin() {
         sendRequest("login", data)
             .then(() => {
                 setShowSuccess(true);
+                setIsAuthenticated(true);
                 setTimeout(() => {
                     navigate("/");
                 }, 2000);
@@ -188,7 +189,7 @@ function AuthLogin() {
                     {showSuccess && (
                         <Alert severity="success">
                             <AlertTitle>Giriş Başarılı!</AlertTitle>
-                            Kullanıcı Profilinize Yönlendiriliyorsunuz.
+                            Ana sayfaya yönlendiriliyorsunuz.
                         </Alert>
                     )}
                     {showError && (

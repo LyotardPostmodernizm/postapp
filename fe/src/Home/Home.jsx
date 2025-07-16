@@ -109,6 +109,7 @@ function Home() {
                         <Post
                             key={post.id}
                             postId={post.id}
+                            avatar={avatar}
                             title={post.title}
                             content={post.content}
                             authorUsername={post.authorUsername}

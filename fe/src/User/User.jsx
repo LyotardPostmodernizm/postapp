@@ -26,6 +26,11 @@ function User() {
             console.error("Kullanıcı bilgileri getirilirken bir hata ile karşılaşıldı:", error);
         }
     }
+
+    const refreshUser = () => {
+        getUser();
+    };
+
     //Daha sonra, güvenlik iyileştirme için kullanılabilir bu method.
     const getUserResponseMe = async () => {
         try {
@@ -63,9 +68,15 @@ function User() {
     }
     return (
         <div>
-            <Avatar userId={user.id} avatarId={user.avatar} username={user.username} fullName={user.fullName} email={user.email}
+            <Avatar userId={user.id}
+                    avatarId={user.avatar}
+                    username={user.username}
+                    fullName={user.fullName}
+                    email={user.email}
                     commentCount={user.commentCount}
-                    postCount={user.postCount} likeCount={user.likeCount}/>
+                    postCount={user.postCount}
+                    likeCount={user.likeCount}
+                    onUserUpdated={refreshUser}/>
 
             {localStorage.getItem("userId") === userId ? <UserActivity userId={user.id}/> : null}
 

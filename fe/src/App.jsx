@@ -15,7 +15,7 @@ function App() {
     useEffect(() => {
         // localStorage'dan token kontrolü
         const token = localStorage.getItem("token");
-        setIsAuthenticated(!!token);
+        if(token != null) setIsAuthenticated(true);
     }, []);
 
 
@@ -30,11 +30,11 @@ function App() {
                     <Route exact path="/users/:userId" element={<User />} />
                     <Route
                         exact path="/auth"
-                        element={<AuthRegister />}
+                        element={<AuthRegister setIsAuthenticated={setIsAuthenticated}/>}
                     />
                     <Route
                         exact path="/login"
-                        element={<AuthLogin />}
+                        element={<AuthLogin setIsAuthenticated={setIsAuthenticated}/>}
                     />
                 </Routes>
             </BrowserRouter>

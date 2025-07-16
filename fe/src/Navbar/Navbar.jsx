@@ -23,9 +23,6 @@ function Navbar({ isAuthenticated, setIsAuthenticated }) {
         setIsAuthenticated(false)
         navigate("/auth", {replace: true});
     }
-    const clickAuth = () => {
-        navigate("/auth", {replace: true});
-    }
 
     return (
         <Box>

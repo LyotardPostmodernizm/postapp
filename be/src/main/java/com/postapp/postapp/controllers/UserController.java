@@ -61,8 +61,26 @@ public class UserController {
         System.out.println("Current User: " + currentUser);
 
         User user = userService.getUserById(id);
-        
-        userMapper.partialUpdate(userUpdateDto, user);
+
+        // Sadece gönderilen alanları güncelliyoruz.
+        if (userUpdateDto.getUsername() != null && !userUpdateDto.getUsername().isEmpty()) {
+            user.setUsername(userUpdateDto.getUsername());
+        }
+
+        if (userUpdateDto.getFirstName() != null && !userUpdateDto.getFirstName().isEmpty()) {
+            user.setFirstName(userUpdateDto.getFirstName());
+        }
+
+        if (userUpdateDto.getLastName() != null && !userUpdateDto.getLastName().isEmpty()) {
+            user.setLastName(userUpdateDto.getLastName());
+        }
+
+        if (userUpdateDto.getAvatar() != 0) { // Default 0 değilse güncelliyoruz.
+            user.setAvatar(userUpdateDto.getAvatar());
+        }
+
+
+        //userMapper.partialUpdate(userUpdateDto, user);
 
         // Parolayı hashliyoruz
         if (userUpdateDto.getPassword() != null && !userUpdateDto.getPassword().isEmpty()) {

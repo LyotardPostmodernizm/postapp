@@ -22,7 +22,18 @@ import {makeAuthenticatedRequest} from "../../services/ApiService.js";
 
 
 function Post(props) {
-    const {postId, title, content, authorUsername, userId, commentCount, likeCount, createdAt, updatedAt} = props;
+    const {
+        postId,
+        avatar,
+        title,
+        content,
+        authorUsername,
+        userId,
+        commentCount,
+        likeCount,
+        createdAt,
+        updatedAt
+    } = props;
     const [likecount, setLikecount] = useState(likeCount);
     const [expanded, setExpanded] = useState(false);
     const [liked, setLiked] = useState(false);
@@ -150,7 +161,7 @@ function Post(props) {
 
     const deleteLike = async (likeId) => {
         try {
-            const response =await makeAuthenticatedRequest(`/likes/${likeId}`, {
+            const response = await makeAuthenticatedRequest(`/likes/${likeId}`, {
                 method: "DELETE",
             });
 
@@ -184,17 +195,11 @@ function Post(props) {
             <Card className="card">
                 <CardHeader
                     avatar={
-                        <Link className="userLink" to={{pathname: "/users/" + userId}}> <Avatar sx={{bgcolor: red[500]}}
-                                                                                                aria-label="recipe">
-                            {
-                                <Typography
-                                    variant={"body2"}
-                                    fontFamily={"Arial"}
-                                    fontSize={"20px"}
-                                    fontWeight={"bold"}
-                                    fontStyle={"italic"}
-                                >{authorUsername.charAt(0).toUpperCase()}</Typography>}
-                        </Avatar>
+                        <Link className="userLink" to={{pathname: "/users/" + userId}}>
+                            <Avatar className="userLink"
+                                    aria-label="recipe"
+                                    src={`/public/Avatars/avatar${avatar}.png`}>
+                            </Avatar>
                         </Link>
 
                     }
@@ -271,6 +276,7 @@ function Post(props) {
                             : !loading ? comments.map((comment, index) => (
                                     <Comment
                                         text={comment.text}
+                                        avatar={avatar}
                                         postId={comment.postId}
                                         userId={comment.userId}
                                         userName={comment.authorUsername}
@@ -284,6 +290,7 @@ function Post(props) {
                         {localStorage.getItem("userId") != null ?
                             <Commentform userId={localStorage.getItem("userId")}
                                          postId={postId}
+                                         avatar={avatar}
                                          userName={authorUsername}
                                          text={" Gönderiye yorum yap"}
                                          setCommentsRefresh={setCommentsRefresh}

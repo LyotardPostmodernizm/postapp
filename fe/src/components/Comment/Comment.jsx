@@ -11,7 +11,7 @@ import IconButton from "@mui/material/IconButton";
 import Commentform from "./Commentform.jsx";
 import Box from "@mui/material/Box";
 
-const Comment = ({text, userId,postId, userName, createdAt, updatedAt}) => {
+const Comment = ({text, avatar, userId,postId, createdAt, updatedAt}) => {
     const [liked, setLiked] = useState(false);
     const [isReplying, setIsReplying] = useState(false);
 
@@ -24,21 +24,10 @@ const Comment = ({text, userId,postId, userName, createdAt, updatedAt}) => {
                         className="userLink"
                         to={{pathname: "/users/" + userId}}>
                         <Avatar
-                            sx={{bgcolor: red[500], marginRight: "10px"}}
-                            aria-label="recipe">
-                            {userName.charAt(0).toUpperCase()}
+                            aria-label="recipe"
+                            src={`/public/Avatars/avatar${avatar}.png`}>
                         </Avatar>
                     </Link>
-                    <Link className="userLink" to={{pathname: "/users/" + userId}}>
-                        <Typography
-                            variant="body2"
-                            color="blue"
-                            fontFamily={"Arial"}
-                            fontStyle={"italic"}
-                            fontSize={"20px"}
-                        >
-                            {userName}
-                        </Typography></Link>
                 </IconButton>
 
                 {updatedAt ? (
@@ -89,7 +78,6 @@ const Comment = ({text, userId,postId, userName, createdAt, updatedAt}) => {
                     <Commentform
                         userId={userId}
                         postId={postId}
-                        userName={userName}
                         text={"Yoruma cevap yazın..."}
                         setCommentsRefresh={setCommentsRefresh}
                         isReplyToComment={true}

@@ -30,5 +30,11 @@ public interface UserMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "email", ignore = true) //Kayıtlı bir userin emaili güncellenemez
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "posts", ignore = true)
+    @Mapping(target = "comments", ignore = true)
+    @Mapping(target = "likes", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     void partialUpdate(UserUpdateDto userUpdateDto, @MappingTarget User user);
 }
