@@ -19,7 +19,6 @@ function Home() {
             .then(response => response.json())
             .then(data => {
                     setPosts(data);
-                    console.log("posts:" + data)
                     setLoading(false);
                 },
                 error => {
@@ -109,7 +108,7 @@ function Home() {
                         <Post
                             key={post.id}
                             postId={post.id}
-                            avatar={avatar}
+                            avatar={post.avatar}
                             title={post.title}
                             content={post.content}
                             authorUsername={post.authorUsername}

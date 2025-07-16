@@ -276,7 +276,7 @@ function Post(props) {
                             : !loading ? comments.map((comment, index) => (
                                     <Comment
                                         text={comment.text}
-                                        avatar={avatar}
+                                        avatar={comment.authorAvatar}
                                         postId={comment.postId}
                                         userId={comment.userId}
                                         userName={comment.authorUsername}

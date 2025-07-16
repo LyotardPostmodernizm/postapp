@@ -11,6 +11,7 @@ import java.util.List;
 public class CommentResponseDto {
     private Long id;
     private String text;
+    private int authorAvatar;
     private String authorUsername;
     private Long postId;
     private Long parentCommentId;

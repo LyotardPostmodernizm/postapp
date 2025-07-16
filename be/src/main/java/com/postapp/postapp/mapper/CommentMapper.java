@@ -27,6 +27,7 @@ public interface CommentMapper {
     @Mapping(target = "parentCommentId", source = "parent.id")
     @Mapping(target = "likeCount", expression = "java(comment.getLikes() != null ? comment.getLikes().size() : 0)")
     @Mapping(target = "children", qualifiedByName = "mapChildren")
+    @Mapping(target = "authorAvatar", source = "user.avatar")
     CommentResponseDto toResponseDto(Comment comment);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

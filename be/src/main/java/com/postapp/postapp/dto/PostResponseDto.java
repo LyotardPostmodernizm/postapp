@@ -11,6 +11,7 @@ public class PostResponseDto {
     private Long id;
     private String title;
     private String content;
+    private int avatar;
     private String authorUsername;
     private Long userId;
     private int commentCount;

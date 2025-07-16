@@ -26,6 +26,7 @@ public interface PostMapper {
     @Mapping(target = "commentCount", expression = "java(post.getComments() != null ? post.getComments().size() : 0)")
     @Mapping(target = "likeCount", expression = "java(post.getLikes() != null ? post.getLikes().size() : 0)")
     @Mapping(target="userId",source = "user.id")
+    @Mapping(target = "avatar", source = "user.avatar")
     PostResponseDto toResponseDto(Post post);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
