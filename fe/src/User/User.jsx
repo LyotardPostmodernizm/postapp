@@ -26,6 +26,7 @@ function User() {
             console.error("Kullanıcı bilgileri getirilirken bir hata ile karşılaşıldı:", error);
         }
     }
+    //Daha sonra, güvenlik iyileştirme için kullanılabilir bu method.
     const getUserResponseMe = async () => {
         try {
             const response = await fetch("/users/me", {

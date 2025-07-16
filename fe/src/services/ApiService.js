@@ -17,12 +17,12 @@ export const makeAuthenticatedRequest = async (url, options = {}) => {
                 }
             } else {
                 logout();
-                return;
+                return null;
             }
         } catch (error) {
             console.error("Token refresh error:", error);
             logout();
-            return;
+            return null;
         }
     }
 
@@ -46,14 +46,14 @@ export const makeAuthenticatedRequest = async (url, options = {}) => {
             }
         });
 
-        // 401 durumunda refresh token dene
+        // 401 durumunda refresh token deniyoruz
         if (response.status === 401 && refreshToken) {
             console.log("401 alındı, refresh token deneniyor...");
 
             const refreshResponse = await RefreshToken();
             if (!refreshResponse.ok) {
                 logout();
-                return;
+                return null;
             }
 
             const refreshData = await refreshResponse.json();
@@ -63,7 +63,7 @@ export const makeAuthenticatedRequest = async (url, options = {}) => {
                 localStorage.setItem("refreshToken", refreshData.refreshToken);
             }
 
-            // Yeni token ile tekrar dene
+            // Yeni token ile tekrar deniyoruz
             const newCleanToken = refreshData.accessToken.replace('Bearer ', '');
             const newAuthHeader = `Bearer ${newCleanToken}`;
 

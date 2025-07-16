@@ -14,12 +14,11 @@ import SendIcon from '@mui/icons-material/Send';
 import {makeAuthenticatedRequest} from "../../services/ApiService.js";
 
 function Postform(props) {
-    const {authorUsername, userId, refreshPosts, addNewPost} = props;
+    const {authorAvatar, userId, refreshPosts, addNewPost} = props;
     const [content, setContent] = useState("");
     const [title, setTitle] = useState("");
     const [isSent, setIsSent] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-
 
     const handleSubmit = async () => {
         if (!title.trim() || !content.trim()) {
@@ -36,6 +35,7 @@ function Postform(props) {
                 setIsSent(true);
                 setTitle("");
                 setContent("");
+                refreshPosts();
             }
         } catch (error) {
             console.error("Post gönderme hatası:", error);
@@ -93,9 +93,9 @@ function Postform(props) {
                 <CardHeader
                     avatar={
                         <Link className="userLink" to={{pathname: "/users/" + userId}}>
-                            <Avatar sx={{bgcolor: red[500]}}
-                                    aria-label="recipe">
-                                {authorUsername.charAt(0).toUpperCase()}
+                            <Avatar
+                                    aria-label="recipe"
+                                    src={`/public/Avatars/avatar${authorAvatar}.png`}>
                             </Avatar>
                         </Link>
                     }
