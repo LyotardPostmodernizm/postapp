@@ -10,11 +10,11 @@ import Collapse from '@mui/material/Collapse';
 import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import {red} from '@mui/material/colors';
+import {formatToIstanbulTime} from "../../Utility/formatToIstanbulTime.js";
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import {Link} from "react-router-dom";
-import {Container, Tooltip} from "@mui/material";
+import {Container, Snackbar, Tooltip} from "@mui/material";
 import Comment from "../Comment/Comment.jsx";
 import Commentform from "../Comment/Commentform.jsx";
 import CommentIcon from '@mui/icons-material/Comment';
@@ -191,114 +191,124 @@ function Post(props) {
     }));
 
     return (
-        <div className="postContainer">
-            <Card className="card">
-                <CardHeader
-                    avatar={
-                        <Link className="userLink" to={{pathname: "/users/" + userId}}>
-                            <Avatar className="userLink"
-                                    aria-label="recipe"
-                                    src={`/public/Avatars/avatar${avatar}.png`}>
-                            </Avatar>
-                        </Link>
+        <>
+            <Snackbar
+                open={isSent}
+                onClose={handleClose}
+                autoHideDuration={1000}
+                message="Gönderi Başarılı"
+                action
+                sx={{bottom: {xs: 90, sm: 0}}}
+            />
+            <div className="postContainer">
+                <Card className="card">
+                    <CardHeader
+                        avatar={
+                            <Link className="userLink" to={{pathname: "/users/" + userId}}>
+                                <Avatar className="userLink"
+                                        aria-label="recipe"
+                                        src={`/public/Avatars/avatar${avatar}.png`}>
+                                </Avatar>
+                            </Link>
 
-                    }
-                    action={
-                        <IconButton aria-label="settings">
-                            <MoreVertIcon/>
-                        </IconButton>
-                    }
-                    subheader={<h1>{title}</h1>}
-                    title={
-                        <Typography
-                            variant={"body2"}
-                            fontFamily={"Arial"}
-                            fontSize={"20px"}
-                            fontWeight={"bold"}
-                            color={"blue"}
-                            fontStyle={"italic"}>
-                            <Link className={"userLink"} to={/users/ + userId}>{authorUsername}</Link>
-
-                        </Typography>}
-                />
-
-                <CardContent>
-                    <Typography
-                        variant="body2"
-                        className="typography"
-                        sx={{color: 'text.secondary'}}
-                    >
-                        {<h2>{content}</h2>}
-                    </Typography>
-                </CardContent>
-
-                <CardContent>
-                    <>
-                        <Typography variant="body2" color="text.secondary" component="div">
-                            Oluşturma Tarihi: {createdAt}
-                        </Typography>
-                        {updatedAt !== null && updatedAt !== createdAt && (
-                            <Typography variant="body2" color="text.secondary" component="div">
-                                Güncelleme Tarihi: {updatedAt}
-                            </Typography>
-                        )}
-                    </>
-                </CardContent>
-                <CardActions disableSpacing>
-                    <Tooltip title={!liked ? "Gönderiyi beğen" : "Gönderiden beğeniyi çek"}>
-                        <IconButton onClick={handleLike} aria-label="Postu favorilere ekle"
-                                    disabled={localStorage.getItem("userId") == null}>
-                            <FavoriteIcon style={{color: liked ? "red" : undefined}}/>
-                        </IconButton>
-                    </Tooltip>
-                    <Typography variant={"subtitle2"}>{likecount}</Typography>
-                    <ExpandMore
-                        expand={expanded}
-                        onClick={handleExpandClick}
-                        aria-expanded={expanded}
-                        aria-label="show more"
-                    >
-                        <Tooltip title={"Yorumları gör"}>
-                            <CommentIcon color={iconClicked ? "disabled" : "black"} onClick={() => {
-                                setIconClicked(iconClicked => !iconClicked)
-                            }} style={{
-                                color: iconClicked ? "black" : undefined,
-                            }}/>
-                        </Tooltip>
-                    </ExpandMore>
-                    <Typography variant={"subtitle2"}>{commentCount}</Typography>
-                </CardActions>
-                <Collapse in={expanded} timeout="auto" unmountOnExit>
-                    <Container className="commentContainer"
-
-                    >
-                        {error ? <div>Error!!</div>
-                            : !loading ? comments.map((comment, index) => (
-                                    <Comment
-                                        text={comment.text}
-                                        avatar={comment.authorAvatar}
-                                        postId={comment.postId}
-                                        userId={comment.userId}
-                                        userName={comment.authorUsername}
-                                        key={index}
-                                        createdDAt={comment.createdAt}
-                                        updatedAt={comment.updatedAt}/>
-                                ))
-                                :
-                                "Loading..."
                         }
-                        {localStorage.getItem("userId") != null ?
-                            <Commentform userId={localStorage.getItem("userId")}
-                                         postId={postId}
-                                         avatar={avatar}
-                                         userName={authorUsername}
-                                         text={" Gönderiye yorum yap"}
-                                         setCommentsRefresh={setCommentsRefresh}
-                                         isReplyToComment={false}/> : null}
-                    </Container>
-                </Collapse>
-            </Card>
-        </div>
+                        action={
+                            <IconButton aria-label="settings">
+                                <MoreVertIcon/>
+                            </IconButton>
+                        }
+                        subheader={<h1>{title}</h1>}
+                        title={
+                            <Typography
+                                variant={"body2"}
+                                fontFamily={"Arial"}
+                                fontSize={"20px"}
+                                fontWeight={"bold"}
+                                color={"blue"}
+                                fontStyle={"italic"}>
+                                <Link className={"userLink"} to={/users/ + userId}>{authorUsername}</Link>
+
+                            </Typography>}
+                    />
+
+                    <CardContent>
+                        <Typography
+                            variant="body2"
+                            className="typography"
+                            sx={{color: 'text.secondary'}}
+                        >
+                            {<h2>{content}</h2>}
+                        </Typography>
+                    </CardContent>
+
+                    <CardContent>
+                        <>
+                            <Typography variant="body2" color="text.secondary" component="div">
+                                Oluşturma Tarihi: {formatToIstanbulTime(createdAt)}
+                            </Typography>
+                            {updatedAt !== null && updatedAt !== createdAt && (
+                                <Typography variant="body2" color="text.secondary" component="div">
+                                    Güncelleme Tarihi: {formatToIstanbulTime(updatedAt)}
+                                </Typography>
+                            )}
+                        </>
+                    </CardContent>
+                    <CardActions disableSpacing>
+                        <Tooltip title={!liked ? "Gönderiyi beğen" : "Gönderiden beğeniyi çek"}>
+                            <IconButton onClick={handleLike} aria-label="Postu favorilere ekle"
+                                        disabled={localStorage.getItem("userId") == null}>
+                                <FavoriteIcon style={{color: liked ? "red" : undefined}}/>
+                            </IconButton>
+                        </Tooltip>
+                        <Typography variant={"subtitle2"}>{likecount}</Typography>
+                        <ExpandMore
+                            expand={expanded}
+                            onClick={handleExpandClick}
+                            aria-expanded={expanded}
+                            aria-label="show more"
+                        >
+                            <Tooltip title={"Yorumları gör"}>
+                                <CommentIcon color={iconClicked ? "disabled" : "black"} onClick={() => {
+                                    setIconClicked(iconClicked => !iconClicked)
+                                }} style={{
+                                    color: iconClicked ? "black" : undefined,
+                                }}/>
+                            </Tooltip>
+                        </ExpandMore>
+                        <Typography variant={"subtitle2"}>{commentCount}</Typography>
+                    </CardActions>
+                    <Collapse in={expanded} timeout="auto" unmountOnExit>
+                        <Container className="commentContainer"
+
+                        >
+                            {error ? <div>Error!!</div>
+                                : !loading ? comments.map((comment, index) => (
+                                        <Comment
+                                            text={comment.text}
+                                            avatar={comment.authorAvatar}
+                                            postId={comment.postId}
+                                            userId={comment.userId}
+                                            userName={comment.authorUsername}
+                                            key={index}
+                                            createdDAt={comment.createdAt}
+                                            updatedAt={comment.updatedAt}/>
+                                    ))
+                                    :
+                                    "Loading..."
+                            }
+                            {localStorage.getItem("userId") != null ?
+                                <Commentform userId={localStorage.getItem("userId")}
+                                             postId={postId}
+                                             avatar={avatar}
+                                             userName={authorUsername}
+                                             text={" Gönderiye yorum yap"}
+                                             setCommentsRefresh={setCommentsRefresh}
+                                             isReplyToComment={false}/> : null}
+                        </Container>
+                    </Collapse>
+                </Card>
+            </div>
+        </>
     );
 }
 

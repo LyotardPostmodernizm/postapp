@@ -34,7 +34,6 @@ function Navbar({ isAuthenticated, setIsAuthenticated }) {
                         color="inherit"
                         aria-label="menu"
                     >
-                        <MenuIcon/>
                     </IconButton>
                     <Typography variant="h6" component="div">
                         <Link className={"homeLink"} to="/">Ana sayfa</Link>
