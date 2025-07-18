@@ -117,6 +117,9 @@ function Home() {
                             likeCount={post.likeCount}
                             createdAt={post.createdAt}
                             updatedAt={post.updatedAt}
+                            currentUserAvatar={avatar}
+                            currentUserUsername={userName}
+
                         />
                     </Container>
                 ))}

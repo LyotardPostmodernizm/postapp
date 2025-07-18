@@ -32,7 +32,9 @@ function Post(props) {
         commentCount,
         likeCount,
         createdAt,
-        updatedAt
+        updatedAt,
+        currentUserAvatar = 1,
+        currentUserUsername = ""
     } = props;
     const [likecount, setLikecount] = useState(likeCount);
     const [expanded, setExpanded] = useState(false);
@@ -42,9 +44,25 @@ function Post(props) {
     const [error, setError] = useState(null);
     const [iconClicked, setIconClicked] = useState(false);
     const [refresh, setRefresh] = useState(false);
+    const [isLikeSent, setIsLikeSent] = useState(false);
+    const [isLikeDeleted,setIsLikeDeleted] = useState(false);
+    const [currentLikeId, setCurrentLikeId] = useState(null);
+
 
     const setCommentsRefresh = () => {
         setRefresh(true)
+    }
+    const handleCloseLikeSnackbar = (event, reason) => {
+        if (reason === 'clickaway' || reason === 'escapeKeyDown') {
+            return;
+        }
+        setIsLikeSent(false);
+    }
+    const handleCloseLikeDeletedSnackbar = (event, reason) => {
+        if (reason === 'clickaway' || reason === 'escapeKeyDown') {
+            return;
+        }
+        setIsLikeDeleted(false);
     }
 
     const loadAllComments = () => {
@@ -64,74 +82,66 @@ function Post(props) {
             )
         setRefresh(false)
     }
-    const saveLike = () => {
-        fetch("/likes", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": localStorage.getItem("token")
-            },
-            body: JSON.stringify({
-                postId: postId,
-                userId: localStorage.getItem("userId"),
-            })
-        }).then(r => r.json())
-            .catch(e => console.log(e))
-            .then(data => {
-                    console.log(data)
-                }
-            )
-    }
 
     const checkIfLiked = async () => {
+        const currentUserId = localStorage.getItem("userId");
+        if (!currentUserId) {
+            return;
+        }
+
         try {
-            const response = await fetch(`/likes?userId=${userId}&postId=${postId}`, {
+            const response = await fetch(`/likes?userId=${currentUserId}&postId=${postId}`, {
                 method: "GET",
             });
             const likeList = await response.json();
-            console.log("likelist:", likeList);
 
-            const isPostLiked = likeList.some(
-                (like) => "" + like.userId === localStorage.getItem("userId") && like.postId === postId
-            );
-            console.log("isPostLiked: " + isPostLiked)
-            setLiked(isPostLiked);
+            if (likeList.length > 0) {
+                setLiked(true);
+                setCurrentLikeId(likeList[0].id);
+            } else {
+                setLiked(false);
+                setCurrentLikeId(null);
+            }
         } catch (error) {
             console.error("Like durumu kontrol edilirken hata oluştu:", error);
         }
     };
 
 
-    useEffect(() => {
-        checkIfLiked();
-    }, []);
-
-    useEffect(() => {
-
-        loadAllComments()
-
-    }, [refresh])
-
-
-    const handleLike = async (postId) => {
+    const saveLike = async () => {
         try {
             const response = await makeAuthenticatedRequest("/likes", {
                 method: "POST",
                 body: JSON.stringify({
-                    postId: postId
+                    postId: postId,
                 })
             });
-
             if (response.ok) {
                 const result = await response.json();
                 console.log("Gönderiye beğeni başarıyla gönderildi:", result);
                 setLiked(true);
+                setIsLikeSent(true);
+                setCurrentLikeId(result.id);
                 setLikecount(prev => prev + 1);
             }
+
         } catch (error) {
-            console.error("Like gönderme hatası:", error);
+            console.error("Beğeni gönderme hatası:", error);
+        }
+    }
+
+    const handleLike = async () => {
+        if (!localStorage.getItem("userId")) {
+            return;
+        }
+
+        if (!liked) {
+            await saveLike();
+        } else {
+            await deleteLike();
         }
     };
+
 
 
     function handleExpandClick() {
@@ -139,44 +149,32 @@ function Post(props) {
         loadAllComments()
     }
 
-    const fetchLikeId = async (userId, postId) => {
-        try {
-            const response = await fetch(`/likes?userId=${userId}&postId=${postId}`, {
-                method: "GET"
-            });
 
-            const likeList = await response.json();
-
-            if (likeList.length > 0) {
-                return likeList[0].id;
-            } else {
-                return null;
-            }
-        } catch (error) {
-            console.error("Beğeni bilgisi alınırken hata oluştu:", error);
-            return null;
+    const deleteLike = async () => {
+        if (!currentLikeId) {
+            console.error("Like ID bulunamadı");
+            return;
         }
-    };
 
-
-    const deleteLike = async (likeId) => {
         try {
-            const response = await makeAuthenticatedRequest(`/likes/${likeId}`, {
+            const response = await makeAuthenticatedRequest(`/likes/${currentLikeId}?userId=${localStorage.getItem("userId")}`, {
                 method: "DELETE",
             });
 
-            if (!response.ok) {
+            if (response.ok) {
+                console.log("Beğeni başarıyla silindi.");
+                setLiked(false);
+                setCurrentLikeId(null);
+                setLikecount(prev => prev - 1);
+                setIsLikeDeleted(true);
+            } else {
                 throw new Error("Beğeniyi silerken bir hata oluştu.");
             }
-
-            console.log("Beğeni başarıyla silindi.");
-
-            setLiked(false);
-            setLikecount((prev) => prev - 1);
         } catch (error) {
             console.error("Beğeni silinemedi:", error);
         }
     };
+
 
 
     const ExpandMore = styled((props) => {
@@ -190,13 +188,32 @@ function Post(props) {
 
     }));
 
+    useEffect(() => {
+        checkIfLiked();
+    }, [postId]);
+
+    useEffect(() => {
+
+        loadAllComments()
+
+    }, [refresh])
+
+
     return (
         <>
             <Snackbar
-                open={isSent}
-                onClose={handleClose}
+                open={isLikeSent}
+                onClose={handleCloseLikeSnackbar}
                 autoHideDuration={1000}
-                message="Gönderi Başarılı"
+                message="Beğeni Gönderme Başarılı"
+                action
+                sx={{bottom: {xs: 90, sm: 0}}}
+            />
+            <Snackbar
+                open={isLikeDeleted}
+                onClose={handleCloseLikeDeletedSnackbar}
+                autoHideDuration={1000}
+                message="Beğeniyi Silme Başarılı"
                 action
                 sx={{bottom: {xs: 90, sm: 0}}}
             />
@@ -299,8 +316,8 @@ function Post(props) {
                             {localStorage.getItem("userId") != null ?
                                 <Commentform userId={localStorage.getItem("userId")}
                                              postId={postId}
-                                             avatar={avatar}
-                                             userName={authorUsername}
+                                             avatar={currentUserAvatar}
+                                             userName={currentUserUsername}
                                              text={" Gönderiye yorum yap"}
                                              setCommentsRefresh={setCommentsRefresh}
                                              isReplyToComment={false}/> : null}

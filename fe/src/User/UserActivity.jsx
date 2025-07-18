@@ -59,12 +59,10 @@ const CustomFullScreenDialog = ({isOpen, postId, setIsOpen}) => {
     }, [postId])
 
 
-
-    return (
-        <Dialog fullScreen open={open} onClose={handleClose} slots={{
+    return (<Dialog fullScreen open={open} onClose={handleClose} slots={{
             transition: Transition,
         }}>
-            <AppBar sx={{ position: 'relative' }}>
+            <AppBar sx={{position: 'relative'}}>
                 <Toolbar>
                     <IconButton
                         edge="start"
@@ -72,17 +70,27 @@ const CustomFullScreenDialog = ({isOpen, postId, setIsOpen}) => {
                         onClick={handleClose}
                         aria-label="close"
                     >
-                        <CloseIcon />
+                        <CloseIcon/>
                     </IconButton>
-                    <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+                    <Typography sx={{ml: 2, flex: 1}} variant="h6" component="div">
                         Kapat
                     </Typography>
                 </Toolbar>
             </AppBar>
-            {post ? <Post postId={post.id} title={post.title} content={post.content} authorUsername={post.authorUsername} userId={post.userId}
-                           commentCount={post.commentCount} likeCount={post.likeCount} createdAt={post.createdAt} updatedAt={post.updatedAt}></Post> : "loading"}
-        </Dialog>
-    )
+            {post ?
+                <Post postId={post.id}
+                      title={post.title}
+                      content={post.content}
+                      authorUsername={post.authorUsername}
+                      userId={post.userId}
+                      commentCount={post.commentCount}
+                      likeCount={post.likeCount}
+                      createdAt={post.createdAt}
+                      updatedAt={post.updatedAt}
+                      currentUserAvatar={1}
+                      currentUserUsername={""}>
+                </Post> : "loading"}
+        </Dialog>)
 }
 
 function UserActivity({userId}) {
@@ -100,8 +108,7 @@ function UserActivity({userId}) {
 
     const fetchActivities = async () => {
         try {
-            const response = await makeAuthenticatedRequest(`/users/activity/${userId}`,
-                {method: "GET"});
+            const response = await makeAuthenticatedRequest(`/users/activity/${userId}`, {method: "GET"});
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -117,8 +124,7 @@ function UserActivity({userId}) {
             const result = JSON.parse(text);
             setActivities(result);
             setLoading(false);
-        }
-        catch (error) {
+        } catch (error) {
             setError(true);
             setLoading(false);
             console.log("error in fetching activities:", error);
@@ -131,15 +137,13 @@ function UserActivity({userId}) {
     }, []);
 
 
-
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Veriler yüklenirken bir hata oluştu</div>;
-    if(activities.length === 0) {
+    if (activities.length === 0) {
         return <div className="ActivitiesInfo">Bu kullanıcıya ait herhangi bir faaliyet bulunmamaktadır.</div>;
     }
 
-    return(
-        <div className="UserActivityContainer">
+    return (<div className="UserActivityContainer">
             <Typography className={"UserActivityTypography"} variant="h6">Kullanıcı Faaliyetleri</Typography>
             {isOpen && <CustomFullScreenDialog postId={selectedPost} setIsOpen={setIsOpen} isOpen={isOpen}/>}
             <TableContainer className="TableContainer" component={Paper}>
@@ -151,18 +155,15 @@ function UserActivity({userId}) {
                             <Button onClick={() => handleNotification(activity[1])} variant="contained" color="primary">
                                 <TableRow hover role="checkbox" tabIndex={-1} key={activity.id}
 
-                                    sx={{'&:last-child td, &:last-child th': {border: 0}}}
+                                          sx={{'&:last-child td, &:last-child th': {border: 0}}}
                                 >
-                                    {activity[0] === "beğendi" ? activity[3] + " kullanıcısı, postunuzu " + activity[0]
-                                        : activity[3] + " kullanıcısı, postunuza " + activity[0]}
+                                    {activity[0] === "beğendi" ? activity[3] + " kullanıcısı, postunuzu " + activity[0] : activity[3] + " kullanıcısı, postunuza " + activity[0]}
                                 </TableRow>
-                            </Button>
-                        ))}
+                            </Button>))}
                     </TableBody>
                 </Table>
             </TableContainer>
-        </div>
-    );
+        </div>);
 }
 
 export default UserActivity

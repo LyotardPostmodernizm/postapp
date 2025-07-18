@@ -7,12 +7,16 @@ import com.postapp.postapp.entities.Like;
 import com.postapp.postapp.entities.Post;
 import com.postapp.postapp.entities.User;
 import com.postapp.postapp.exceptions.UnauthorizedException;
+import com.postapp.postapp.exceptions.UserNotFoundException;
 import com.postapp.postapp.mapper.LikeMapper;
+import com.postapp.postapp.security.JwtUserDetails;
 import com.postapp.postapp.services.CommentService;
 import com.postapp.postapp.services.LikeService;
 import com.postapp.postapp.services.PostService;
+import com.postapp.postapp.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,6 +30,7 @@ public class LikeController {
     private final LikeMapper likeMapper;
     private final PostService postService;
     private final CommentService commentService;
+    private final UserService userService;
 
     @GetMapping
     public List<LikeResponseDto> getAllLikes(@RequestParam Optional<Long> userId,
@@ -45,16 +50,33 @@ public class LikeController {
     @PostMapping
     public LikeResponseDto createLike(
             @RequestBody LikeCreateDto likeCreateDto,
-            @AuthenticationPrincipal User currentUser
+            @AuthenticationPrincipal JwtUserDetails currentUser
+
     ) {
         // Sadece postId VEYA commentId dolu olmalı
         if ((likeCreateDto.getPostId() == null && likeCreateDto.getCommentId() == null) ||
                 (likeCreateDto.getPostId() != null && likeCreateDto.getCommentId() != null)) {
             throw new IllegalArgumentException("Sadece post veya comment üzerine beğeni atılabilir!");
         }
+        Long userId = currentUser.getId();
+        User user = userService.getUserById(userId);
+        if(user==null){
+            throw new UserNotFoundException("Kullanıcı Bulunamadı!");
+        }
+
+        if (likeCreateDto.getPostId() != null) {
+            List<Like> existingLikes = likeService.getAllLikes(
+                    Optional.of(userId),
+                    Optional.of(likeCreateDto.getPostId()),
+                    Optional.empty()
+            );
+            if (!existingLikes.isEmpty()) {
+                throw new IllegalArgumentException("Bu postu zaten beğendiniz!");
+            }
+        }
 
         Like like = likeMapper.toEntity(likeCreateDto);
-        like.setUser(currentUser);
+        like.setUser(user);
 
         // Post veya Comment ilişkisini kuruyoruz
         if (likeCreateDto.getPostId() != null) {
@@ -69,8 +91,9 @@ public class LikeController {
         return likeMapper.toResponseDto(savedLike);
     }
     @DeleteMapping("/{id}")
-    public void deleteLikeById(@PathVariable Long id, @AuthenticationPrincipal User currentUser) {
-        if (!currentUser.getId().equals(likeService.getLikeById(id).getUser().getId())) {
+    public void deleteLikeById(@PathVariable Long id, @RequestParam Long userId) {
+        Like like = likeService.getLikeById(id);
+        if (!userId.equals(like.getUser().getId())) {
             throw new UnauthorizedException("Bu beğeniyi silme yetkiniz yok!");
         }
         likeService.deleteLike(id);
