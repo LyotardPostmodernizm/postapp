@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -40,7 +41,8 @@ public class Comment {
     @JsonIgnore
     private Post post;
 
-    @OneToMany(mappedBy = "comment")
+    @OneToMany(mappedBy = "comment",fetch = FetchType.LAZY)
+    @BatchSize(size = 25)
     private List<Like> likes;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -48,7 +50,8 @@ public class Comment {
     @JsonIgnore
     private Comment parent;
 
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
+    @BatchSize(size = 25)
     private List<Comment> children = new ArrayList<>();
 
     @Temporal(TemporalType.TIMESTAMP)

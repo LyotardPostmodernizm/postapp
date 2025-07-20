@@ -13,8 +13,10 @@ public class CommentResponseDto {
     private String text;
     private int authorAvatar;
     private String authorUsername;
+    private Long userId;
     private Long postId;
     private Long parentCommentId;
+    private int replyCount;
     private int likeCount;
     private List<CommentResponseDto> children;
     private LocalDateTime createdAt;

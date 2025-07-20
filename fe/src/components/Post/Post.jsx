@@ -65,21 +65,33 @@ function Post(props) {
         setIsLikeDeleted(false);
     }
 
+    //Sadece postlara ait yorumları,yani parenti olmayan ana yorumları getiriyoruz
     const loadAllComments = () => {
-        fetch("/comments?postId=" + postId,
-            {method: "GET"})
+        fetch("/comments?postId=" + postId + "&parentId=0", {method: "GET"})
             .then(response => response.json())
             .then(data => {
                     setComments(data);
-                    console.log('Yorumlar yüklendi:', data)
+                    console.log('=== FRONTEND DEBUG ===');
+                    console.log('Ana yorumlar yüklendi:', data);
+                    console.log('Ana yorum sayısı:', data.length);
+
+                    data.forEach((comment, index) => {
+                        console.log(`Ana yorum ${index + 1}:`, {
+                            id: comment.id,
+                            text: comment.text,
+                            replyCount: comment.replyCount,
+                            childrenLength: comment.children ? comment.children.length : 0,
+                            children: comment.children
+                        });
+                    });
+
                     setLoading(false);
                 },
                 error => {
                     setError(error);
                     setLoading(false);
                     console.log("Yorumlar yüklenirken hata oluştu:" + error)
-                }
-            )
+                })
         setRefresh(false)
     }
 
@@ -141,8 +153,6 @@ function Post(props) {
             await deleteLike();
         }
     };
-
-
 
     function handleExpandClick() {
         setExpanded(!expanded);
@@ -274,7 +284,7 @@ function Post(props) {
                         <Tooltip title={!liked ? "Gönderiyi beğen" : "Gönderiden beğeniyi çek"}>
                             <IconButton onClick={handleLike} aria-label="Postu favorilere ekle"
                                         disabled={localStorage.getItem("userId") == null}>
-                                <FavoriteIcon style={{color: liked ? "red" : undefined}}/>
+                                <FavoriteIcon style={{color: liked ? "red" : "gray"}}/>
                             </IconButton>
                         </Tooltip>
                         <Typography variant={"subtitle2"}>{likecount}</Typography>
@@ -299,16 +309,23 @@ function Post(props) {
 
                         >
                             {error ? <div>Error!!</div>
-                                : !loading ? comments.map((comment, index) => (
+                                : !loading ? comments.map((comment) => (
                                         <Comment
+                                            key={comment.id}
+                                            commentId={comment.id}
                                             text={comment.text}
                                             avatar={comment.authorAvatar}
                                             postId={comment.postId}
                                             userId={comment.userId}
                                             userName={comment.authorUsername}
-                                            key={index}
-                                            createdDAt={comment.createdAt}
-                                            updatedAt={comment.updatedAt}/>
+                                            likeCount={comment.likeCount}
+                                            replyCount={comment.replyCount}
+                                            children={comment.children}
+                                            createdAt={comment.createdAt}
+                                            updatedAt={comment.updatedAt}
+                                            setCommentsRefresh={setCommentsRefresh}
+                                        />
+
                                     ))
                                     :
                                     "Loading..."

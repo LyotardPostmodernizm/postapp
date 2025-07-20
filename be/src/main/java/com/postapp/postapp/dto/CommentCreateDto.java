@@ -12,6 +12,4 @@ public class CommentCreateDto {
     @NotBlank
     @Size(max = 250)
     private String text;
-//    private Long postId;
-//    private Long parentCommentId;
 }

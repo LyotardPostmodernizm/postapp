@@ -9,11 +9,15 @@ import SendIcon from '@mui/icons-material/Send';
 import IconButton from "@mui/material/IconButton";
 import {makeAuthenticatedRequest} from "../../services/ApiService.js";
 
-const Commentform = ({userId, avatar, postId, commentId, text, setCommentsRefresh, isReplyToComment}) => {
+const Commentform = ({userId, avatar, postId, commentId, text, setCommentsRefresh, isReplyToComment,isReply=false}) => {
 
     const [content, setContent] = useState("");
 
     const handleSubmit = async () => {
+        if (!content.trim()) {
+            return;
+        }
+
         if (isReplyToComment) {
             await handleSubmitOnComment(commentId, content);
         } else {
@@ -22,8 +26,9 @@ const Commentform = ({userId, avatar, postId, commentId, text, setCommentsRefres
     };
 
 
+
     //Posta yorum yazma
-    const handleSubmitOnPost = async (content) => {
+    const handleSubmitOnPost = async (postId, content) => {
         try {
             const response = await makeAuthenticatedRequest(`/comments/posts/${postId}`, {
                 method: "POST", body: JSON.stringify({
@@ -34,7 +39,7 @@ const Commentform = ({userId, avatar, postId, commentId, text, setCommentsRefres
                 const result = await response.json();
                 console.log("Gönderiye yorum başarıyla gönderildi:", result);
                 setContent("");
-                setCommentsRefresh(true);
+                setCommentsRefresh();
             }
 
         } catch (error) {
@@ -56,7 +61,7 @@ const Commentform = ({userId, avatar, postId, commentId, text, setCommentsRefres
                 const result = await response.json();
                 console.log("Yoruma cevap başarıyla gönderildi:", result);
                 setContent("");
-                setCommentsRefresh(true);
+                setCommentsRefresh();
             }
         } catch (error) {
             console.error("Yorum gönderme hatası:", error);
@@ -64,34 +69,39 @@ const Commentform = ({userId, avatar, postId, commentId, text, setCommentsRefres
     };
 
 
-    return (<OutlinedInput
-            className={"commentInput"}
+    return (
+        <OutlinedInput
+            className={isReply ? "commentInput replyInput" : "commentInput mainInput"}
             id="outlined-required"
             multiline
             fullWidth
             value={content}
             placeholder={text}
+            size={isReply ? "small" : "medium"}
             onChange={(e) => {
                 setContent(e.target.value)
             }}
             inputProps={{maxLength: 250}}
-            startAdornment={<InputAdornment position="start">
-                <Link className="userLink" to={{pathname: "/users/" + userId}}>
-                    <Avatar
-                        aria-label="recipe"
-                        src={`/public/Avatars/avatar${avatar}.png`}>
-                    </Avatar>
-                </Link>
-            </InputAdornment>}
-
-            endAdornment={<InputAdornment position="end">
-                <IconButton onClick={handleSubmit} aria-label="send">
-                    <SendIcon color={"primary"}/>
-                </IconButton>
-            </InputAdornment>}
+            startAdornment={
+                <InputAdornment position="start">
+                    <Link className="userLink" to={{pathname: "/users/" + userId}}>
+                        <Avatar
+                            aria-label="recipe"
+                            src={`/public/Avatars/avatar${avatar}.png`}
+                            sx={{width: isReply ? 32 : 40, height: isReply ? 32 : 40}}
+                        />
+                    </Link>
+                </InputAdornment>
+            }
+            endAdornment={
+                <InputAdornment position="end">
+                    <IconButton onClick={handleSubmit} aria-label="send" size={isReply ? "small" : "medium"}>
+                        <SendIcon color={"primary"} fontSize={isReply ? "small" : "medium"} />
+                    </IconButton>
+                </InputAdornment>
+            }
         />
-
-
     )
+
 }
 export default Commentform;

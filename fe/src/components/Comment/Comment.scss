@@ -1,53 +1,56 @@
 
-.commentFormContainer {
- width: 100%;
+.commentWrapper {
+  margin-bottom: 12px;
+  padding: 8px;
+
+  &.mainComment {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border-left: 3px solid #007bff;
+  }
+
+  &.replyComment {
+    background-color: #ffffff;
+    border-radius: 6px;
+    border-left: 2px solid #6c757d;
+    margin-top: 8px;
+
+    .replyComment {
+      background-color: #f1f3f4;
+      border-left: 1px solid #adb5bd;
+    }
+  }
 }
-.commentContainer{
-  width: 20px;
+
+.commentHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.commentInfo {
+  margin-left: 12px;
+}
+
+.commentActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.likeContainer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .replyForm {
+  margin-top: 12px;
+}
+
+.repliesContainer {
+  border-left: 2px solid #e9ecef;
+  padding-left: 12px;
   margin-top: 8px;
-  padding-left: 200px;
 }
-
-.commentInput{
-  margin-top: 3rem;
-  visibility: visible;
-}
-
-.card {
-  border-radius: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-
-}
-.userInfoRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 3rem;
-}
-.relativeContainer {
-  position: relative;
-  width: 100%;
-  margin-bottom: 3rem;
-}
-
-.absoluteIcon {
-  position: absolute;
-  bottom: -10px;
-  right: -15px;
-  font-size: 24px;
-  cursor: pointer;
-  color: dimgray;
-}
-.absoluteIcon2 {
-  position: absolute;
-  bottom: -9px;
-  left: -8px;
-  font-size: 24px;
-  cursor: pointer;
-  color: dimgray;
-}
-
-
