@@ -8,8 +8,10 @@ import com.postapp.postapp.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.sql.Timestamp;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,17 +41,36 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
-    public User getUserByEmail(String email){
+    public User getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
-    public List<Object> getUserActivity(Long userId) {
+    public List<Object[]> getUserActivity(Long userId) {
         List<Long> top10PostIds = postRepository.findTop10ByUserId(userId);
-        if(top10PostIds.isEmpty()){
+        if (top10PostIds.isEmpty()) {
             return null;
         }
-        List<Object> result = List.of(commentRepository.findByPostIds(top10PostIds), likeRepository.findByPostIds(top10PostIds));
-       return result;
+        List<Object[]> commentActivities = commentRepository.findByPostIds(top10PostIds);
+        List<Object[]> likeActivities = likeRepository.findByPostIds(top10PostIds);
 
+        List<Object[]> allActivities = new ArrayList<>();
+        allActivities.addAll(commentActivities);
+        allActivities.addAll(likeActivities);
+
+        allActivities.sort((a, b) -> {
+            try {
+                // created_at değerlerini karşılaştırıyoruz
+                Timestamp dateA = (java.sql.Timestamp) a[4];
+                Timestamp dateB = (java.sql.Timestamp) b[4];
+                return dateB.compareTo(dateA);
+            } catch (Exception e) {
+                return 0;
+            }
+        });
+
+        return allActivities.stream()
+                .limit(10)
+                .collect(Collectors.toList());
     }
 }
+

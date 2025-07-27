@@ -20,7 +20,11 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
 
     List<Like> findByUserId(Long userId);
 
-    @Query(value = "SELECT 'beğendi', l.post_id, u.avatar, u.username FROM likes l LEFT JOIN user u on l.user_id = u.id WHERE l.post_id IN (:postIds) ORDER BY l.created_at desc limit 10",nativeQuery = true)
-    List<Object> findByPostIds(@Param("postIds") List<Long> postIds);
+    @Query(value = "SELECT 'beğendi', l.post_id, u.avatar, u.username, l.created_at " +
+            "FROM likes l LEFT JOIN user u ON l.user_id = u.id " +
+            "WHERE l.post_id IN (:postIds) " +
+            "ORDER BY l.created_at DESC LIMIT 10", nativeQuery = true)
+    List<Object[]> findByPostIds(@Param("postIds") List<Long> postIds);
+
 
 }

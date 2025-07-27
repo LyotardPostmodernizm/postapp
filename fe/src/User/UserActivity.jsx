@@ -18,6 +18,8 @@ import Toolbar from "@mui/material/Toolbar";
 import CloseIcon from '@mui/icons-material/Close';
 import Slide from '@mui/material/Slide';
 import {makeAuthenticatedRequest} from "../services/ApiService.js";
+import Avatar from "@mui/material/Avatar";
+import {formatToIstanbulTime} from "../Utility/formatToIstanbulTime.js";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -27,26 +29,33 @@ const CustomFullScreenDialog = ({isOpen, postId, setIsOpen}) => {
     const [open, setOpen] = useState(isOpen);
     const [post, setPost] = useState();
 
+
     const fetchPost = async () => {
+        if (!postId) {
+            console.error("Post ID bulunamadı!");
+            return;
+        }
+
         try {
             const response = await makeAuthenticatedRequest(`/posts/${postId}`, {
                 method: "GET"
             });
 
             if (!response.ok) {
-                throw new Error('Post fetch failed');
+                throw new Error('Post görüntüleme başarısız! HTTP error: ' + response.status);
             }
 
             const result = await response.json();
             setPost(result);
         } catch (error) {
-            console.error("Error fetching post:", error);
+            console.error("Post görüntüleme başarısız!", error);
         }
     };
 
     const handleClose = () => {
         setOpen(false);
         setIsOpen(false);
+        setPost(null);
     };
 
 
@@ -140,30 +149,75 @@ function UserActivity({userId}) {
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Veriler yüklenirken bir hata oluştu</div>;
     if (activities.length === 0) {
-        return <div className="ActivitiesInfo">Bu kullanıcıya ait herhangi bir faaliyet bulunmamaktadır.</div>;
+        return <div className="ActivitiesInfo">Herhangi bir bildirim bulunmamaktadır.</div>;
     }
 
-    return (<div className="UserActivityContainer">
-            <Typography className={"UserActivityTypography"} variant="h6">Kullanıcı Faaliyetleri</Typography>
+    return (
+        <div className="UserActivityContainer">
+            <Typography className={"UserActivityTypography"} variant="h6">
+                Son Kullanıcı Bildirimleri ({activities.length})
+            </Typography>
             {isOpen && <CustomFullScreenDialog postId={selectedPost} setIsOpen={setIsOpen} isOpen={isOpen}/>}
+
             <TableContainer className="TableContainer" component={Paper}>
                 <Table sx={{minWidth: 650}} aria-label="simple table">
                     <TableHead>
+                        <TableRow>
+                            <TableCell>Kullanıcı</TableCell>
+                            <TableCell>Aktivite</TableCell>
+                            <TableCell>Tarih</TableCell>
+                            <TableCell>İşlem</TableCell>
+                        </TableRow>
                     </TableHead>
                     <TableBody>
-                        {activities.map((activity) => (
-                            <Button onClick={() => handleNotification(activity[1])} variant="contained" color="primary">
-                                <TableRow hover role="checkbox" tabIndex={-1} key={activity.id}
-
-                                          sx={{'&:last-child td, &:last-child th': {border: 0}}}
-                                >
-                                    {activity[0] === "beğendi" ? activity[3] + " kullanıcısı, postunuzu " + activity[0] : activity[3] + " kullanıcısı, postunuza " + activity[0]}
-                                </TableRow>
-                            </Button>))}
+                        {activities.map((activity, index) => (
+                            <TableRow
+                                key={index}
+                                hover
+                                sx={{'&:last-child td, &:last-child th': {border: 0}}}
+                            >
+                                <TableCell>
+                                    <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                                        <Avatar
+                                            src={`/public/Avatars/avatar${activity[2]}.png`}
+                                            sx={{width: 32, height: 32}}
+                                        />
+                                        <Typography variant="body2">
+                                            {activity[3]}
+                                        </Typography>
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <Typography variant="body2">
+                                        {activity[0] === "beğendi" ?
+                                            "Postunuzu beğendi" :
+                                            "Postunuza yorum yaptı"
+                                        }
+                                    </Typography>
+                                </TableCell>
+                                <TableCell>
+                                    <Typography variant="caption">
+                                        {activity[4] ? formatToIstanbulTime(activity[4]) : 'Tarih bilinmiyor'}
+                                    </Typography>
+                                </TableCell>
+                                <TableCell>
+                                    <Button
+                                        onClick={() => handleNotification(activity[1])}
+                                        variant="outlined"
+                                        size="small"
+                                        color="primary"
+                                    >
+                                        Postu Görüntüle
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        ))}
                     </TableBody>
                 </Table>
             </TableContainer>
-        </div>);
+        </div>
+    );
+
 }
 
 export default UserActivity

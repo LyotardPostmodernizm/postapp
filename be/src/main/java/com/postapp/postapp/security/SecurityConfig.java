@@ -58,6 +58,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/posts/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/comments/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/likes/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/users/{id}").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .anyRequest().authenticated()

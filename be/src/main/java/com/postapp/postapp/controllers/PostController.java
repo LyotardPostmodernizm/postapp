@@ -48,7 +48,7 @@ public class PostController {
     @Operation(summary = "Get post by id",
             description = "Get post by id",
             tags = {"Posts"} )
-    @GetMapping("/id")
+    @GetMapping("/{id}")
     public PostResponseDto getPostById(@PathVariable Long id) {
         Post post = postService.getPostById(id);
         return postMapper.toResponseDto(post);

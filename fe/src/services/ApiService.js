@@ -1,5 +1,7 @@
 import {RefreshToken} from "./RefreshTokenService.js";
 
+const API_BASE_URL = '/api';
+
 export const makeAuthenticatedRequest = async (url, options = {}) => {
     const token = localStorage.getItem("token");
     const refreshToken = localStorage.getItem("refreshToken");
@@ -35,9 +37,10 @@ export const makeAuthenticatedRequest = async (url, options = {}) => {
     const authHeader = cleanToken ? `Bearer ${cleanToken}` : null;
 
     console.log("Final Auth Header:", authHeader);
+    const fullUrl = url.startsWith('/api') ? url : `${API_BASE_URL}${url}`;
 
     try {
-        let response = await fetch(url, {
+        let response = await fetch(fullUrl, {
             ...options,
             headers: {
                 "Content-Type": "application/json",
@@ -67,7 +70,7 @@ export const makeAuthenticatedRequest = async (url, options = {}) => {
             const newCleanToken = refreshData.accessToken.replace('Bearer ', '');
             const newAuthHeader = `Bearer ${newCleanToken}`;
 
-            response = await fetch(url, {
+            response = await fetch(fullUrl, {
                 ...options,
                 headers: {
                     "Content-Type": "application/json",

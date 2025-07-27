@@ -94,9 +94,14 @@ public class UserController {
 
 
     @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable Long id) {
+    public void deleteUser(@PathVariable Long id,
+                           @AuthenticationPrincipal JwtUserDetails currentUser) {
+        if (!currentUser.getId().equals(id)) {
+            throw new ForbiddenException("Bu kullanıcıyı silme yetkiniz yok!");
+        }
         userService.deleteUserById(id);
     }
+
 
     @GetMapping("/me")
     public UserResponseDto getCurrentUser(@AuthenticationPrincipal JwtUserDetails currentUser) {
@@ -104,9 +109,14 @@ public class UserController {
         return userMapper.toResponseDto(user);
     }
     @GetMapping("/activity/{userId}")
-    public List<Object> getActivity(@PathVariable Long userId) {
+    public List<Object[]> getActivity(@PathVariable Long userId,
+                                      @AuthenticationPrincipal JwtUserDetails currentUser) {
+        if (!currentUser.getId().equals(userId)) {
+            throw new ForbiddenException("Bu kullanıcının aktivitelerini görme yetkiniz yok!");
+        }
         return userService.getUserActivity(userId);
     }
+
     @ExceptionHandler(UserNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     private void userNotFoundHandler(UserNotFoundException ex) {

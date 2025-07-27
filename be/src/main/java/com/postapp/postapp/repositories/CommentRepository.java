@@ -94,6 +94,10 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findMostLikedCommentsByPostId(@Param("postId") Long postId);
 
 
-    @Query(value = "SELECT 'yorum yaptı', c.post_id, u.avatar, u.username FROM comment c LEFT JOIN user u ON u.id = c.user_id WHERE c.post_id IN (:postIds) ORDER BY c.created_at desc limit 10",nativeQuery = true)
-    List<Object> findByPostIds(@Param("postIds") List<Long> postIds);
+    @Query(value = "SELECT 'yorum yaptı', c.post_id, u.avatar, u.username, c.created_at " +
+            "FROM comment c LEFT JOIN user u ON u.id = c.user_id " +
+            "WHERE c.post_id IN (:postIds) " +
+            "ORDER BY c.created_at DESC LIMIT 10", nativeQuery = true)
+    List<Object[]> findByPostIds(@Param("postIds") List<Long> postIds);
+
 }

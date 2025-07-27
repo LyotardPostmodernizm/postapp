@@ -84,7 +84,7 @@ const Comment = ({
         if (!currentUserId || !commentId) return;
 
         try {
-            const response = await fetch(`/likes?userId=${currentUserId}&commentId=${commentId}`, {
+            const response = await fetch(`/api/likes?userId=${currentUserId}&commentId=${commentId}`, {
                 method: "GET",
             });
 

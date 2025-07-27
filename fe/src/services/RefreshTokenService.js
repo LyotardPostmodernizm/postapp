@@ -1,5 +1,5 @@
 export const RefreshToken = () => {
-    return fetch("http://localhost:8080/auth/refresh", {
+    return fetch("http://localhost:8080/api/auth/refresh", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

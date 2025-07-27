@@ -67,7 +67,7 @@ function Post(props) {
 
     //Sadece postlara ait yorumları,yani parenti olmayan ana yorumları getiriyoruz
     const loadAllComments = () => {
-        fetch("/comments?postId=" + postId + "&parentId=0", {method: "GET"})
+        fetch("/api/comments?postId=" + postId + "&parentId=0", {method: "GET"})
             .then(response => response.json())
             .then(data => {
                     setComments(data);
@@ -102,7 +102,7 @@ function Post(props) {
         }
 
         try {
-            const response = await fetch(`/likes?userId=${currentUserId}&postId=${postId}`, {
+            const response = await fetch(`/api/likes?userId=${currentUserId}&postId=${postId}`, {
                 method: "GET",
             });
             const likeList = await response.json();
