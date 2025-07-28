@@ -10,6 +10,7 @@ import com.postapp.postapp.security.JwtUserDetails;
 import com.postapp.postapp.services.PostService;
 import com.postapp.postapp.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -27,26 +28,40 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/posts")
 @RequiredArgsConstructor
-@Tag(name = "Posts", description = "Post management APIs")
+@Tag(name = "Posts", description = "Post yönetimi API'leri")
 public class PostController {
     private final PostService postService;
     private final PostMapper postMapper;
     private final UserService userService;
 
-    @Operation(summary = "Get all posts",
-            description = "Get all posts by optional userId",
-            tags = {"Posts"} )
+    @Operation(summary = "Tüm postları getir",
+            description = "Opsiyonel userId parametresi ile filtrelenmiş postları getir",
+            tags = {"Posts"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Postlar başarıyla getirildi",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = PostResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "Geçersiz parametre")
+    })
     @GetMapping
-    public List<PostResponseDto> getAllPosts(@RequestParam Optional<Long> userId) {
-        List<PostResponseDto>posts =  postService.getAllPosts(userId).stream()
+    public List<PostResponseDto> getAllPosts(@Parameter(description = "Belirli bir kullanıcının postlarını getirmek için kullanıcı ID'si")
+                                             @RequestParam Optional<Long> userId) {
+        List<PostResponseDto> posts = postService.getAllPosts(userId).stream()
                 .map(postMapper::toResponseDto)
                 .toList();
         return posts;
     }
 
-    @Operation(summary = "Get post by id",
-            description = "Get post by id",
-            tags = {"Posts"} )
+    @Operation(summary = "ID ile post getir",
+            description = "Belirtilen ID'ye sahip postu getir",
+            tags = {"Posts"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Post başarıyla getirildi",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = PostResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "Post bulunamadı")
+    })
+
     @GetMapping("/{id}")
     public PostResponseDto getPostById(@PathVariable Long id) {
         Post post = postService.getPostById(id);
@@ -54,21 +69,23 @@ public class PostController {
     }
 
 
-    @Operation(summary = "Create a new post")
+    @Operation(summary = "Yeni post oluştur",
+            description = "Yeni bir post oluştur",
+            tags = {"Posts"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Post created successfully",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = PostCreateDto.class)) }),
-            @ApiResponse(responseCode = "400", description = "Invalid input provided") })
+            @ApiResponse(responseCode = "201", description = "Post başarıyla oluşturuldu",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = PostResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "Geçersiz girdi")
+    })
 
     @PostMapping
     public PostResponseDto createPost(@io.swagger.v3.oas.annotations.parameters.RequestBody(
-                                                  description = "Post to create", required = true,
-                                                  content = @Content(mediaType = "application/json",
-                                                          schema = @Schema(implementation = PostCreateDto.class),
-                                                          examples = @ExampleObject(value = "{ \"title\": \"Title of Post\", \"content\": \"Content of Post\" }")))
-            @RequestBody PostCreateDto postCreateDto
-    ) {
+            description = "Oluşturulacak post bilgileri", required = true,
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = PostCreateDto.class),
+                    examples = @ExampleObject(value = "{ \"title\": \"Post Başlığı\", \"content\": \"Post İçeriği\", \"userId\": 1 }")))
+                                      @Valid @RequestBody PostCreateDto postCreateDto) {
         User user = userService.getUserById(postCreateDto.getUserId());
         if (user == null) {
             throw new RuntimeException("Kullanıcı bulunamadı!");
@@ -79,13 +96,26 @@ public class PostController {
         Post savedPost = postService.createPost(post);
         return postMapper.toResponseDto(savedPost);
     }
-    @Operation(summary = "Update a post",description = "Update a post by id",tags = {"Posts"})
-    @PutMapping("/{id}")
-    public PostResponseDto updatePost(
-            @PathVariable Long id,
-            @Valid @RequestBody PostCreateDto postCreateDto
 
-    ) {
+    @Operation(summary = "Post güncelle",
+            description = "Belirtilen ID'ye sahip postu güncelle",
+            tags = {"Posts"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Post başarıyla güncellendi",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = PostResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "Geçersiz girdi"),
+            @ApiResponse(responseCode = "401", description = "Yetkisiz erişim"),
+            @ApiResponse(responseCode = "404", description = "Post bulunamadı")
+    })
+    public PostResponseDto updatePost(@Parameter(description = "Post ID'si", required = true)
+                                      @PathVariable Long id,
+                                      @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                                              description = "Güncellenecek post bilgileri", required = true,
+                                              content = @Content(mediaType = "application/json",
+                                                      schema = @Schema(implementation = PostCreateDto.class),
+                                                      examples = @ExampleObject(value = "{ \"title\": \"Güncellenmiş Başlık\", \"content\": \"Güncellenmiş İçerik\", \"userId\": 1 }")))
+                                      @Valid @RequestBody PostCreateDto postCreateDto) {
         Post existingPost = postService.getPostById(id);
 
         User user = userService.getUserById(postCreateDto.getUserId());
@@ -100,28 +130,32 @@ public class PostController {
 
 
         // Post güncelleme işlemi
-            postMapper.partialUpdate(postCreateDto, existingPost);
-            existingPost.setUser(user);
-            Post updatedPost = postService.createPost(existingPost);
-            return postMapper.toResponseDto(updatedPost);
+        postMapper.partialUpdate(postCreateDto, existingPost);
+        existingPost.setUser(user);
+        Post updatedPost = postService.createPost(existingPost);
+        return postMapper.toResponseDto(updatedPost);
 
     }
-
+    @Operation(summary = "Post sil",
+            description = "Belirtilen ID'ye sahip postu sil",
+            tags = {"Posts"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Post başarıyla silindi"),
+            @ApiResponse(responseCode = "401", description = "Yetkisiz erişim"),
+            @ApiResponse(responseCode = "404", description = "Post bulunamadı")
+    })
     @DeleteMapping("/{id}")
     public void deletePostById(
             @PathVariable Long id,
             @AuthenticationPrincipal JwtUserDetails currentUser
     ) {
         Post post = postService.getPostById(id);
-
-        // ✅ Kullanıcı yetkisi kontrolü - sadece kendi postunu silebilir
         if (!post.getUser().getId().equals(currentUser.getId())) {
             throw new UnauthorizedException("Bu postu silme yetkiniz yok!");
         }
 
         postService.deletePost(id);
     }
-
 
 
 }
