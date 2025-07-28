@@ -28,8 +28,6 @@ public class JwtTokenGenerator {
         if (jwtUserDetails == null) {
             throw new SignatureException("Invalid token");
         }
-        //return Jwts.builder().setSubject(Long.toString(jwtUserDetails.getId())).setIssuedAt(new Date())
-                //.setExpiration(expireDate).signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, SECRET).compact();
 
         return Jwts.builder()
                 .setSubject(jwtUserDetails.getUsername())

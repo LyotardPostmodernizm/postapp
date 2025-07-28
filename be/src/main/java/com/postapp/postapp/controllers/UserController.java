@@ -55,10 +55,8 @@ public class UserController {
                                       @AuthenticationPrincipal JwtUserDetails currentUser
     ) {
         if (!currentUser.getId().equals(id)) {
-            System.out.println("Current user's id: "+currentUser.getId());
             throw new ForbiddenException("Bu kullanıcıyı güncelleme yetkiniz yok!");
         }
-        System.out.println("Current User: " + currentUser);
 
         User user = userService.getUserById(id);
 
@@ -78,9 +76,6 @@ public class UserController {
         if (userUpdateDto.getAvatar() != 0) { // Default 0 değilse güncelliyoruz.
             user.setAvatar(userUpdateDto.getAvatar());
         }
-
-
-        //userMapper.partialUpdate(userUpdateDto, user);
 
         // Parolayı hashliyoruz
         if (userUpdateDto.getPassword() != null && !userUpdateDto.getPassword().isEmpty()) {

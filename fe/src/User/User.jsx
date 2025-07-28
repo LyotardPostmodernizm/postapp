@@ -63,7 +63,6 @@ function User() {
             setUser(userData);
         } catch (error) {
             console.error("Kimlik doğrulamalı kullanıcı bilgileri alınırken hata:", error);
-            // Fallback olarak public endpoint'i dene
             await getUser();
         }
     }

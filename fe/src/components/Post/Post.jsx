@@ -12,7 +12,7 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import {formatToIstanbulTime} from "../../Utility/formatToIstanbulTime.js";
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import DeleteIcon from '@mui/icons-material/Delete';
 import {Link} from "react-router-dom";
 import {Container, Snackbar, Tooltip} from "@mui/material";
 import Comment from "../Comment/Comment.jsx";
@@ -34,7 +34,8 @@ function Post(props) {
         createdAt,
         updatedAt,
         currentUserAvatar = 1,
-        currentUserUsername = ""
+        currentUserUsername = "",
+        onPostDeleted
     } = props;
     const [likecount, setLikecount] = useState(likeCount);
     const [expanded, setExpanded] = useState(false);
@@ -45,8 +46,10 @@ function Post(props) {
     const [iconClicked, setIconClicked] = useState(false);
     const [refresh, setRefresh] = useState(false);
     const [isLikeSent, setIsLikeSent] = useState(false);
-    const [isLikeDeleted,setIsLikeDeleted] = useState(false);
+    const [isLikeDeleted, setIsLikeDeleted] = useState(false);
     const [currentLikeId, setCurrentLikeId] = useState(null);
+    const [isPostDeleted, setIsPostDeleted] = useState(false);
+
 
 
     const setCommentsRefresh = () => {
@@ -64,6 +67,13 @@ function Post(props) {
         }
         setIsLikeDeleted(false);
     }
+    const handlePostDeleteSnackbar = (event, reason) => {
+        if (reason === 'clickaway' || reason === 'escapeKeyDown') {
+            return;
+        }
+        setIsPostDeleted(false);
+    };
+
 
     //Sadece postlara ait yorumları,yani parenti olmayan ana yorumları getiriyoruz
     const loadAllComments = () => {
@@ -71,20 +81,6 @@ function Post(props) {
             .then(response => response.json())
             .then(data => {
                     setComments(data);
-                    console.log('=== FRONTEND DEBUG ===');
-                    console.log('Ana yorumlar yüklendi:', data);
-                    console.log('Ana yorum sayısı:', data.length);
-
-                    data.forEach((comment, index) => {
-                        console.log(`Ana yorum ${index + 1}:`, {
-                            id: comment.id,
-                            text: comment.text,
-                            replyCount: comment.replyCount,
-                            childrenLength: comment.children ? comment.children.length : 0,
-                            children: comment.children
-                        });
-                    });
-
                     setLoading(false);
                 },
                 error => {
@@ -185,6 +181,35 @@ function Post(props) {
         }
     };
 
+    const handleDeletePost = async () => {
+        if (!window.confirm("Bu gönderiyi silmek istediğinizden emin misiniz?")) {
+            return;
+        }
+
+        try {
+            const response = await makeAuthenticatedRequest(`/posts/${postId}`, {
+                method: "DELETE"
+            });
+
+            if (response.ok) {
+                setIsPostDeleted(true);
+
+                setTimeout(() => {
+                    if (onPostDeleted) {
+                        onPostDeleted(postId);
+                    }
+                }, 1000);
+
+            } else {
+                throw new Error("Gönderi silinirken bir hata oluştu");
+            }
+        } catch (error) {
+            console.error("Gönderi silinemedi:", error);
+            alert("Gönderi silinirken bir hata oluştu");
+        }
+    };
+
+
 
 
     const ExpandMore = styled((props) => {
@@ -227,6 +252,14 @@ function Post(props) {
                 action
                 sx={{bottom: {xs: 90, sm: 0}}}
             />
+            <Snackbar
+                open={isPostDeleted}
+                onClose={handlePostDeleteSnackbar}
+                autoHideDuration={1000}
+                message="Gönderi Başarıyla Silindi"
+                sx={{bottom: {xs: 90, sm: 0}}}
+            />
+
             <div className="postContainer">
                 <Card className="card">
                     <CardHeader
@@ -240,10 +273,20 @@ function Post(props) {
 
                         }
                         action={
-                            <IconButton aria-label="settings">
-                                <MoreVertIcon/>
-                            </IconButton>
+
+                            localStorage.getItem("userId") !== null && localStorage.getItem("userId") === "" + userId ? (
+                                <Tooltip title="Gönderiyi Sil">
+                                    <IconButton
+                                        onClick={handleDeletePost}
+                                        aria-label="delete post"
+                                        color="error"
+                                    >
+                                        <DeleteIcon/>
+                                    </IconButton>
+                                </Tooltip>
+                            ) : null
                         }
+
                         subheader={<h1>{title}</h1>}
                         title={
                             <Typography

@@ -36,7 +36,6 @@ export const makeAuthenticatedRequest = async (url, options = {}) => {
     const cleanToken = finalToken ? finalToken.replace('Bearer ', '') : null;
     const authHeader = cleanToken ? `Bearer ${cleanToken}` : null;
 
-    console.log("Final Auth Header:", authHeader);
     const fullUrl = url.startsWith('/api') ? url : `${API_BASE_URL}${url}`;
 
     try {
@@ -51,7 +50,6 @@ export const makeAuthenticatedRequest = async (url, options = {}) => {
 
         // 401 durumunda refresh token deniyoruz
         if (response.status === 401 && refreshToken) {
-            console.log("401 alındı, refresh token deneniyor...");
 
             const refreshResponse = await RefreshToken();
             if (!refreshResponse.ok) {
@@ -82,7 +80,6 @@ export const makeAuthenticatedRequest = async (url, options = {}) => {
 
         return response;
     } catch (error) {
-        console.error("Request failed:", error);
         throw error;
     }
 };

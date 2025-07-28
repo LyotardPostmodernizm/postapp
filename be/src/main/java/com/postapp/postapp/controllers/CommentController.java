@@ -60,41 +60,12 @@ public class CommentController {
             comments = commentService.getAllComments();
         }
 
-        System.out.println("=== REPOSITORY'DEN GELEN COMMENT'LAR ===");
-        for (Comment comment : comments) {
-            System.out.println("Comment ID: " + comment.getId() +
-                    ", Text: " + comment.getText() +
-                    ", Children size: " + (comment.getChildren() != null ? comment.getChildren().size() : "null"));
-
-            if (comment.getChildren() != null) {
-                for (Comment child : comment.getChildren()) {
-                    System.out.println("  - Child ID: " + child.getId() +
-                            ", Text: " + child.getText() +
-                            ", Parent ID: " + (child.getParent() != null ? child.getParent().getId() : "null"));
-                }
-            }
-        }
 
         List<CommentResponseDto> result = comments.stream()
                 .map(commentMapper::toResponseDto)
                 .collect(Collectors.toList());
 
 
-        System.out.println("=== MAPPED RESULT'LAR ===");
-        for (CommentResponseDto dto : result) {
-            System.out.println("DTO ID: " + dto.getId() +
-                    ", Text: " + dto.getText() +
-                    ", Children size: " + (dto.getChildren() != null ? dto.getChildren().size() : "null") +
-                    ", Reply count: " + dto.getReplyCount());
-
-            if (dto.getChildren() != null) {
-                for (CommentResponseDto child : dto.getChildren()) {
-                    System.out.println("  - Child DTO ID: " + child.getId() +
-                            ", Text: " + child.getText() +
-                            ", Parent ID: " + child.getParentCommentId());
-                }
-            }
-        }
 
         return result;
 

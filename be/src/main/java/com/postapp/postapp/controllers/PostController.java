@@ -6,6 +6,7 @@ import com.postapp.postapp.entities.Post;
 import com.postapp.postapp.entities.User;
 import com.postapp.postapp.exceptions.UnauthorizedException;
 import com.postapp.postapp.mapper.PostMapper;
+import com.postapp.postapp.security.JwtUserDetails;
 import com.postapp.postapp.services.PostService;
 import com.postapp.postapp.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,7 +18,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import net.bytebuddy.implementation.bind.MethodDelegationBinder;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,7 +41,6 @@ public class PostController {
         List<PostResponseDto>posts =  postService.getAllPosts(userId).stream()
                 .map(postMapper::toResponseDto)
                 .toList();
-        System.out.println(posts);
         return posts;
     }
 
@@ -109,23 +108,20 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}")
-    public void deletePostById(@PathVariable Long id,
-                               @RequestParam Long userId) {
-
+    public void deletePostById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal JwtUserDetails currentUser
+    ) {
         Post post = postService.getPostById(id);
 
-        User user = userService.getUserById(userId);
-        if (user == null) {
-            throw new RuntimeException("Kullanıcı bulunamadı!");
-        }
-
-        // Kullanıcı yetkisi kontrolü - sadece kendi postunu silebilir
-        if (!post.getUser().getId().equals(userId)) {
+        // ✅ Kullanıcı yetkisi kontrolü - sadece kendi postunu silebilir
+        if (!post.getUser().getId().equals(currentUser.getId())) {
             throw new UnauthorizedException("Bu postu silme yetkiniz yok!");
         }
 
         postService.deletePost(id);
     }
+
 
 
 }
