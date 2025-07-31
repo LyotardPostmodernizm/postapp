@@ -34,7 +34,15 @@ function Home() {
     const removePost = (postId) => {
         setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
     }
-
+    const updatePost = (postId, updatedPostData) => {
+        setPosts(prevPosts =>
+            prevPosts.map(post =>
+                post.id === postId
+                    ? { ...post, ...updatedPostData }
+                    : post
+            )
+        );
+    }
 
     const retrieveUserData = async (userId) => {
     try {
@@ -124,6 +132,7 @@ function Home() {
                             currentUserAvatar={avatar}
                             currentUserUsername={userName}
                             onPostDeleted={removePost}
+                            onPostUpdated={updatePost}
 
                         />
                     </Container>

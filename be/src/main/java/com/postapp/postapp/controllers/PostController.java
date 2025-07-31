@@ -108,6 +108,7 @@ public class PostController {
             @ApiResponse(responseCode = "401", description = "Yetkisiz erişim"),
             @ApiResponse(responseCode = "404", description = "Post bulunamadı")
     })
+    @PutMapping("/{id}")
     public PostResponseDto updatePost(@Parameter(description = "Post ID'si", required = true)
                                       @PathVariable Long id,
                                       @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -115,19 +116,18 @@ public class PostController {
                                               content = @Content(mediaType = "application/json",
                                                       schema = @Schema(implementation = PostCreateDto.class),
                                                       examples = @ExampleObject(value = "{ \"title\": \"Güncellenmiş Başlık\", \"content\": \"Güncellenmiş İçerik\", \"userId\": 1 }")))
-                                      @Valid @RequestBody PostCreateDto postCreateDto) {
+                                      @Valid @RequestBody PostCreateDto postCreateDto,
+                                      @AuthenticationPrincipal JwtUserDetails currentUser
+    ) {
         Post existingPost = postService.getPostById(id);
 
-        User user = userService.getUserById(postCreateDto.getUserId());
-        if (user == null) {
-            throw new RuntimeException("Kullanıcı bulunamadı!");
-        }
-
         // Kullanıcı yetkisi kontrolü - sadece kendi postunu güncelleyebilir
-        if (!existingPost.getUser().getId().equals(postCreateDto.getUserId())) {
+
+        if (!existingPost.getUser().getId().equals(currentUser.getId())) {
             throw new UnauthorizedException("Bu postu güncelleme yetkiniz yok!");
         }
 
+        User user = userService.getUserById(currentUser.getId());
 
         // Post güncelleme işlemi
         postMapper.partialUpdate(postCreateDto, existingPost);
