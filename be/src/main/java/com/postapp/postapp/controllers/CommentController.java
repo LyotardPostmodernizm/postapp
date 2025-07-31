@@ -269,7 +269,7 @@ public class CommentController {
     })
     @DeleteMapping("/{id}")
     public void deleteCommentById(@PathVariable Long id,
-                                  @AuthenticationPrincipal User currentUser) {
+                                  @AuthenticationPrincipal JwtUserDetails currentUser) {
         Comment comment = commentService.getCommentById(id);
         if (!comment.getUser().getId().equals(currentUser.getId())) {
             throw new UnauthorizedException("Bu yorumu silme yetkiniz yok!");

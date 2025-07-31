@@ -2,8 +2,7 @@ import React, {useEffect, useState} from 'react';
 import './Comment.scss';
 import {Link} from "react-router-dom";
 import Avatar from "@mui/material/Avatar";
-import {red} from "@mui/material/colors";
-import {InputAdornment, OutlinedInput, Snackbar, TextField, Tooltip} from "@mui/material";
+import {Modal, Snackbar, TextField, Tooltip} from "@mui/material";
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import Typography from "@mui/material/Typography";
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -15,23 +14,40 @@ import {formatToIstanbulTime} from "../../Utility/formatToIstanbulTime.js";
 import Collapse from "@mui/material/Collapse";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import Button from "@mui/material/Button";
+
+const modalStyle = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 500,
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4,
+    borderRadius: 2
+};
 
 
 const Comment = ({
-                     text,
+                     text:initialText,
                      avatar,
                      postId,
                      userId,
                      userName,
-                     createdAt,
-                     updatedAt,
+                     createdAt:initialCreatedAt,
+                     updatedAt:initialUpdatedAt,
                      commentId,
                      likeCount: initialLikeCount,
                      replyCount = 0,
                      children = [],
                      setCommentsRefresh,
                      isReply = false,
-                     depth = 0
+                     depth = 0,
+                     onCommentDeleted
                  }) => {
     const [liked, setLiked] = useState(false);
     const [isReplying, setIsReplying] = useState(false);
@@ -43,6 +59,140 @@ const Comment = ({
     const [isLikeSent, setIsLikeSent] = useState(false);
     const [isLikeDeleted, setIsLikeDeleted] = useState(false);
     const MAX_DEPTH = 5;
+
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editText, setEditText] = useState(initialText);
+    const [isCommentUpdated, setIsCommentUpdated] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
+
+
+    const [isCommentDeleted, setIsCommentDeleted] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const [currentText, setCurrentText] = useState(initialText);
+    const [currentCreatedAt, setCurrentCreatedAt] = useState(initialCreatedAt);
+    const [currentUpdatedAt, setCurrentUpdatedAt] = useState(initialUpdatedAt);
+
+    useEffect(() => {
+        setCurrentText(initialText);
+        setCurrentCreatedAt(initialCreatedAt);
+        setCurrentUpdatedAt(initialUpdatedAt);
+        setEditText(initialText);
+    }, [initialText, initialCreatedAt, initialUpdatedAt]);
+
+
+    const handleCommentUpdateSnackbar = (event, reason) => {
+        if (reason === 'clickaway' || reason === 'escapeKeyDown') {
+            return;
+        }
+        setIsCommentUpdated(false);
+    }
+
+    const handleCommentDeleteSnackbar = (event, reason) => {
+        if (reason === 'clickaway' || reason === 'escapeKeyDown') {
+            return;
+        }
+        setIsCommentDeleted(false);
+    }
+
+    const handleEditComment = () => {
+        setEditText(currentText);
+        setIsEditModalOpen(true);
+    }
+
+    const handleCloseEditModal = () => {
+        setIsEditModalOpen(false);
+        setEditText(currentText);
+    }
+
+    const handleUpdateComment = async () => {
+        if (!editText.trim()) {
+            alert('Yorum içeriği boş olamaz!');
+            return;
+        }
+
+        setIsUpdating(true);
+
+        try {
+            const response = await makeAuthenticatedRequest(`/comments/${commentId}`, {
+                method: "PUT",
+                body: JSON.stringify({
+                    text: editText.trim(),
+                    userId: parseInt(localStorage.getItem("userId"))
+                })
+            });
+
+            if (response.ok) {
+                const updatedComment = await response.json();
+                console.log("Yorum başarıyla güncellendi:", updatedComment);
+
+                setCurrentText(editText.trim());
+                setCurrentUpdatedAt(new Date().toISOString());
+
+                setIsEditModalOpen(false);
+                setIsCommentUpdated(true);
+
+                setTimeout(() => {
+                    if (setCommentsRefresh && typeof setCommentsRefresh === 'function') {
+                        setCommentsRefresh();
+                    }
+                }, 500);
+
+            } else {
+                const errorData = await response.text();
+                console.error("Yorum güncellenirken bir hata oluştu:", response.status, errorData);
+                throw new Error("Yorum güncellenirken bir hata oluştu");
+            }
+        } catch (error) {
+            console.error("Yorum güncellenemedi:", error);
+            alert("Yorum güncellenirken bir hata oluştu: " + error.message);
+
+            if (error.message.includes("Authentication")) {
+                localStorage.clear();
+                window.location.href = "/login";
+            }
+
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
+    const handleDeleteComment = async () => {
+        if (!window.confirm("Bu yorumu silmek istediğinizden emin misiniz?")) {
+            return;
+        }
+
+        setIsDeleting(true);
+
+        try {
+            const response = await makeAuthenticatedRequest(`/comments/${commentId}`, {
+                method: "DELETE"
+            });
+
+            if (response.ok) {
+                console.log("Yorum başarıyla silindi");
+                setIsCommentDeleted(true);
+
+                 //Parent component'e bildiriyoruz
+                if (onCommentDeleted && typeof onCommentDeleted === 'function') {
+                    onCommentDeleted();
+                }
+
+
+                setTimeout(() => {
+                    setCommentsRefresh();
+                }, 1500);
+
+            } else {
+                throw new Error("Yorum silinirken bir hata oluştu");
+            }
+        } catch (error) {
+            console.error("Yorum silinemedi:", error);
+            alert("Yorum silinirken bir hata oluştu: " + error.message);
+        } finally {
+            setIsDeleting(false);
+        }
+    }
 
 
     const handleCloseLikeSnackbar = (event, reason) => {
@@ -178,6 +328,58 @@ const Comment = ({
                 action
                 sx={{bottom: {xs: 90, sm: 0}}}
             />
+            <Snackbar
+                open={isCommentUpdated}
+                onClose={handleCommentUpdateSnackbar}
+                autoHideDuration={2000}
+                message="Yorum Başarıyla Güncellendi"
+                sx={{bottom: {xs: 90, sm: 0}}}
+            />
+            <Snackbar
+                open={isCommentDeleted}
+                onClose={handleCommentDeleteSnackbar}
+                autoHideDuration={2000}
+                message="Yorum Başarıyla Silindi"
+                sx={{bottom: {xs: 90, sm: 0}}}
+            />
+            <Modal
+                open={isEditModalOpen}
+                onClose={handleCloseEditModal}
+                aria-labelledby="edit-comment-modal"
+            >
+                <Box sx={modalStyle}>
+                    <Typography variant="h6" component="h2" sx={{mb: 2}}>
+                        Yorumu Düzenle
+                    </Typography>
+
+                    <TextField
+                        fullWidth
+                        label="Yorum"
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                        margin="normal"
+                        multiline
+                        rows={4}
+                    />
+
+                    <Box sx={{mt: 3, display: 'flex', gap: 2, justifyContent: 'flex-end'}}>
+                        <Button
+                            onClick={handleCloseEditModal}
+                            variant="outlined"
+                            disabled={isUpdating}
+                        >
+                            İptal
+                        </Button>
+                        <Button
+                            onClick={handleUpdateComment}
+                            variant="contained"
+                            disabled={isUpdating || !editText.trim()}
+                        >
+                            {isUpdating ? 'Güncelleniyor...' : 'Güncelle'}
+                        </Button>
+                    </Box>
+                </Box>
+            </Modal>
 
             <div className={`commentWrapper ${isReply ? 'replyComment' : 'mainComment'}`}
                  style={{marginLeft: depth > 0 ? `${depth * 20}px` : '0px'}}>
@@ -198,14 +400,19 @@ const Comment = ({
                             </Link>
                         </Typography>
                         <Typography variant="caption" className="commentDate">
-                            {formatToIstanbulTime(createdAt)}
+                            {formatToIstanbulTime(currentCreatedAt)}
                         </Typography>
-                    </div>
+                        {currentUpdatedAt && currentCreatedAt && currentUpdatedAt !== currentCreatedAt && (
+                            <Typography variant="caption" className="commentDate" sx={{display: 'block', fontStyle: 'italic'}}>
+                                (Düzenlendi: {formatToIstanbulTime(currentUpdatedAt)})
+                            </Typography>
+                        )}
+                            </div>
                 </div>
 
                 <div className="commentContent">
                     <Typography variant={isReply ? "body2" : "body1"} className="commentText">
-                        {text}
+                        {currentText}
                     </Typography>
                 </div>
 
@@ -255,7 +462,36 @@ const Comment = ({
                             {likeCount}
                         </Typography>
                     </div>
+
+                    {localStorage.getItem("userId") !== null && localStorage.getItem("userId") === "" + userId && (
+                        <div className="editContainer" style={{display: 'flex', gap: '4px'}}>
+                            <Tooltip title="Yorumu Düzenle">
+                                <IconButton
+                                    size="small"
+                                    onClick={handleEditComment}
+                                    color="primary"
+                                    disabled={isDeleting}
+
+                                >
+                                    <EditIcon fontSize="small"/>
+                                </IconButton>
+                            </Tooltip>
+
+                            <Tooltip title="Yorumu Sil">
+                                <IconButton
+                                    size="small"
+                                    onClick={handleDeleteComment}
+                                    color="error"
+                                    disabled={isDeleting}
+
+                                >
+                                    <DeleteIcon fontSize="small"/>
+                                </IconButton>
+                            </Tooltip>
+                        </div>
+                    )}
                 </div>
+
 
 
                 {isReplying && localStorage.getItem("userId") && (

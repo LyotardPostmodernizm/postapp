@@ -45,7 +45,7 @@ function Post(props) {
         content,
         authorUsername,
         userId,
-        commentCount,
+        commentCount:initialCommentCount,
         likeCount,
         createdAt,
         updatedAt,
@@ -55,6 +55,7 @@ function Post(props) {
         onPostUpdated,
     } = props;
     const [likecount, setLikecount] = useState(likeCount);
+    const [currentCommentCount, setCurrentCommentCount] = useState(initialCommentCount || 0);
     const [expanded, setExpanded] = useState(false);
     const [liked, setLiked] = useState(false);
     const [comments, setComments] = useState([]);
@@ -74,11 +75,43 @@ function Post(props) {
     const [isPostUpdated, setIsPostUpdated] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
 
+    // Yorum sayısını hesaplayan recursive fonksiyon
+    const calculateTotalCommentCount = (commentsList) => {
+        if (!commentsList || commentsList.length === 0) return 0;
+
+        let count = commentsList.length; // Ana yorumlar
+
+        //Child yorumlar
+        commentsList.forEach(comment => {
+            if (comment.children && comment.children.length > 0) {
+                count += calculateTotalCommentCount(comment.children);
+            }
+        });
+
+        return count;
+    }
+
+    useEffect(() => {
+        setCurrentCommentCount(initialCommentCount || 0);
+    }, [initialCommentCount]);
 
 
     const setCommentsRefresh = () => {
         setRefresh(true)
     }
+
+    // Yorum eklendiğinde count'u arttırıyoruz
+    const handleCommentAdded = () => {
+        setCurrentCommentCount(prev => prev + 1);
+        setCommentsRefresh(); // Yorumları yeniden yüklüyoruz
+    };
+
+    // Yorum silindiğinde count'u azaltıyoruz
+    const handleCommentDeleted = () => {
+        setCurrentCommentCount(prev => Math.max(0, prev - 1)); // Negative olmayacak şekilde azaltıyoruz
+        setCommentsRefresh(); // Yorumları yeniden yüklüyoruz
+    };
+
 
     const handleCloseLikeSnackbar = (event, reason) => {
         if (reason === 'clickaway' || reason === 'escapeKeyDown') {
@@ -128,6 +161,11 @@ function Post(props) {
             .then(data => {
                     setComments(data);
                     setLoading(false);
+
+                    // Yorum sayısını gerçek data'dan hesaplayıp güncelliyoruz
+                    const totalCount = calculateTotalCommentCount(data);
+                    setCurrentCommentCount(totalCount);
+
                 },
                 error => {
                     setError(error);
@@ -516,7 +554,7 @@ function Post(props) {
                                 }}/>
                             </Tooltip>
                         </ExpandMore>
-                        <Typography variant={"subtitle2"}>{commentCount}</Typography>
+                        <Typography variant={"subtitle2"}>{currentCommentCount}</Typography>
                     </CardActions>
                     <Collapse in={expanded} timeout="auto" unmountOnExit>
                         <Container className="commentContainer"
@@ -538,6 +576,8 @@ function Post(props) {
                                             createdAt={comment.createdAt}
                                             updatedAt={comment.updatedAt}
                                             setCommentsRefresh={setCommentsRefresh}
+                                            onCommentDeleted={handleCommentDeleted}
+
                                         />
 
                                     ))
@@ -551,7 +591,9 @@ function Post(props) {
                                              userName={currentUserUsername}
                                              text={" Gönderiye yorum yap"}
                                              setCommentsRefresh={setCommentsRefresh}
-                                             isReplyToComment={false}/> : null}
+                                             isReplyToComment={false}
+                                             onCommentAdded={handleCommentAdded}
+                                /> : null}
                         </Container>
                     </Collapse>
                 </Card>
