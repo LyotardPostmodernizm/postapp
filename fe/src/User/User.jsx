@@ -4,12 +4,12 @@ import Avatar from '../components/Avatar/Avatar.jsx';
 import Typography from "@mui/material/Typography";
 import UserActivity from "./UserActivity.jsx";
 import {makeAuthenticatedRequest} from "../services/ApiService.js";
+import {AnimatedBackground} from 'animated-backgrounds';
 import {styled} from "@mui/material/styles";
 import {Alert, Container, Fade} from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import {CircularProgress} from "@mui/joy";
-
 
 const StyledContainer = styled(Container)(({theme}) => ({
     minHeight: '100vh',
@@ -38,7 +38,6 @@ const ErrorBox = styled(Box)(({theme}) => ({
     padding: theme.spacing(4),
 }));
 
-
 function User() {
     const {userId} = useParams();
     const navigate = useNavigate();
@@ -50,7 +49,6 @@ function User() {
         try {
             setLoading(true);
             setError(null);
-
 
             const response = await fetch(`/api/users/${userId}`, {
                 method: "GET",
@@ -82,24 +80,6 @@ function User() {
     const refreshUser = () => {
         getUser();
     };
-
-    const getUserWithAuth = async () => {
-        try {
-            const response = await makeAuthenticatedRequest(`/users/${userId}`, {
-                method: "GET"
-            });
-
-            if (!response || !response.ok) {
-                throw new Error('Kimlik doğrulamalı kullanıcı bilgileri alınamadı!');
-            }
-
-            const userData = await response.json();
-            setUser(userData);
-        } catch (error) {
-            console.error("Kimlik doğrulamalı kullanıcı bilgileri alınırken hata:", error);
-            await getUser();
-        }
-    }
 
     useEffect(() => {
         if (userId) {
@@ -194,37 +174,10 @@ function User() {
     const currentUserId = localStorage.getItem("userId");
     const isOwnProfile = currentUserId && user.id === parseInt(currentUserId);
 
-    if (!isOwnProfile) {
-        return (
-            <StyledContainer maxWidth="lg">
-                <ErrorBox>
-                    <Alert
-                        severity="warning"
-                        sx={{
-                            mb: 3,
-                            borderRadius: 2,
-                            boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-                        }}
-                    >
-                        <Typography variant="h6">
-                            Bu kullanıcı profiline erişim izniniz yok!
-                        </Typography>
-                    </Alert>
-                    <Button
-                        onClick={() => navigate('/')}
-                        variant="contained"
-                        size="large"
-                        sx={{borderRadius: 3}}
-                    >
-                        Ana Sayfaya Dön
-                    </Button>
-                </ErrorBox>
-            </StyledContainer>
-        );
-    }
-
-
     return (
+        <>
+        <AnimatedBackground animationName="fireflyForest"
+                            blendMode="normal"/>
         <StyledContainer maxWidth="lg">
             <Fade in={!loading}>
                 <Box>
@@ -238,8 +191,8 @@ function User() {
                         postCount={user.postCount}
                         likeCount={user.likeCount}
                         onUserUpdated={refreshUser}
+                        isOwnProfile={isOwnProfile}
                     />
-
                     {isOwnProfile && (
                         <Box sx={{mt: 4}}>
                             <UserActivity userId={user.id}/>
@@ -248,7 +201,7 @@ function User() {
                 </Box>
             </Fade>
         </StyledContainer>
-
+        </>
     )
 }
 

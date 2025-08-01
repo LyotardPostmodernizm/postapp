@@ -33,8 +33,7 @@ import CommentIcon from '@mui/icons-material/Comment';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
-
-const StyledCard = styled(Card)(({theme}) => ({
+const StyledCard = styled(Card)(({ theme }) => ({
     borderRadius: theme.spacing(3),
     boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
     background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
@@ -52,7 +51,7 @@ const StyledCard = styled(Card)(({theme}) => ({
     }
 }));
 
-const ProfileAvatar = styled(MuiAvatar)(({theme}) => ({
+const ProfileAvatar = styled(MuiAvatar)(({ theme }) => ({
     width: 150,
     height: 150,
     border: '6px solid white',
@@ -63,7 +62,7 @@ const ProfileAvatar = styled(MuiAvatar)(({theme}) => ({
     marginTop: '-75px',
 }));
 
-const StatsCard = styled(Paper)(({theme}) => ({
+const StatsCard = styled(Paper)(({ theme }) => ({
     padding: theme.spacing(3),
     borderRadius: theme.spacing(2),
     textAlign: 'center',
@@ -76,7 +75,7 @@ const StatsCard = styled(Paper)(({theme}) => ({
     }
 }));
 
-const InfoItem = styled(Box)(({theme}) => ({
+const InfoItem = styled(Box)(({ theme }) => ({
     display: 'flex',
     alignItems: 'center',
     padding: theme.spacing(2),
@@ -90,7 +89,7 @@ const InfoItem = styled(Box)(({theme}) => ({
     }
 }));
 
-const EditButton = styled(Button)(({theme}) => ({
+const EditButton = styled(Button)(({ theme }) => ({
     borderRadius: theme.spacing(3),
     textTransform: 'none',
     fontSize: '1rem',
@@ -130,17 +129,11 @@ const nameModalStyle = {
     p: 4,
 };
 
-
-function Avatar({userId, avatarId, fullName, username, email, commentCount, likeCount, postCount, onUserUpdated}) {
-
-    const [open, setOpen] = useState(false); //Avatar için
-    const [open2, setOpen2] = useState(false); //Ad - soyad için
+function Avatar({userId, avatarId, fullName, username, email, commentCount, likeCount, postCount, onUserUpdated, isOwnProfile = false}) {
+    const [open, setOpen] = useState(false);
+    const [open2, setOpen2] = useState(false);
     const [avatar, setAvatar] = useState(avatarId);
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => {
-        setOpen(false);
-        saveAvatar();
-    }
+
     const parseFullName = (fullName) => {
         if (!fullName || fullName === "null null") {
             return ["", ""];
@@ -152,33 +145,40 @@ function Avatar({userId, avatarId, fullName, username, email, commentCount, like
     const [firstName, lastName] = parseFullName(fullName);
     const [name, setName] = useState(firstName);
     const [surname, setSurname] = useState(lastName);
+    const [isAvatarChanged, setIsAvatarChanged] = useState(false);
+    const [isNameChanged, setIsNameChanged] = useState(false);
+
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => {
+        setOpen(false);
+        saveAvatar();
+    };
 
     const handleOpen2 = () => setOpen2(true);
     const handleClose2 = () => {
         setOpen2(false);
         updateFullName();
-    }
+    };
 
-    const avatars = (Array(30).fill().map((_, i) => i + 1))
+    const avatars = (Array(30).fill().map((_, i) => i + 1));
+
     const handleChange = (event) => {
         setAvatar(event.target.value);
     };
-    const [isAvatarChanged, setIsAvatarChanged] = useState(false);
-    const [isNameChanged, setIsNameChanged] = useState(false);
 
     const handleCloseSnackbar = (event, reason) => {
         if (reason === 'clickaway' || reason === 'escapeKeyDown') {
             return;
         }
         setIsAvatarChanged(false);
-    }
+    };
+
     const handleCloseSnackbar2 = (event, reason) => {
         if (reason === 'clickaway' || reason === 'escapeKeyDown') {
             return;
         }
         setIsNameChanged(false);
-    }
-
+    };
 
     const saveAvatar = async () => {
         try {
@@ -187,7 +187,6 @@ function Avatar({userId, avatarId, fullName, username, email, commentCount, like
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": localStorage.getItem("token")
-
                 },
                 body: JSON.stringify({
                     avatar: avatar,
@@ -197,16 +196,15 @@ function Avatar({userId, avatarId, fullName, username, email, commentCount, like
                 const data = await response.json();
                 console.log("Avatar başarıyla güncellendi", data);
                 setIsAvatarChanged(true);
-
-                if (onUserUpdated) {
+                if(onUserUpdated){
                     onUserUpdated();
                 }
             }
-
         } catch (e) {
             console.error("Avatar güncellenirken hata ile karşılaşıldı: " + e);
         }
-    }
+    };
+
     const updateFullName = async () => {
         try {
             const response = await makeAuthenticatedRequest(`/users/${userId}`, {
@@ -218,23 +216,20 @@ function Avatar({userId, avatarId, fullName, username, email, commentCount, like
                 body: JSON.stringify({
                     firstName: name,
                     lastName: surname
-
                 })
-            })
-            if (response.ok) {
+            });
+            if(response.ok){
                 const data = await response.json();
                 console.log("Ad - Soyad başarıyla güncellendi", data);
                 setIsNameChanged(true);
-
-                if (onUserUpdated) {
+                if(onUserUpdated){
                     onUserUpdated();
                 }
-
             }
         } catch (e) {
-            console.error("Ad - Soyad güncellenirken hata ile karılaşıldı:" + e)
+            console.error("Ad - Soyad güncellenirken hata ile karılaşıldı:" + e);
         }
-    }
+    };
 
     useEffect(() => {
         setAvatar(avatarId);
@@ -245,14 +240,13 @@ function Avatar({userId, avatarId, fullName, username, email, commentCount, like
 
     const displayName = fullName === "null null" || !fullName ? "Ad Soyad Belirtilmemiş" : fullName;
 
-
     return (
         <>
             <Snackbar
                 open={isAvatarChanged}
                 onClose={handleCloseSnackbar}
                 autoHideDuration={3000}
-                anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
             >
                 <Box sx={{
                     display: 'flex',
@@ -263,7 +257,7 @@ function Avatar({userId, avatarId, fullName, username, email, commentCount, like
                     borderRadius: 2,
                     boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
                 }}>
-                    <CheckCircleIcon sx={{mr: 1}}/>
+                    <CheckCircleIcon sx={{ mr: 1 }} />
                     Avatar Başarıyla Güncellendi
                 </Box>
             </Snackbar>
@@ -272,7 +266,7 @@ function Avatar({userId, avatarId, fullName, username, email, commentCount, like
                 open={isNameChanged}
                 onClose={handleCloseSnackbar2}
                 autoHideDuration={3000}
-                anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
             >
                 <Box sx={{
                     display: 'flex',
@@ -283,22 +277,22 @@ function Avatar({userId, avatarId, fullName, username, email, commentCount, like
                     borderRadius: 2,
                     boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
                 }}>
-                    <CheckCircleIcon sx={{mr: 1}}/>
+                    <CheckCircleIcon sx={{ mr: 1 }} />
                     İsim Başarıyla Güncellendi
                 </Box>
             </Snackbar>
 
-            <Box sx={{maxWidth: 1200, mx: 'auto', p: 3}}>
+            <Box sx={{ maxWidth: 1200, mx: 'auto', p: 3 }}>
                 <StyledCard>
-                    <Box sx={{height: 120}}/>
+                    <Box sx={{ height: 120 }} />
 
-                    <CardContent sx={{pt: 0, pb: 4}}>
-                        <Box sx={{textAlign: 'center', mb: 4}}>
+                    <CardContent sx={{ pt: 0, pb: 4 }}>
+                        <Box sx={{ textAlign: 'center', mb: 4 }}>
                             <Badge
                                 overlap="circular"
-                                anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
+                                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                                 badgeContent={
-                                    parseInt(localStorage.getItem("userId")) === userId ? (
+                                    isOwnProfile ? (
                                         <Tooltip title="Avatar Değiştir">
                                             <IconButton
                                                 onClick={handleOpen}
@@ -312,7 +306,7 @@ function Avatar({userId, avatarId, fullName, username, email, commentCount, like
                                                     }
                                                 }}
                                             >
-                                                <PhotoCameraIcon fontSize="small"/>
+                                                <PhotoCameraIcon fontSize="small" />
                                             </IconButton>
                                         </Tooltip>
                                     ) : null
@@ -324,36 +318,37 @@ function Avatar({userId, avatarId, fullName, username, email, commentCount, like
                                 />
                             </Badge>
 
-                            <Typography variant="h4" sx={{mt: 2, mb: 1, fontWeight: 'bold', color: '#333'}}>
+                            <Typography variant="h4" sx={{ mt: 2, mb: 1, fontWeight: 'bold', color: '#333' }}>
                                 {username}
                             </Typography>
 
-                            <Typography variant="h6" sx={{color: 'text.secondary', mb: 3}}>
+                            <Typography variant="h6" sx={{ color: 'text.secondary', mb: 3 }}>
                                 {displayName}
                             </Typography>
 
-                            {parseInt(localStorage.getItem("userId")) === userId && (
+
+                            {isOwnProfile && (
                                 <EditButton
                                     variant="outlined"
-                                    startIcon={<EditIcon/>}
+                                    startIcon={<EditIcon />}
                                     onClick={handleOpen2}
-                                    sx={{mb: 3}}
+                                    sx={{ mb: 3 }}
                                 >
                                     Profil Bilgilerini Düzenle
                                 </EditButton>
                             )}
                         </Box>
 
-                        <Divider sx={{mb: 4}}/>
+                        <Divider sx={{ mb: 4 }} />
 
                         <Grid container spacing={3}>
                             <Grid item xs={12} md={6}>
-                                <Typography variant="h6" sx={{mb: 3, fontWeight: 'bold', color: '#333'}}>
+                                <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold', color: '#333' }}>
                                     Kişisel Bilgiler
                                 </Typography>
 
                                 <InfoItem>
-                                    <PersonIcon sx={{mr: 2, color: 'primary.main'}}/>
+                                    <PersonIcon sx={{ mr: 2, color: 'primary.main' }} />
                                     <Box>
                                         <Typography variant="body2" color="text.secondary">
                                             Kullanıcı Adı
@@ -364,28 +359,31 @@ function Avatar({userId, avatarId, fullName, username, email, commentCount, like
                                     </Box>
                                 </InfoItem>
 
-                                <InfoItem>
-                                    <EmailIcon sx={{mr: 2, color: 'primary.main'}}/>
-                                    <Box>
-                                        <Typography variant="body2" color="text.secondary">
-                                            E-posta Adresi
-                                        </Typography>
-                                        <Typography variant="body1" fontWeight="medium">
-                                            {email}
-                                        </Typography>
-                                    </Box>
-                                </InfoItem>
+
+                                {isOwnProfile && (
+                                    <InfoItem>
+                                        <EmailIcon sx={{ mr: 2, color: 'primary.main' }} />
+                                        <Box>
+                                            <Typography variant="body2" color="text.secondary">
+                                                E-posta Adresi
+                                            </Typography>
+                                            <Typography variant="body1" fontWeight="medium">
+                                                {email}
+                                            </Typography>
+                                        </Box>
+                                    </InfoItem>
+                                )}
                             </Grid>
 
                             <Grid item xs={12} md={6}>
-                                <Typography variant="h6" sx={{mb: 3, fontWeight: 'bold', color: '#333'}}>
+                                <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold', color: '#333' }}>
                                     Aktivite İstatistikleri
                                 </Typography>
 
                                 <Grid container spacing={2}>
                                     <Grid item xs={4}>
                                         <StatsCard>
-                                            <ArticleIcon sx={{fontSize: 40, color: 'primary.main', mb: 1}}/>
+                                            <ArticleIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
                                             <Typography variant="h4" fontWeight="bold" color="primary.main">
                                                 {postCount}
                                             </Typography>
@@ -397,7 +395,7 @@ function Avatar({userId, avatarId, fullName, username, email, commentCount, like
 
                                     <Grid item xs={4}>
                                         <StatsCard>
-                                            <CommentIcon sx={{fontSize: 40, color: 'info.main', mb: 1}}/>
+                                            <CommentIcon sx={{ fontSize: 40, color: 'info.main', mb: 1 }} />
                                             <Typography variant="h4" fontWeight="bold" color="info.main">
                                                 {commentCount}
                                             </Typography>
@@ -409,7 +407,7 @@ function Avatar({userId, avatarId, fullName, username, email, commentCount, like
 
                                     <Grid item xs={4}>
                                         <StatsCard>
-                                            <FavoriteIcon sx={{fontSize: 40, color: 'error.main', mb: 1}}/>
+                                            <FavoriteIcon sx={{ fontSize: 40, color: 'error.main', mb: 1 }} />
                                             <Typography variant="h4" fontWeight="bold" color="error.main">
                                                 {likeCount}
                                             </Typography>
@@ -424,106 +422,109 @@ function Avatar({userId, avatarId, fullName, username, email, commentCount, like
                     </CardContent>
                 </StyledCard>
 
-                {/* Avatar Modal */}
-                <Modal open={open} onClose={handleClose}>
-                    <Box sx={modalStyle}>
-                        <Typography variant="h5" sx={{mb: 3, textAlign: 'center', fontWeight: 'bold'}}>
-                            Avatar Seçin
-                        </Typography>
-                        <List dense sx={{
-                            width: '100%',
-                            maxWidth: 600,
-                            bgcolor: 'background.paper',
-                            position: 'relative',
-                            overflow: 'auto',
-                            maxHeight: 500,
-                            borderRadius: 2,
-                        }}>
-                            {avatars.map((value) => {
-                                const labelId = `avatar-${value}`;
-                                return (
-                                    <ListItem
-                                        key={value}
-                                        sx={{
-                                            borderRadius: 2,
-                                            mb: 1,
-                                            border: avatar == value ? '2px solid #1976d2' : '2px solid transparent',
-                                            '&:hover': {
-                                                bgcolor: 'action.hover',
-                                            }
-                                        }}
-                                    >
-                                        <CardMedia
-                                            style={{
-                                                width: 80,
-                                                height: 80,
-                                                borderRadius: '50%',
-                                                marginRight: 16
+
+                {isOwnProfile && (
+                    <Modal open={open} onClose={handleClose}>
+                        <Box sx={modalStyle}>
+                            <Typography variant="h5" sx={{ mb: 3, textAlign: 'center', fontWeight: 'bold' }}>
+                                Avatar Seçin
+                            </Typography>
+                            <List dense sx={{
+                                width: '100%',
+                                maxWidth: 600,
+                                bgcolor: 'background.paper',
+                                position: 'relative',
+                                overflow: 'auto',
+                                maxHeight: 500,
+                                borderRadius: 2,
+                            }}>
+                                {avatars.map((value) => {
+                                    const labelId = `avatar-${value}`;
+                                    return (
+                                        <ListItem
+                                            key={value}
+                                            sx={{
+                                                borderRadius: 2,
+                                                mb: 1,
+                                                border: avatar == value ? '2px solid #1976d2' : '2px solid transparent',
+                                                '&:hover': {
+                                                    bgcolor: 'action.hover',
+                                                }
                                             }}
-                                            component="img"
-                                            alt={`Avatar${value}`}
-                                            image={`/public/Avatars/avatar${value}.png`}
-                                            title={`Avatar-${value}`}
-                                        />
-                                        <Box sx={{flexGrow: 1}}>
-                                            <Typography variant="body1">
-                                                Avatar {value}
-                                            </Typography>
-                                        </Box>
-                                        <Radio
-                                            edge="end"
-                                            value={value}
-                                            onChange={handleChange}
-                                            checked={"" + avatar === "" + value}
-                                            inputProps={{'aria-labelledby': labelId}}
-                                        />
-                                    </ListItem>
-                                );
-                            })}
-                        </List>
-                    </Box>
-                </Modal>
-
-                {/* Name Modal */}
-                <Modal open={open2} onClose={handleClose2}>
-                    <Box sx={nameModalStyle}>
-                        <Typography variant="h5" sx={{mb: 4, textAlign: 'center', fontWeight: 'bold'}}>
-                            Profil Bilgilerini Düzenle
-                        </Typography>
-
-                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 3}}>
-                            <TextField
-                                fullWidth
-                                label="Adınız"
-                                variant="outlined"
-                                value={name === "null" ? "" : name}
-                                onChange={(e) => setName(e.target.value)}
-                                sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                        borderRadius: 2,
-                                    }
-                                }}
-                            />
-
-                            <TextField
-                                fullWidth
-                                label="Soyadınız"
-                                variant="outlined"
-                                value={surname === "null" ? "" : surname}
-                                onChange={(e) => setSurname(e.target.value)}
-                                sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                        borderRadius: 2,
-                                    }
-                                }}
-                            />
+                                        >
+                                            <CardMedia
+                                                style={{
+                                                    width: 80,
+                                                    height: 80,
+                                                    borderRadius: '50%',
+                                                    marginRight: 16
+                                                }}
+                                                component="img"
+                                                alt={`Avatar${value}`}
+                                                image={`/public/Avatars/avatar${value}.png`}
+                                                title={`Avatar-${value}`}
+                                            />
+                                            <Box sx={{ flexGrow: 1 }}>
+                                                <Typography variant="body1">
+                                                    Avatar {value}
+                                                </Typography>
+                                            </Box>
+                                            <Radio
+                                                edge="end"
+                                                value={value}
+                                                onChange={handleChange}
+                                                checked={"" + avatar === "" + value}
+                                                inputProps={{'aria-labelledby': labelId}}
+                                            />
+                                        </ListItem>
+                                    );
+                                })}
+                            </List>
                         </Box>
-                    </Box>
-                </Modal>
+                    </Modal>
+                )}
+
+                {/* Name Modal - sadece kendi profilinde açılsın */}
+                {isOwnProfile && (
+                    <Modal open={open2} onClose={handleClose2}>
+                        <Box sx={nameModalStyle}>
+                            <Typography variant="h5" sx={{ mb: 4, textAlign: 'center', fontWeight: 'bold' }}>
+                                Profil Bilgilerini Düzenle
+                            </Typography>
+
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                                <TextField
+                                    fullWidth
+                                    label="Adınız"
+                                    variant="outlined"
+                                    value={name === "null" ? "" : name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            borderRadius: 2,
+                                        }
+                                    }}
+                                />
+
+                                <TextField
+                                    fullWidth
+                                    label="Soyadınız"
+                                    variant="outlined"
+                                    value={surname === "null" ? "" : surname}
+                                    onChange={(e) => setSurname(e.target.value)}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            borderRadius: 2,
+                                        }
+                                    }}
+                                />
+                            </Box>
+                        </Box>
+                    </Modal>
+                )}
             </Box>
         </>
     );
-
 }
 
 export default Avatar;

@@ -7,6 +7,7 @@ import User from "./User/User.jsx";
 import AuthRegister from "./components/Auth/AuthRegister.jsx";
 import AuthLogin from "./components/Auth/AuthLogin.jsx";
 import NotFound from "./components/NotFound/NotFound.jsx";
+import Footer from "./components/Footer/Footer.jsx";
 
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
                     />
                     <Route path="*" element={<NotFound />} />
                 </Routes>
+                <Footer/>
             </BrowserRouter>
 
         </div>
