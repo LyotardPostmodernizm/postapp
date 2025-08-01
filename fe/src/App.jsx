@@ -6,6 +6,7 @@ import Home from "./Home/Home.jsx";
 import User from "./User/User.jsx";
 import AuthRegister from "./components/Auth/AuthRegister.jsx";
 import AuthLogin from "./components/Auth/AuthLogin.jsx";
+import NotFound from "./components/NotFound/NotFound.jsx";
 
 
 function App() {
@@ -13,7 +14,6 @@ function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
-        // localStorage'dan token kontrolü
         const token = localStorage.getItem("token");
         if(token != null) setIsAuthenticated(true);
     }, []);
@@ -36,6 +36,7 @@ function App() {
                         exact path="/login"
                         element={<AuthLogin setIsAuthenticated={setIsAuthenticated}/>}
                     />
+                    <Route path="*" element={<NotFound />} />
                 </Routes>
             </BrowserRouter>
 

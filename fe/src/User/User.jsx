@@ -4,6 +4,40 @@ import Avatar from '../components/Avatar/Avatar.jsx';
 import Typography from "@mui/material/Typography";
 import UserActivity from "./UserActivity.jsx";
 import {makeAuthenticatedRequest} from "../services/ApiService.js";
+import {styled} from "@mui/material/styles";
+import {Alert, Container, Fade} from "@mui/material";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import {CircularProgress} from "@mui/joy";
+
+
+const StyledContainer = styled(Container)(({theme}) => ({
+    minHeight: '100vh',
+    paddingTop: theme.spacing(4),
+    paddingBottom: theme.spacing(4),
+    background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+}));
+
+const LoadingBox = styled(Box)(({theme}) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '60vh',
+    textAlign: 'center',
+    padding: theme.spacing(4),
+}));
+
+const ErrorBox = styled(Box)(({theme}) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '60vh',
+    textAlign: 'center',
+    padding: theme.spacing(4),
+}));
+
 
 function User() {
     const {userId} = useParams();
@@ -75,63 +109,146 @@ function User() {
 
     if (loading) {
         return (
-            <div style={{textAlign: 'center', padding: '20px'}}>
-                <Typography variant="h6">Kullanıcı bilgileri yükleniyor...</Typography>
-            </div>
+            <StyledContainer maxWidth="lg">
+                <Fade in={loading}>
+                    <LoadingBox>
+                        <CircularProgress size={"60"} thickness={4}/>
+                        <Typography variant="h6" sx={{mt: 3, color: 'text.secondary'}}>
+                            Kullanıcı bilgileri yükleniyor...
+                        </Typography>
+                    </LoadingBox>
+                </Fade>
+            </StyledContainer>
         );
     }
 
     if (error) {
         return (
-            <div style={{textAlign: 'center', padding: '20px'}}>
-                <Typography variant="h6" color="error">
-                    Hata: {error}
-                </Typography>
-                <button onClick={() => getUser()} style={{marginTop: '10px'}}>
-                    Tekrar Dene
-                </button>
-            </div>
+            <StyledContainer maxWidth="lg">
+                <ErrorBox>
+                    <Alert
+                        severity="error"
+                        sx={{
+                            mb: 3,
+                            borderRadius: 2,
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                        }}
+                    >
+                        <Typography variant="h6" component="div">
+                            {error}
+                        </Typography>
+                    </Alert>
+                    <Box sx={{display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center'}}>
+                        <Button
+                            onClick={() => getUser()}
+                            variant="contained"
+                            size="large"
+                            sx={{borderRadius: 3}}
+                        >
+                            Tekrar Dene
+                        </Button>
+                        <Button
+                            onClick={() => navigate('/')}
+                            variant="outlined"
+                            size="large"
+                            sx={{borderRadius: 3}}
+                        >
+                            Ana Sayfaya Dön
+                        </Button>
+                    </Box>
+                </ErrorBox>
+            </StyledContainer>
         );
     }
 
     if (!user) {
         return (
-            <div style={{textAlign: 'center', padding: '20px'}}>
-                <Typography variant="h6">Kullanıcı bulunamadı!</Typography>
-            </div>
+            <StyledContainer maxWidth="lg">
+                <ErrorBox>
+                    <Alert
+                        severity="warning"
+                        sx={{
+                            mb: 3,
+                            borderRadius: 2,
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                        }}
+                    >
+                        <Typography variant="h6">
+                            Kullanıcı bulunamadı!
+                        </Typography>
+                    </Alert>
+                    <Button
+                        onClick={() => navigate('/')}
+                        variant="contained"
+                        size="large"
+                        sx={{borderRadius: 3}}
+                    >
+                        Ana Sayfaya Dön
+                    </Button>
+                </ErrorBox>
+            </StyledContainer>
         );
     }
+
 
     const currentUserId = localStorage.getItem("userId");
     const isOwnProfile = currentUserId && user.id === parseInt(currentUserId);
 
     if (!isOwnProfile) {
         return (
-            <div style={{textAlign: 'center', padding: '20px'}}>
-                <Typography variant="h6">Bu kullanıcı profiline erişim izniniz yok!</Typography>
-                <button onClick={() => navigate('/')} style={{marginTop: '10px'}}>
-                    Ana Sayfaya Dön
-                </button>
-            </div>
+            <StyledContainer maxWidth="lg">
+                <ErrorBox>
+                    <Alert
+                        severity="warning"
+                        sx={{
+                            mb: 3,
+                            borderRadius: 2,
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                        }}
+                    >
+                        <Typography variant="h6">
+                            Bu kullanıcı profiline erişim izniniz yok!
+                        </Typography>
+                    </Alert>
+                    <Button
+                        onClick={() => navigate('/')}
+                        variant="contained"
+                        size="large"
+                        sx={{borderRadius: 3}}
+                    >
+                        Ana Sayfaya Dön
+                    </Button>
+                </ErrorBox>
+            </StyledContainer>
         );
     }
 
-    return (
-        <div>
-            <Avatar
-                userId={user.id}
-                avatarId={user.avatar}
-                username={user.username}
-                fullName={user.fullName}
-                email={user.email}
-                commentCount={user.commentCount}
-                postCount={user.postCount}
-                likeCount={user.likeCount}
-                onUserUpdated={refreshUser}
-            />
 
-            {isOwnProfile && <UserActivity userId={user.id}/>}
-        </div>
+    return (
+        <StyledContainer maxWidth="lg">
+            <Fade in={!loading}>
+                <Box>
+                    <Avatar
+                        userId={user.id}
+                        avatarId={user.avatar}
+                        username={user.username}
+                        fullName={user.fullName}
+                        email={user.email}
+                        commentCount={user.commentCount}
+                        postCount={user.postCount}
+                        likeCount={user.likeCount}
+                        onUserUpdated={refreshUser}
+                    />
+
+                    {isOwnProfile && (
+                        <Box sx={{mt: 4}}>
+                            <UserActivity userId={user.id}/>
+                        </Box>
+                    )}
+                </Box>
+            </Fade>
+        </StyledContainer>
+
     )
 }
 

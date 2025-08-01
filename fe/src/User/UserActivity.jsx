@@ -20,15 +20,88 @@ import Slide from '@mui/material/Slide';
 import {makeAuthenticatedRequest} from "../services/ApiService.js";
 import Avatar from "@mui/material/Avatar";
 import {formatToIstanbulTime} from "../Utility/formatToIstanbulTime.js";
+import {Box, Card, CardContent, Chip, CircularProgress, Alert, Fade} from "@mui/material";
+import {styled} from '@mui/material/styles';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import CommentIcon from '@mui/icons-material/Comment';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
+const StyledCard = styled(Card)(({ theme }) => ({
+    borderRadius: theme.spacing(3),
+    boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+    background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+    border: 'none',
+}));
+
+const ActivityHeader = styled(Box)(({ theme }) => ({
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: 'white',
+    padding: theme.spacing(3),
+    borderRadius: `${theme.spacing(3)} ${theme.spacing(3)} 0 0`,
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(2),
+}));
+
+const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
+    borderRadius: theme.spacing(0, 0, 3, 3),
+    '& .MuiTableHead-root': {
+        background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+    },
+    '& .MuiTableCell-head': {
+        fontWeight: 'bold',
+        color: '#333',
+        fontSize: '1rem',
+    },
+    '& .MuiTableRow-root': {
+        transition: 'all 0.2s ease',
+        '&:hover': {
+            background: 'rgba(102, 126, 234, 0.05)',
+            transform: 'scale(1.01)',
+        },
+    },
+}));
+
+const ActivityChip = styled(Chip)(({ theme, activityType }) => ({
+    borderRadius: theme.spacing(2),
+    fontWeight: 'medium',
+    ...(activityType === 'like' && {
+        background: 'linear-gradient(135deg, #ff6b6b, #ee5a52)',
+        color: 'white',
+    }),
+    ...(activityType === 'comment' && {
+        background: 'linear-gradient(135deg, #4ecdc4, #44a08d)',
+        color: 'white',
+    }),
+}));
+
+const ViewButton = styled(Button)(({ theme }) => ({
+    borderRadius: theme.spacing(2),
+    textTransform: 'none',
+    fontWeight: 'medium',
+    boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+    transition: 'all 0.3s ease',
+    '&:hover': {
+        transform: 'translateY(-2px)',
+        boxShadow: '0 6px 20px rgba(0,0,0,0.15)',
+    },
+}));
+
+const EmptyState = styled(Box)(({ theme }) => ({
+    textAlign: 'center',
+    padding: theme.spacing(6),
+    color: 'text.secondary',
+}));
+
 const CustomFullScreenDialog = ({isOpen, postId, setIsOpen}) => {
     const [open, setOpen] = useState(isOpen);
     const [post, setPost] = useState();
-
+    const [loading, setLoading] = useState(true);
 
     const fetchPost = async () => {
         if (!postId) {
@@ -37,6 +110,7 @@ const CustomFullScreenDialog = ({isOpen, postId, setIsOpen}) => {
         }
 
         try {
+            setLoading(true);
             const response = await makeAuthenticatedRequest(`/posts/${postId}`, {
                 method: "GET"
             });
@@ -49,6 +123,8 @@ const CustomFullScreenDialog = ({isOpen, postId, setIsOpen}) => {
             setPost(result);
         } catch (error) {
             console.error("Post görüntüleme başarısız!", error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -58,20 +134,27 @@ const CustomFullScreenDialog = ({isOpen, postId, setIsOpen}) => {
         setPost(null);
     };
 
-
     useEffect(() => {
         setOpen(isOpen);
     }, [isOpen]);
 
     useEffect(() => {
-        fetchPost();
-    }, [postId])
+        if (postId) {
+            fetchPost();
+        }
+    }, [postId]);
 
-
-    return (<Dialog fullScreen open={open} onClose={handleClose} slots={{
-            transition: Transition,
-        }}>
-            <AppBar sx={{position: 'relative'}}>
+    return (
+        <Dialog
+            fullScreen
+            open={open}
+            onClose={handleClose}
+            slots={{transition: Transition}}
+        >
+            <AppBar sx={{
+                position: 'relative',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+            }}>
                 <Toolbar>
                     <IconButton
                         edge="start"
@@ -82,25 +165,41 @@ const CustomFullScreenDialog = ({isOpen, postId, setIsOpen}) => {
                         <CloseIcon/>
                     </IconButton>
                     <Typography sx={{ml: 2, flex: 1}} variant="h6" component="div">
-                        Kapat
+                        Gönderi Detayı
                     </Typography>
                 </Toolbar>
             </AppBar>
-            {post ?
-                <Post postId={post.id}
-                      title={post.title}
-                      content={post.content}
-                      authorUsername={post.authorUsername}
-                      userId={post.userId}
-                      commentCount={post.commentCount}
-                      likeCount={post.likeCount}
-                      createdAt={post.createdAt}
-                      updatedAt={post.updatedAt}
-                      currentUserAvatar={1}
-                      currentUserUsername={""}>
-                </Post> : "loading"}
-        </Dialog>)
-}
+
+            <Box sx={{ p: 2, background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', minHeight: '100vh' }}>
+                {loading ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+                        <CircularProgress size={60} />
+                    </Box>
+                ) : post ? (
+                    <Post
+                        postId={post.id}
+                        title={post.title}
+                        content={post.content}
+                        authorUsername={post.authorUsername}
+                        userId={post.userId}
+                        commentCount={post.commentCount}
+                        likeCount={post.likeCount}
+                        createdAt={post.createdAt}
+                        updatedAt={post.updatedAt}
+                        currentUserAvatar={1}
+                        currentUserUsername={""}
+                        avatar={post.avatar}
+                    />
+                ) : (
+                    <Alert severity="error" sx={{ mt: 2 }}>
+                        Gönderi yüklenemedi!
+                    </Alert>
+                )}
+            </Box>
+        </Dialog>
+    );
+};
+
 
 function UserActivity({userId}) {
     const [activities, setActivities] = useState([]);
@@ -146,78 +245,141 @@ function UserActivity({userId}) {
     }, []);
 
 
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>Veriler yüklenirken bir hata oluştu</div>;
+    if (loading) {
+        return (
+            <StyledCard>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 6 }}>
+                    <CircularProgress size={60} />
+                    <Typography variant="h6" sx={{ ml: 3 }}>
+                        Bildirimler yükleniyor...
+                    </Typography>
+                </Box>
+            </StyledCard>
+        );
+    }
+
+    if (error) {
+        return (
+            <StyledCard>
+                <CardContent>
+                    <Alert severity="error" sx={{ borderRadius: 2 }}>
+                        <Typography variant="h6">
+                            Bildirimler yüklenirken bir hata oluştu
+                        </Typography>
+                    </Alert>
+                </CardContent>
+            </StyledCard>
+        );
+    }
+
     if (activities.length === 0) {
-        return <div className="ActivitiesInfo">Herhangi bir bildirim bulunmamaktadır.</div>;
+        return (
+            <StyledCard>
+                <ActivityHeader>
+                    <NotificationsIcon sx={{ fontSize: 32 }} />
+                    <Typography variant="h5" fontWeight="bold">
+                        Son Bildirimler
+                    </Typography>
+                </ActivityHeader>
+                <EmptyState>
+                    <NotificationsIcon sx={{ fontSize: 64, mb: 2, opacity: 0.3 }} />
+                    <Typography variant="h6" gutterBottom>
+                        Henüz bildirim bulunmuyor
+                    </Typography>
+                    <Typography variant="body2">
+                        Gönderilerinize yapılan etkileşimler burada görünecek
+                    </Typography>
+                </EmptyState>
+            </StyledCard>
+        );
     }
 
     return (
-        <div className="UserActivityContainer">
-            <Typography className={"UserActivityTypography"} variant="h6">
-                Son Kullanıcı Bildirimleri ({activities.length})
-            </Typography>
-            {isOpen && <CustomFullScreenDialog postId={selectedPost} setIsOpen={setIsOpen} isOpen={isOpen}/>}
+        <Fade in={!loading}>
+            <StyledCard>
+                <ActivityHeader>
+                    <NotificationsIcon sx={{ fontSize: 32 }} />
+                    <Box>
+                        <Typography variant="h5" fontWeight="bold">
+                            Son Bildirimler
+                        </Typography>
+                        <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                            {activities.length} bildirim
+                        </Typography>
+                    </Box>
+                </ActivityHeader>
 
-            <TableContainer className="TableContainer" component={Paper}>
-                <Table sx={{minWidth: 650}} aria-label="simple table">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Kullanıcı</TableCell>
-                            <TableCell>Aktivite</TableCell>
-                            <TableCell>Tarih</TableCell>
-                            <TableCell>İşlem</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {activities.map((activity, index) => (
-                            <TableRow
-                                key={index}
-                                hover
-                                sx={{'&:last-child td, &:last-child th': {border: 0}}}
-                            >
-                                <TableCell>
-                                    <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                                        <Avatar
-                                            src={`/public/Avatars/avatar${activity[2]}.png`}
-                                            sx={{width: 32, height: 32}}
-                                        />
-                                        <Typography variant="body2">
-                                            {activity[3]}
-                                        </Typography>
-                                    </div>
-                                </TableCell>
-                                <TableCell>
-                                    <Typography variant="body2">
-                                        {activity[0] === "beğendi" ?
-                                            "Postunuzu beğendi" :
-                                            "Postunuza yorum yaptı"
-                                        }
-                                    </Typography>
-                                </TableCell>
-                                <TableCell>
-                                    <Typography variant="caption">
-                                        {activity[4] ? formatToIstanbulTime(activity[4]) : 'Tarih bilinmiyor'}
-                                    </Typography>
-                                </TableCell>
-                                <TableCell>
-                                    <Button
-                                        onClick={() => handleNotification(activity[1])}
-                                        variant="outlined"
-                                        size="small"
-                                        color="primary"
-                                    >
-                                        Postu Görüntüle
-                                    </Button>
-                                </TableCell>
+                {isOpen && (
+                    <CustomFullScreenDialog
+                        postId={selectedPost}
+                        setIsOpen={setIsOpen}
+                        isOpen={isOpen}
+                    />
+                )}
+
+                <StyledTableContainer>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Kullanıcı</TableCell>
+                                <TableCell>Aktivite</TableCell>
+                                <TableCell>Tarih</TableCell>
+                                <TableCell align="center">İşlem</TableCell>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-        </div>
+                        </TableHead>
+                        <TableBody>
+                            {activities.map((activity, index) => (
+                                <TableRow key={index}>
+                                    <TableCell>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                            <Avatar
+                                                src={`/public/Avatars/avatar${activity[2]}.png`}
+                                                sx={{ width: 48, height: 48 }}
+                                            />
+                                            <Box>
+                                                <Typography variant="body1" fontWeight="medium">
+                                                    {activity[3]}
+                                                </Typography>
+                                            </Box>
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell>
+                                        <ActivityChip
+                                            icon={activity[0] === "beğendi" ?
+                                                <FavoriteIcon fontSize="small" /> :
+                                                <CommentIcon fontSize="small" />
+                                            }
+                                            label={activity[0] === "beğendi" ?
+                                                "Postunuzu beğendi" :
+                                                "Postunuza yorum yaptı"
+                                            }
+                                            activityType={activity[0] === "beğendi" ? 'like' : 'comment'}
+                                            size="small"
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Typography variant="body2" color="text.secondary">
+                                            {activity[4] ? formatToIstanbulTime(activity[4]) : 'Tarih bilinmiyor'}
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        <ViewButton
+                                            onClick={() => handleNotification(activity[1])}
+                                            variant="contained"
+                                            size="small"
+                                            startIcon={<VisibilityIcon />}
+                                        >
+                                            Görüntüle
+                                        </ViewButton>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </StyledTableContainer>
+            </StyledCard>
+        </Fade>
     );
-
 }
 
 export default UserActivity
