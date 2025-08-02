@@ -17,6 +17,7 @@ import "./AuthRegister.scss"
 import Paper from '@mui/material/Paper';
 import { AnimatedBackground } from 'animated-backgrounds';
 
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 const schema = yup.object().shape({
     username: yup
@@ -83,7 +84,7 @@ const onSubmit = (data) => {
 
 
 const sendRequest = async (path, data) => {
-    const response = await fetch("http://localhost:8080/auth/" + path, {
+    const response = await fetch(`${apiUrl}/auth/` + path, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -177,7 +178,7 @@ return (
 
                     <InputLabel htmlFor="password">
                         Parola
-                    < /InputLabel>
+                    </InputLabel>
                     <Controller
                         name="password"
                         control={control}

@@ -16,6 +16,8 @@ import Paper from '@mui/material/Paper';
 import {AnimatedBackground} from 'animated-backgrounds';
 import './AuthLogin.scss'
 
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 
 const schema = yup.object().shape({
     password: yup
@@ -72,7 +74,7 @@ function AuthLogin({setIsAuthenticated}) {
             });
     };
     const sendRequest = async (path, data) => {
-        const response = await fetch("http://localhost:8080/auth/" + path, {
+        const response = await fetch(`${apiUrl}/auth/` + path, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -137,7 +139,7 @@ function AuthLogin({setIsAuthenticated}) {
 
                         <InputLabel htmlFor="password">
                             Parola
-                        < /InputLabel>
+                        </InputLabel>
                         <Controller
                             name="password"
                             control={control}

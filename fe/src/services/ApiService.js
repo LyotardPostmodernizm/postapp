@@ -1,6 +1,7 @@
 import {RefreshToken} from "./RefreshTokenService.js";
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 
 export const makeAuthenticatedRequest = async (url, options = {}) => {
     const token = localStorage.getItem("token");
