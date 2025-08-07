@@ -9,6 +9,8 @@ import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -28,10 +30,9 @@ public class RefreshToken {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
 
-    @Column(nullable = false,unique = true)
+    @Column(nullable = false, unique = true)
     private String token;
 
-    @Column(nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date expirationDate;
+    @Column(nullable = false, columnDefinition = "DATETIME")
+    private LocalDateTime expirationDate;
 }

@@ -3,7 +3,11 @@ package com.postapp.postapp.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
-import java.util.Date;
+
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Entity
@@ -40,21 +44,25 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Like>likes;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedAt;
+    @Column(name = "created_at", columnDefinition = "DATETIME")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", columnDefinition = "DATETIME")
+    private LocalDateTime updatedAt;
+
 
     @PrePersist
     protected void onCreate() {
-        createdAt = new Date();
+        ZonedDateTime turkeyTime = ZonedDateTime.now(ZoneId.of("Europe/Istanbul"));
+        createdAt = turkeyTime.toLocalDateTime();
         updatedAt = createdAt;
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = new Date();
+        ZonedDateTime turkeyTime = ZonedDateTime.now(ZoneId.of("Europe/Istanbul"));
+        updatedAt = turkeyTime.toLocalDateTime();
     }
 
 }

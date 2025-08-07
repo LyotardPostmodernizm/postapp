@@ -7,10 +7,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import java.util.Date;
+
 
 @Service
 @RequiredArgsConstructor
@@ -19,20 +22,30 @@ public class RefreshTokenService {
     private  Long expirationTime;
     private final RefreshTokenRepository refreshTokenRepository;
 
-    public boolean isExpired(RefreshToken refreshToken){
-        return refreshToken.getExpirationDate().before(new Date());
+    public boolean isExpired(RefreshToken refreshToken) {
+        ZonedDateTime turkeyTime = ZonedDateTime.now(ZoneId.of("Europe/Istanbul"));
+        LocalDateTime now = turkeyTime.toLocalDateTime();
+        return refreshToken.getExpirationDate().isBefore(now);
     }
-    public String createRefreshToken(User user){
+
+    public String createRefreshToken(User user) {
         RefreshToken token = refreshTokenRepository.findByUserId(user.getId());
-        if(token == null) {
-            token =	new RefreshToken();
+        if (token == null) {
+            token = new RefreshToken();
             token.setUser(user);
         }
+
         token.setToken(UUID.randomUUID().toString());
-        token.setExpirationDate(Date.from(Instant.now().plusSeconds(expirationTime)));
+
+
+        ZonedDateTime turkeyTime = ZonedDateTime.now(ZoneId.of("Europe/Istanbul"));
+        LocalDateTime expirationDateTime = turkeyTime.plusSeconds(expirationTime).toLocalDateTime();
+        token.setExpirationDate(expirationDateTime);
+
         refreshTokenRepository.save(token);
         return token.getToken();
     }
+
 
     public RefreshToken getByUserId(Long userId) {
         return refreshTokenRepository.findByUserId(userId);
