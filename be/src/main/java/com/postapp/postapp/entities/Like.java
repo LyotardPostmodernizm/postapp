@@ -10,6 +10,10 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 @Entity
@@ -41,12 +45,14 @@ public class Like {
     @JsonIgnore
     private Comment comment;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
+    @Column(name = "created_at", columnDefinition = "DATETIME")
+    private LocalDateTime createdAt;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = new Date();
+        ZonedDateTime turkeyTime = ZonedDateTime.now(ZoneId.of("Europe/Istanbul"));
+        createdAt = turkeyTime.toLocalDateTime();
     }
+
 
 }
