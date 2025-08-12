@@ -9,7 +9,6 @@ import {
     Grid,
     Paper,
     Divider,
-    Chip,
     IconButton,
     Tooltip,
     Avatar as MuiAvatar,
@@ -182,7 +181,7 @@ function Avatar({userId, avatarId, fullName, username, email, commentCount, like
 
     const saveAvatar = async () => {
         try {
-            const response = await makeAuthenticatedRequest(`/users/${userId}`, {
+            await makeAuthenticatedRequest(`/api/users/${userId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -192,14 +191,11 @@ function Avatar({userId, avatarId, fullName, username, email, commentCount, like
                     avatar: avatar,
                 })
             });
-            if (response.ok) {
-                const data = await response.json();
-                console.log("Avatar başarıyla güncellendi", data);
+                console.log("Avatar başarıyla güncellendi");
                 setIsAvatarChanged(true);
                 if(onUserUpdated){
                     onUserUpdated();
                 }
-            }
         } catch (e) {
             console.error("Avatar güncellenirken hata ile karşılaşıldı: " + e);
         }
@@ -207,7 +203,7 @@ function Avatar({userId, avatarId, fullName, username, email, commentCount, like
 
     const updateFullName = async () => {
         try {
-            const response = await makeAuthenticatedRequest(`/users/${userId}`, {
+             await makeAuthenticatedRequest(`/api/users/${userId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -218,14 +214,11 @@ function Avatar({userId, avatarId, fullName, username, email, commentCount, like
                     lastName: surname
                 })
             });
-            if(response.ok){
-                const data = await response.json();
-                console.log("Ad - Soyad başarıyla güncellendi", data);
+                console.log("Ad - Soyad başarıyla güncellendi");
                 setIsNameChanged(true);
                 if(onUserUpdated){
                     onUserUpdated();
                 }
-            }
         } catch (e) {
             console.error("Ad - Soyad güncellenirken hata ile karılaşıldı:" + e);
         }

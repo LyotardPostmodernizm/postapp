@@ -4,7 +4,7 @@ import './Home.scss';
 import {Container} from "@mui/material";
 import Postform from "../components/Post/Postform.jsx";
 import {AnimatedBackground} from 'animated-backgrounds';
-import {makeAuthenticatedRequest} from "../services/ApiService.js";
+import apiService, {makeAuthenticatedRequest} from "../services/ApiService.js";
 import {styled, keyframes} from '@mui/material/styles';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import HomeIcon from '@mui/icons-material/Home';
@@ -21,7 +21,7 @@ const pulse = keyframes`
   }
   50% {
     transform: scale(1.1);
-    opacity: 0.7;
+    opacity: 0.7; 
   }
   100% {
     transform: scale(1);
@@ -158,19 +158,18 @@ function Home() {
 
 
     const refreshPosts = () => {
-        fetch("/api/posts")
-            .then(response => response.json())
+        apiService.getAllPostsPublic()
             .then(data => {
-                    setPosts(data);
-                    setLoading(false);
-                },
-                error => {
-                    setError(error);
-                    setLoading(false);
-                    console.log(error)
-                }
-            )
-    }
+                setPosts(data);
+                setLoading(false);
+            })
+            .catch(error => {
+                setError(error);
+                setLoading(false);
+                console.error(error);
+            });
+    };
+
     const addNewPost = (newPost) => {
         setPosts(prevPosts => [newPost, ...prevPosts]);
     }
@@ -189,31 +188,23 @@ function Home() {
 
     const retrieveUserData = async (userId) => {
         try {
-            const response = await makeAuthenticatedRequest(`/users/${userId}`,
-                {method: "GET"})
+            const data = await apiService.getUserById(userId);
 
-            if(!response){
-                console.log("Kullanıcı bilgileri null olarak alındı. Kullanıcı, çıkış yapmış olabilir.")
+            if (!data) {
+                console.log("Kullanıcı bilgileri null olarak alındı. Kullanıcı, çıkış yapmış olabilir.");
+                return;
             }
 
-            if (response.ok) {
-                const data = await response.json();
-                setUserName(data.username);
-                setAvatar(data.avatar);
-            }
-            else {
-                console.log("Error Home avatar - Response status:", response.status);
-                const errorData = await response.json();
-                console.log("Error details:", errorData);
-            }
+            setUserName(data.username);
+            setAvatar(data.avatar);
 
-        }
-        catch (e) {
-            console.log("Username fetch hatası:",e)
-            setError(e)
-            setLoading(false)
+        } catch (e) {
+            console.error("Username fetch hatası:", e);
+            setError(e);
+            setLoading(false);
         }
     };
+
 
     useEffect(() => {
         refreshPosts();
@@ -288,17 +279,16 @@ function Home() {
             <div className={"homeContainer"}>
                 <AnimatedBackground animationName="fireflyForest"
                                     blendMode="normal"/>
-
+                {localStorage.getItem("userId") != null ?
                 <Container className={"home"} fixed>
-                    {localStorage.getItem("userId") != null ? <Postform
+                     <Postform
                         authorUsername={userName}
                         authorAvatar={avatar}
                         userId={localStorage.getItem("userId")}
                         refreshPosts={refreshPosts}
                         addNewPost={addNewPost}
-                    /> : null}
-
-                </Container>
+                    />
+                </Container> : null}
 
                 {posts.map((post, index) => (
                     <Container className={"home"} fixed

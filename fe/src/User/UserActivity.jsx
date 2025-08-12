@@ -111,16 +111,10 @@ const CustomFullScreenDialog = ({isOpen, postId, setIsOpen}) => {
 
         try {
             setLoading(true);
-            const response = await makeAuthenticatedRequest(`/posts/${postId}`, {
+            const response = await makeAuthenticatedRequest(`/api/posts/${postId}`, {
                 method: "GET"
             });
-
-            if (!response.ok) {
-                throw new Error('Post görüntüleme başarısız! HTTP error: ' + response.status);
-            }
-
-            const result = await response.json();
-            setPost(result);
+            setPost(response);
         } catch (error) {
             console.error("Post görüntüleme başarısız!", error);
         } finally {
@@ -215,29 +209,24 @@ function UserActivity({userId}) {
     }
 
     const fetchActivities = async () => {
+        setLoading(true);
+        setError(false);
+
         try {
-            const response = await makeAuthenticatedRequest(`/users/activity/${userId}`, {method: "GET"});
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const text = await response.text();
-            if (!text) {
+            const result = await makeAuthenticatedRequest(`/api/users/activity/${userId}`, { method: "GET" });
+            if (!result || (Array.isArray(result) && result.length === 0)) {
                 setActivities([]);
-                setLoading(false);
-                return;
+            } else {
+                setActivities(result);
             }
-
-            const result = JSON.parse(text);
-            setActivities(result);
-            setLoading(false);
         } catch (error) {
             setError(true);
+            console.error("error in fetching activities:", error);
+        } finally {
             setLoading(false);
-            console.log("error in fetching activities:", error);
         }
-    }
+    };
+
     useEffect(() => {
         if (localStorage.getItem("token")) {
             fetchActivities();

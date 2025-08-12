@@ -9,7 +9,7 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import IconButton from "@mui/material/IconButton";
 import Commentform from "./Commentform.jsx";
 import Box from "@mui/material/Box";
-import {makeAuthenticatedRequest} from "../../services/ApiService.js";
+import apiService, {makeAuthenticatedRequest} from "../../services/ApiService.js";
 import {formatToIstanbulTime} from "../../Utility/formatToIstanbulTime.js";
 import Collapse from "@mui/material/Collapse";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -114,35 +114,31 @@ const Comment = ({
         setIsUpdating(true);
 
         try {
-            const response = await makeAuthenticatedRequest(`/comments/${commentId}`, {
+            const updatedComment = await makeAuthenticatedRequest(`/api/comments/${commentId}`, {
                 method: "PUT",
                 body: JSON.stringify({
                     text: editText.trim(),
-                    userId: parseInt(localStorage.getItem("userId"))
-                })
+                    userId: parseInt(localStorage.getItem("userId"), 10)
+                }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
             });
 
-            if (response.ok) {
-                const updatedComment = await response.json();
-                console.log("Yorum başarıyla güncellendi:", updatedComment);
+            console.log("Yorum başarıyla güncellendi:", updatedComment);
 
-                setCurrentText(editText.trim());
-                setCurrentUpdatedAt(new Date().toISOString());
+            setCurrentText(editText.trim());
+            setCurrentUpdatedAt(new Date().toISOString());
 
-                setIsEditModalOpen(false);
-                setIsCommentUpdated(true);
+            setIsEditModalOpen(false);
+            setIsCommentUpdated(true);
 
-                setTimeout(() => {
-                    if (setCommentsRefresh && typeof setCommentsRefresh === 'function') {
-                        setCommentsRefresh();
-                    }
-                }, 500);
+            setTimeout(() => {
+                if (setCommentsRefresh && typeof setCommentsRefresh === 'function') {
+                    setCommentsRefresh();
+                }
+            }, 500);
 
-            } else {
-                const errorData = await response.text();
-                console.error("Yorum güncellenirken bir hata oluştu:", response.status, errorData);
-                throw new Error("Yorum güncellenirken bir hata oluştu");
-            }
         } catch (error) {
             console.error("Yorum güncellenemedi:", error);
             alert("Yorum güncellenirken bir hata oluştu: " + error.message);
@@ -151,11 +147,11 @@ const Comment = ({
                 localStorage.clear();
                 window.location.href = "/login";
             }
-
         } finally {
             setIsUpdating(false);
         }
     };
+
 
     const handleDeleteComment = async () => {
         if (!window.confirm("Bu yorumu silmek istediğinizden emin misiniz?")) {
@@ -165,11 +161,9 @@ const Comment = ({
         setIsDeleting(true);
 
         try {
-            const response = await makeAuthenticatedRequest(`/comments/${commentId}`, {
+            await makeAuthenticatedRequest(`/api/comments/${commentId}`, {
                 method: "DELETE"
             });
-
-            if (response.ok) {
                 console.log("Yorum başarıyla silindi");
                 setIsCommentDeleted(true);
 
@@ -177,15 +171,10 @@ const Comment = ({
                 if (onCommentDeleted && typeof onCommentDeleted === 'function') {
                     onCommentDeleted();
                 }
-
-
                 setTimeout(() => {
                     setCommentsRefresh();
                 }, 1500);
 
-            } else {
-                throw new Error("Yorum silinirken bir hata oluştu");
-            }
         } catch (error) {
             console.error("Yorum silinemedi:", error);
             alert("Yorum silinirken bir hata oluştu: " + error.message);
@@ -234,41 +223,33 @@ const Comment = ({
         if (!currentUserId || !commentId) return;
 
         try {
-            const response = await fetch(`/api/likes?userId=${currentUserId}&commentId=${commentId}`, {
-                method: "GET",
-            });
+            const likeList = await apiService.getLikesByUserIdAndCommentId(currentUserId, commentId);
 
-            if (response.ok) {
-                const likeList = await response.json();
-                if (likeList.length > 0) {
-                    setLiked(true);
-                    setCurrentLikeId(likeList[0].id);
-                } else {
-                    setLiked(false);
-                    setCurrentLikeId(null);
-                }
+            if (Array.isArray(likeList) && likeList.length > 0) {
+                setLiked(true);
+                setCurrentLikeId(likeList[0].id);
+            } else {
+                setLiked(false);
+                setCurrentLikeId(null);
             }
         } catch (error) {
             console.error("Like durumu kontrol edilirken hata oluştu:", error);
         }
     };
 
+
     const saveLike = async () => {
         try {
-            const response = await makeAuthenticatedRequest("/likes", {
+            const response = await makeAuthenticatedRequest("/api/likes", {
                 method: "POST",
                 body: JSON.stringify({
                     commentId: commentId,
                 })
             });
-
-            if (response.ok) {
-                const result = await response.json();
                 setLiked(true);
                 setIsLikeSent(true);
-                setCurrentLikeId(result.id);
+                setCurrentLikeId(response.id);
                 setLikeCount(prev => prev + 1);
-            }
         } catch (error) {
             console.error("Like gönderme hatası:", error);
         }
@@ -279,16 +260,13 @@ const Comment = ({
         if (!currentLikeId) return;
 
         try {
-            const response = await makeAuthenticatedRequest(`/likes/${currentLikeId}?userId=${localStorage.getItem("userId")}`, {
+            await makeAuthenticatedRequest(`/likes/${currentLikeId}?userId=${localStorage.getItem("userId")}`, {
                 method: "DELETE",
             });
-
-            if (response.ok) {
                 setLiked(false);
                 setIsLikeDeleted(true);
                 setCurrentLikeId(null);
                 setLikeCount(prev => prev - 1);
-            }
         } catch (error) {
             console.error("Beğeni silinemedi:", error);
         }

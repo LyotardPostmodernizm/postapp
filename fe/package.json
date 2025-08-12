@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "build:production": "NODE_ENV=production VITE_API_URL='' vite build",
+    "preview": "vite preview",
+    "preview:production": "vite preview --host"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

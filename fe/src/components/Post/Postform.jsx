@@ -53,29 +53,27 @@ function Postform(props) {
     }
     const savePost = async () => {
         try {
-            const response = await makeAuthenticatedRequest("/posts", {
+            const result = await makeAuthenticatedRequest("/api/posts", {
                 method: "POST",
                 body: JSON.stringify({
                     title: title,
                     content: content,
-                    userId:parseInt(userId),
-                })
+                    userId: parseInt(userId, 10),
+                }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
             });
 
-            if (response && response.ok) {
-                const result = await response.json();
-                console.log("Post başarıyla gönderildi:", result);
-                return result;
-            }
-            else{
-                console.log("Post gönderme hatası:",response?.status);
-            }
+            console.log("Post başarıyla gönderildi:", result);
+            return result;
+
         } catch (error) {
             console.error("Post gönderme hatası:", error);
             throw error;
         }
-
     };
+
 
 
     return (

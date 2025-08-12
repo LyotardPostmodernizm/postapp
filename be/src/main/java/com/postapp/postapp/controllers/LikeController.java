@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/likes")
+@RequestMapping("api/likes")
 @RequiredArgsConstructor
 @Tag(name = "Likes", description = "Beğeni yönetimi API'leri")
 public class LikeController {

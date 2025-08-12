@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/comments")
+@RequestMapping("api/comments")
 @Tag(name = "Comments", description = "Yorum yönetimi API'leri")
 public class CommentController {
 

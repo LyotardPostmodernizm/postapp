@@ -16,6 +16,7 @@ import * as yup from 'yup';
 import "./AuthRegister.scss"
 import Paper from '@mui/material/Paper';
 import { AnimatedBackground } from 'animated-backgrounds';
+import ApiService from "../../services/ApiService.js";
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -84,16 +85,10 @@ const onSubmit = (data) => {
 
 
 const sendRequest = async (path, data) => {
-    const response = await fetch(`${apiUrl}/auth/` + path, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            username: data.username,
+    const response = await ApiService.register({
+        username: data.username,
             password: data.password,
             email: data.email
-        })
     })
     if (!response.ok) {
         const data = await response.json();

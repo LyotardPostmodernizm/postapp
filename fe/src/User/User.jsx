@@ -3,7 +3,7 @@ import {useParams, useNavigate} from "react-router-dom";
 import Avatar from '../components/Avatar/Avatar.jsx';
 import Typography from "@mui/material/Typography";
 import UserActivity from "./UserActivity.jsx";
-import {makeAuthenticatedRequest} from "../services/ApiService.js";
+import ApiService, {makeAuthenticatedRequest} from "../services/ApiService.js";
 import {AnimatedBackground} from 'animated-backgrounds';
 import {styled} from "@mui/material/styles";
 import {Alert, Container, Fade} from "@mui/material";
@@ -50,32 +50,16 @@ function User() {
             setLoading(true);
             setError(null);
 
-            const response = await fetch(`/api/users/${userId}`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            });
-
-            if (!response.ok) {
-                if (response.status === 404) {
-                    throw new Error('Kullanıcı bulunamadı!');
-                } else if (response.status === 401) {
-                    throw new Error('Bu sayfaya erişim izniniz yok!');
-                } else {
-                    throw new Error(`Kullanıcı bilgileri alınamadı! (${response.status})`);
-                }
-            }
-
-            const userData = await response.json();
+            const userData = await ApiService.getUserById(userId);
             setUser(userData);
+
         } catch (error) {
             console.error("Kullanıcı bilgileri getirilirken hata oluştu:", error);
-            setError(error.message);
+            setError(error.message || "Kullanıcı bilgileri alınamadı!");
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     const refreshUser = () => {
         getUser();

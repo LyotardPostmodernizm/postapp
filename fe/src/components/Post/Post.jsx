@@ -19,6 +19,7 @@ import Comment from "../Comment/Comment.jsx";
 import Commentform from "../Comment/Commentform.jsx";
 import CommentIcon from '@mui/icons-material/Comment';
 import {makeAuthenticatedRequest} from "../../services/ApiService.js";
+import ApiService  from "../../services/ApiService.js";
 import EditIcon from '@mui/icons-material/Edit';
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -75,7 +76,7 @@ function Post(props) {
     const [isPostUpdated, setIsPostUpdated] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
 
-    // Yorum sayısını hesaplayan recursive fonksiyon
+    // Yorum sayısını hesaplayan recursive fonksiyonumuz
     const calculateTotalCommentCount = (commentsList) => {
         if (!commentsList || commentsList.length === 0) return 0;
 
@@ -156,36 +157,33 @@ function Post(props) {
 
     //Sadece postlara ait yorumları,yani parenti olmayan ana yorumları getiriyoruz
     const loadAllComments = () => {
-        fetch("/api/comments?postId=" + postId + "&parentId=0", {method: "GET"})
-            .then(response => response.json())
+        setLoading(true);
+
+        ApiService.loadComments(postId)
             .then(data => {
-                    setComments(data);
-                    setLoading(false);
+                setComments(data);
+                setLoading(false);
 
-                    // Yorum sayısını gerçek data'dan hesaplayıp güncelliyoruz
-                    const totalCount = calculateTotalCommentCount(data);
-                    setCurrentCommentCount(totalCount);
-
-                },
-                error => {
-                    setError(error);
-                    setLoading(false);
-                    console.log("Yorumlar yüklenirken hata oluştu:" + error)
-                })
-        setRefresh(false)
-    }
+                const totalCount = calculateTotalCommentCount(data);
+                setCurrentCommentCount(totalCount);
+            })
+            .catch(error => {
+                setError(error);
+                setLoading(false);
+                console.error("Yorumlar yüklenirken hata oluştu:", error);
+            })
+            .finally(() => {
+                setRefresh(false);
+            });
+    };
 
     const checkIfLiked = async () => {
         const currentUserId = localStorage.getItem("userId");
         if (!currentUserId) {
             return;
         }
-
         try {
-            const response = await fetch(`/api/likes?userId=${currentUserId}&postId=${postId}`, {
-                method: "GET",
-            });
-            const likeList = await response.json();
+            const likeList = await ApiService.getLikesByUserIdAndPostId(currentUserId, postId);
 
             if (likeList.length > 0) {
                 setLiked(true);
@@ -200,27 +198,30 @@ function Post(props) {
     };
 
 
+
     const saveLike = async () => {
         try {
-            const response = await makeAuthenticatedRequest("/likes", {
+            const result = await makeAuthenticatedRequest("/api/likes", {
                 method: "POST",
                 body: JSON.stringify({
                     postId: postId,
-                })
+                }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
             });
-            if (response.ok) {
-                const result = await response.json();
-                console.log("Gönderiye beğeni başarıyla gönderildi:", result);
-                setLiked(true);
-                setIsLikeSent(true);
-                setCurrentLikeId(result.id);
-                setLikecount(prev => prev + 1);
-            }
+
+            console.log("Gönderiye beğeni başarıyla gönderildi:", result);
+            setLiked(true);
+            setIsLikeSent(true);
+            setCurrentLikeId(result.id);
+            setLikecount(prev => prev + 1);
 
         } catch (error) {
             console.error("Beğeni gönderme hatası:", error);
         }
     }
+
 
     const handleLike = async () => {
         if (!localStorage.getItem("userId")) {
@@ -242,24 +243,20 @@ function Post(props) {
 
     const deleteLike = async () => {
         if (!currentLikeId) {
-            console.error("Like ID bulunamadı");
+            console.error("Like bulunamadı");
             return;
         }
-
         try {
-            const response = await makeAuthenticatedRequest(`/likes/${currentLikeId}?userId=${localStorage.getItem("userId")}`, {
+             await makeAuthenticatedRequest(`/api/likes/${currentLikeId}?userId=${localStorage.getItem("userId")}`, {
                 method: "DELETE",
             });
 
-            if (response.ok) {
                 console.log("Beğeni başarıyla silindi.");
                 setLiked(false);
                 setCurrentLikeId(null);
                 setLikecount(prev => prev - 1);
                 setIsLikeDeleted(true);
-            } else {
-                throw new Error("Beğeniyi silerken bir hata oluştu.");
-            }
+
         } catch (error) {
             console.error("Beğeni silinemedi:", error);
         }
@@ -271,30 +268,26 @@ function Post(props) {
         }
 
         try {
-            const response = await makeAuthenticatedRequest(`/posts/${postId}`, {
+            await makeAuthenticatedRequest(`/api/posts/${postId}`, {
                 method: "DELETE"
             });
 
-            if (response.ok) {
-                console.log("Gönderi başarıyla silindi");
-                setIsPostDeleted(true);
-                setIsDeleting(true);
+            console.log("Gönderi başarıyla silindi");
+            setIsPostDeleted(true);
+            setIsDeleting(true);
 
+            setTimeout(() => {
+                if (onPostDeleted) {
+                    onPostDeleted(postId);
+                }
+            }, 1500);
 
-                setTimeout(() => {
-                    if (onPostDeleted) {
-                        onPostDeleted(postId);
-                    }
-                }, 1500);
-
-            } else {
-                throw new Error("Gönderi silinirken bir hata oluştu");
-            }
         } catch (error) {
             console.error("Gönderi silinemedi:", error);
             alert("Gönderi silinirken bir hata oluştu");
         }
     };
+
 
     const handleUpdatePost = async () => {
         if (!editTitle.trim() || !editContent.trim()) {
@@ -305,30 +298,25 @@ function Post(props) {
         setIsUpdating(true);
 
         try {
-            const response = await makeAuthenticatedRequest(`/posts/${postId}`, {
+            const updatedPost = await makeAuthenticatedRequest(`/api/posts/${postId}`, {
                 method: "PUT",
                 body: JSON.stringify({
                     title: editTitle.trim(),
                     content: editContent.trim(),
-                    userId: parseInt(localStorage.getItem("userId"))
-
-                })
+                    userId: parseInt(localStorage.getItem("userId"), 10)
+                }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
             });
 
-            if (response.ok) {
-                const updatedPost = await response.json();
-                console.log("Gönderi başarıyla güncellendi:", updatedPost);
+            console.log("Gönderi başarıyla güncellendi");
 
-                setIsEditModalOpen(false);
-                setIsPostUpdated(true);
+            setIsEditModalOpen(false);
+            setIsPostUpdated(true);
 
-
-                if (onPostUpdated) {
-                    onPostUpdated(postId, updatedPost);
-                }
-
-            } else {
-                throw new Error("Gönderi güncellenirken bir hata oluştu");
+            if (onPostUpdated) {
+                onPostUpdated(postId, updatedPost);
             }
         } catch (error) {
             console.error("Gönderi güncellenemedi:", error);
@@ -337,6 +325,7 @@ function Post(props) {
             setIsUpdating(false);
         }
     };
+
 
 
 
@@ -582,7 +571,7 @@ function Post(props) {
 
                                     ))
                                     :
-                                    "Loading..."
+                                    "Yükleniyor..."
                             }
                             {localStorage.getItem("userId") != null ?
                                 <Commentform userId={localStorage.getItem("userId")}

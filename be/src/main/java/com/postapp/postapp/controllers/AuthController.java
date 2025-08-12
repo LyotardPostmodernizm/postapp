@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/auth")
+@RequestMapping("api/auth")
 @Tag(name = "Authentication", description = "Kimlik doğrulama ve yetkilendirme API'leri")
 public class AuthController {
     private final AuthenticationManager authenticationManager;

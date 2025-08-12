@@ -30,17 +30,14 @@ const Commentform = ({userId, avatar, postId, commentId, text, setCommentsRefres
     //Posta yorum yazma
     const handleSubmitOnPost = async (postId, content) => {
         try {
-            const response = await makeAuthenticatedRequest(`/comments/posts/${postId}`, {
+             await makeAuthenticatedRequest(`/api/comments/posts/${postId}`, {
                 method: "POST", body: JSON.stringify({
                     text: content,
                 })
             });
-            if (response.ok) {
-                const result = await response.json();
-                console.log("Gönderiye yorum başarıyla gönderildi:", result);
+                console.log("Gönderiye yorum başarıyla gönderildi:");
                 setContent("");
                 setCommentsRefresh();
-            }
 
         } catch (error) {
             console.error("Yorum gönderme hatası:", error);
@@ -51,18 +48,14 @@ const Commentform = ({userId, avatar, postId, commentId, text, setCommentsRefres
     // Commente yorum yazma
     const handleSubmitOnComment = async (commentId, content) => {
         try {
-            const response = await makeAuthenticatedRequest(`/comments/${commentId}/replies`, {
+             await makeAuthenticatedRequest(`/api/comments/${commentId}/replies`, {
                 method: "POST", body: JSON.stringify({
                     text: content,
                 })
             });
-
-            if (response.ok) {
-                const result = await response.json();
-                console.log("Yoruma cevap başarıyla gönderildi:", result);
+                console.log("Yoruma cevap başarıyla gönderildi:");
                 setContent("");
                 setCommentsRefresh();
-            }
         } catch (error) {
             console.error("Yorum gönderme hatası:", error);
         }

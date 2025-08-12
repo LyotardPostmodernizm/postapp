@@ -15,6 +15,7 @@ import * as yup from 'yup';
 import Paper from '@mui/material/Paper';
 import {AnimatedBackground} from 'animated-backgrounds';
 import './AuthLogin.scss'
+import ApiService from "../../services/ApiService";
 
 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -74,29 +75,24 @@ function AuthLogin({setIsAuthenticated}) {
             });
     };
     const sendRequest = async (path, data) => {
-        const response = await fetch(`${apiUrl}/auth/` + path, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                password: data.password,
-                email: data.email
-            })
-        })
-        if (!response.ok) {
-            const data = await response.json();
-            setAlertMessage(data.message)
-            throw new Error(data.message || "Giriş işlemi sırasında bir hata oluştu!");
-        }
+        try {
+            const responseData = await ApiService.login({
+                email: data.email,
+                password: data.password
+            });
 
-        const responseData = await response.json();
-        setAlertMessage(responseData.message)
-        localStorage.setItem("token", responseData.accessToken);
-        localStorage.setItem("userId", responseData.userId);
-        localStorage.setItem("refreshToken", responseData.refreshToken);
-        return responseData;
+            setAlertMessage(responseData.message);
+            localStorage.setItem("token", responseData.accessToken);
+            localStorage.setItem("userId", responseData.userId);
+            localStorage.setItem("refreshToken", responseData.refreshToken);
+
+            return responseData;
+        } catch (error) {
+            setAlertMessage(error.message || "Giriş işlemi sırasında bir hata oluştu!");
+            throw error;
+        }
     };
+
 
     return (
         <div className="loginContainer">
