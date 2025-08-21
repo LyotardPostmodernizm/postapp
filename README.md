@@ -76,8 +76,9 @@ PostApp, kullanıcıların sosyal medya gönderileri paylaşabileceği, bu gönd
 - DB_USERNAME= **your_mysql_username** (MySQL kullanıcı adınızı yazın)
 - DB_PASSWORD= **your_super_secure_password_here** (MySQL workbench'ten oluşturduğunuz database'nin parolasını giriniz.)
 - DB_DRIVER= **com.mysql.cj.jdbc.Driver** (MySQL kullanacağımız için bu aynen kalsın.)
+- JWT_SECRET = **your_super_long_random_jwt_secret_key_at_least_32_characters_long** (Burada yazan ifade yerine, en az 32 karakterlik bir şifre yazın.)
 
-**Geriye kalan tüm çevre değişkenlerini, oluştuduğunuz .env dosyasına aynen taşıyabilirsiniz.**
+**Geriye kalan tüm çevre değişkenlerini, oluşturduğunuz .env dosyasına aynen taşıyabilirsiniz.**
 
 #### 3. Backend'i Çalıştırma:
 ```
