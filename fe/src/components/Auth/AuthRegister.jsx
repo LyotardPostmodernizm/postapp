@@ -84,26 +84,27 @@ const onSubmit = (data) => {
 };
 
 
-const sendRequest = async (path, data) => {
-    const response = await ApiService.register({
-        username: data.username,
-            password: data.password,
-            email: data.email
-    })
-    if (!response.ok) {
-        const data = await response.json();
-        setAlertMessage(data.message)
-        throw new Error(data.message || "Kayıt sırasında bir hata oluştu");
-    }
+    const sendRequest = async (path, data) => {
+        try {
+            const responseData = await ApiService.register({
+                username: data.username,
+                password: data.password,
+                email: data.email
+            });
 
-    const responseData = await response.json();
-    setAlertMessage(responseData.message)
-    localStorage.setItem("token", responseData.accessToken);
-    localStorage.setItem("refreshToken", responseData.refreshToken);
-    localStorage.setItem("userId", responseData.userId);
 
-    return responseData;
-};
+            setAlertMessage(responseData.message || "Kayıt başarılı!");
+            localStorage.setItem("token", responseData.accessToken);
+            localStorage.setItem("refreshToken", responseData.refreshToken);
+            localStorage.setItem("userId", responseData.userId);
+
+            return responseData;
+        } catch (error) {
+
+            setAlertMessage(error.message || "Kayıt sırasında bir hata oluştu");
+            throw error;
+        }
+    };
 
 
 return (

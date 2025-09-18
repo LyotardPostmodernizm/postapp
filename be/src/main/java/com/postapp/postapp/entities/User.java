@@ -29,8 +29,10 @@ public class User {
     @NotEmpty
     private String password;
 
+    @Column(name = "first_name")
     private String firstName;
-    private String lastName;
+
+    @Column(name = "last_name")   private String lastName;
 
     @NotEmpty
     private String email;
