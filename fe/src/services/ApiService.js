@@ -31,18 +31,27 @@ class ApiService {
 
         try {
             const response = await fetch(url, config);
+            const responseText = await response.text();
 
             if (!response.ok) {
-                const errorText = await response.text();
-                console.error(`HTTP Error ${response.status}:`, errorText);
-                throw new Error(`HTTP error! status: ${response.status}`);
+                // JSON formatında hata mesajı olup olmadığını kontrol ediyoruz önce
+                let errorMessage = `HTTP error! status: ${response.status}`;
+                try {
+                    const errorJson = JSON.parse(responseText);
+                    errorMessage = errorJson.message || errorMessage;
+                } catch (e) {
+                    // JSON değilse, metin(string) olarak kullanıyoruz
+                    errorMessage = responseText || errorMessage;
+                }
+                console.error(`HTTP Error ${response.status}:`, errorMessage);
+                throw new Error(errorMessage);
             }
 
-            const contentType = response.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                return await response.json();
-            } else {
-                return await response.text();
+            // Başarılı yanıtı JSON'a çevir
+            try {
+                return JSON.parse(responseText);
+            } catch (e) {
+                return responseText;
             }
         } catch (error) {
             console.error('Public API call failed:', error);
@@ -112,9 +121,16 @@ class ApiService {
             }
 
             if (!response.ok) {
-                const errorText = await response.text();
-                console.error(`HTTP Error ${response.status}:`, errorText);
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const responseText = await response.text();
+                let errorMessage = `HTTP error! status: ${response.status}`;
+                try {
+                    const errorJson = JSON.parse(responseText);
+                    errorMessage = errorJson.message || errorMessage;
+                } catch (e) {
+                    errorMessage = responseText || errorMessage;
+                }
+                console.error(`HTTP Error ${response.status}:`, errorMessage);
+                throw new Error(errorMessage);
             }
 
             const contentType = response.headers.get('content-type');
